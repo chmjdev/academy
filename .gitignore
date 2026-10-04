@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/run/
+*.log
+.pids.json
+.DS_Store

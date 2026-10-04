@@ -1,0 +1,18 @@
+{
+  "name": "academy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ANC CC Ops Academy — Official Digital Learning & Command Platform by CEDEC Africa on academy.cedec.io",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "check": "npm test"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
