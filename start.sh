@@ -97,7 +97,7 @@ start_dev() {
 }
 
 start_prod() {
-  local stage="prod" port env_file
+  local stage="prod" port env_file image
   port="$(jcds_port "$stage")"
   env_file="$(jcds_env_file "$stage")"
 
@@ -107,6 +107,16 @@ start_prod() {
   local env_args=()
   if [ -n "$env_file" ] && [ -f "$env_file" ]; then
     env_args+=(--env-file "$env_file")
+  fi
+
+  if docker image inspect "$PROJECT_NAME-$stage:latest" >/dev/null 2>&1; then
+    image="$PROJECT_NAME-$stage:latest"
+  elif docker image inspect "$PROJECT_NAME:$stage" >/dev/null 2>&1; then
+    image="$PROJECT_NAME:$stage"
+  else
+    echo "==> building $PROJECT_NAME:$stage image"
+    docker build -t "$PROJECT_NAME:$stage" .
+    image="$PROJECT_NAME:$stage"
   fi
 
   docker run -d \
@@ -119,7 +129,7 @@ start_prod() {
     -e "NODE_ENV=production" \
     -e "ACADEMY_HOST=0.0.0.0" \
     "${env_args[@]}" \
-    "$PROJECT_NAME:$stage" >/dev/null
+    "$image" >/dev/null
 
   echo "$PROJECT_NAME $stage listening on 127.0.0.1:$port"
 }
