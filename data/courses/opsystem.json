@@ -1,0 +1,350 @@
+{
+  "course": {
+    "id": "opsystem",
+    "system": "opsystem",
+    "name": "OpSystem Field Terminal Course",
+    "tagline": "Run an OpSystem terminal accountably: right device, right identity, sound evidence custody.",
+    "summary": "OpSystem is a field command and evidence terminal for police response units, working against OpSystem Core. This course covers the administration and accountability side of the terminal: installing it, signing in as yourself, managing the team and devices, keeping evidence custody sound, running the incident lifecycle, and reviewing anything an AI produces.",
+    "audience": [
+      "Terminal administrator",
+      "Commander",
+      "Field officer"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "opsystem-01-terminal-and-identity",
+      "moduleNumber": 1,
+      "title": "The terminal, the core and your identity",
+      "subtitle": "Install the app and make sure the record shows you",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "OpSystem runs as a desktop (Electron) or Android app; opened in an ordinary browser this build shows only the OpSystem logo. Each terminal talks to an OpSystem Core, which stores incidents and evidence. Everything the core records is attributed to an operator, so the first job on any terminal is making sure it is signed in as the person using it.",
+      "keyPoints": [
+        "The app is installed with the project's own start script on macOS, an installer on Windows, or an APK on Android; the macOS and release Android builds are unsigned.",
+        "On a device with no saved session the app opens as its built-in default super-user profile, not the sign-in screen.",
+        "You reach the sign-in screen by clicking SIGN OUT, then sign in with your issued account or a one-use enrolment link.",
+        "The core looks operators up by email, so sign in with your police email rather than your LO number."
+      ],
+      "operationalProcedures": [
+        "1. Install the app for the device (see Install OpSystem).",
+        "2. Open it and click SIGN OUT if it opened on the default profile.",
+        "3. Sign in with your issued email account, or paste your enrolment link on the ENROLMENT LINK tab.",
+        "4. Check the header shows your own name and station before doing any work."
+      ],
+      "takeaways": [
+        "Never work under the built-in default profile: actions would not be attributed to you.",
+        "Enrolment links are single-use and expire; never forward one outside a channel your unit trusts."
+      ],
+      "guides": [
+        "install-opsystem",
+        "sign-in-or-enrol",
+        "choose-a-layout"
+      ],
+      "quiz": [
+        {
+          "question": "What does OpSystem show when it starts on a device with no saved session?",
+          "options": [
+            "The built-in default super-user profile",
+            "The sign-in screen",
+            "A blank grid until a core is configured",
+            "An enrolment QR code"
+          ],
+          "correctIndex": 0,
+          "explanation": "The app opens as its built-in default profile; you must SIGN OUT to reach the sign-in screen and sign in as yourself."
+        },
+        {
+          "question": "Which identifier should you sign in with?",
+          "options": [
+            "Your LO number",
+            "Your police email",
+            "Your vehicle callsign",
+            "Your device label"
+          ],
+          "correctIndex": 1,
+          "explanation": "The core looks operators up by email, so an LO number sign-in fails."
+        },
+        {
+          "question": "What does this build show when opened in an ordinary web browser?",
+          "options": [
+            "The full tactical grid",
+            "A read-only docket",
+            "Only the OpSystem logo",
+            "The sign-in screen"
+          ],
+          "correctIndex": 2,
+          "explanation": "The browser build is closed; use the desktop or Android app."
+        }
+      ]
+    },
+    {
+      "id": "opsystem-02-team-and-devices",
+      "moduleNumber": 2,
+      "title": "Team, roles and devices",
+      "subtitle": "Who may use a terminal, and how access is taken away",
+      "badge": "Access control",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "A commander with the SUPER_USER role manages the team from Core connection and team in the Analysis desk: inviting operators with a role (OFFICER, ANALYST or SUPER_USER), disabling operators and revoking devices. Each device holds its own token for the core.",
+      "keyPoints": [
+        "Only a SUPER_USER sees the TEAM — OPERATORS & DEVICES section.",
+        "INVITE produces a single-use enrolment link that expires; it carries the terminal's gate key.",
+        "Disable ends every device an operator has; Revoke this device cuts off a single device; Disconnect this device revokes the current device's own token.",
+        "Every device the app enrols is labelled the same way, so tell devices apart by operator and enrolment time, not by label."
+      ],
+      "operationalProcedures": [
+        "1. Open ANALYSIS and click the gear icon (Core connection and team).",
+        "2. Check the header reads CORE and the expected address.",
+        "3. To add someone, fill email, name, role and LO number and click INVITE, then COPY the link and send it over a trusted channel.",
+        "4. To remove access, use Disable on the operator or Revoke this device on the device."
+      ],
+      "takeaways": [
+        "Grant SUPER_USER only to commanders who manage the team.",
+        "When an officer leaves or a device is lost, disable or revoke the same day, and record that you did."
+      ],
+      "guides": [
+        "connect-to-core-and-manage-team",
+        "sign-in-or-enrol"
+      ],
+      "quiz": [
+        {
+          "question": "Who can see the team management section?",
+          "options": [
+            "Any operator",
+            "Operators with the ANALYST role",
+            "Only the device that created the core",
+            "Operators with the SUPER_USER role"
+          ],
+          "correctIndex": 3,
+          "explanation": "The team section appears only for a SUPER_USER."
+        },
+        {
+          "question": "An operator's phone is lost but their vehicle terminal is fine. What should a commander do?",
+          "options": [
+            "Revoke the lost device",
+            "Disable the operator",
+            "Delete the incident",
+            "Change the core address"
+          ],
+          "correctIndex": 0,
+          "explanation": "Revoke this device cuts off one device; Disable would end all of the operator's devices."
+        },
+        {
+          "question": "How should an enrolment link be handled?",
+          "options": [
+            "Posted in the unit's public group so everyone can join",
+            "Sent over a channel the unit trusts, once, before it expires",
+            "Reused for each new officer",
+            "Printed on the vehicle terminal"
+          ],
+          "correctIndex": 1,
+          "explanation": "Links are single-use, expire, and carry the terminal's gate key."
+        }
+      ]
+    },
+    {
+      "id": "opsystem-03-evidence-custody",
+      "moduleNumber": 3,
+      "title": "Evidence custody and what is verified",
+      "subtitle": "Hashes, the docket and the limits of a label",
+      "badge": "Evidence",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Evidence captured on a terminal is sealed with a SHA-256 hash and a chain-of-custody line, and sent to the core when an incident is active and the core is reachable. A hash shows the bytes have not changed since sealing; it does not show that the content is true. Only the capture notice tells you whether the core stored the same bytes.",
+      "keyPoints": [
+        "The capture notice reads core verified when the core stored the same bytes, or CORE HASH MISMATCH when it did not.",
+        "The docket shows a ✓ SEAL VERIFIED label on every item, whether or not the core checked it, so the label is not evidence of verification.",
+        "Evidence captured while the core is offline, or with no active incident, stays on the device; nothing retries the upload later.",
+        "RECORDED BY on items sealed on the device can show the built-in default profile rather than the signed-in officer."
+      ],
+      "operationalProcedures": [
+        "1. Make sure an incident is active and the header shows CORE before capturing.",
+        "2. After each capture, read the notice and note whether it says core verified.",
+        "3. Open DOCKET to review hashes and sources; use EXPORT DOSSIER to save a copy.",
+        "4. Record in the case notes any item that stayed local or showed a mismatch."
+      ],
+      "takeaways": [
+        "A matching hash proves integrity of bytes, not the truth of what they show.",
+        "Do not cite the ✓ SEAL VERIFIED label as proof of core verification."
+      ],
+      "guides": [
+        "capture-video-evidence",
+        "review-the-evidence-docket"
+      ],
+      "quiz": [
+        {
+          "question": "What does a matching SHA-256 hash establish?",
+          "options": [
+            "That the content is true",
+            "That a commander approved the item",
+            "That the bytes are unchanged since sealing",
+            "That the source is lawful"
+          ],
+          "correctIndex": 2,
+          "explanation": "A hash proves byte integrity only."
+        },
+        {
+          "question": "Where do you learn whether the core stored the same bytes?",
+          "options": [
+            "The ✓ SEAL VERIFIED label in the docket",
+            "The incident bar colour",
+            "The device label",
+            "The capture notice: core verified or CORE HASH MISMATCH"
+          ],
+          "correctIndex": 3,
+          "explanation": "The docket label is shown on every item; only the capture notice reflects the core's check."
+        },
+        {
+          "question": "What happens to evidence captured while the core is offline?",
+          "options": [
+            "It stays on the device only",
+            "It uploads automatically when the core returns",
+            "It is discarded",
+            "It is emailed to the commander"
+          ],
+          "correctIndex": 0,
+          "explanation": "No queue retries the upload, so note local-only items in the case record."
+        }
+      ]
+    },
+    {
+      "id": "opsystem-04-incident-lifecycle",
+      "moduleNumber": 4,
+      "title": "The incident lifecycle",
+      "subtitle": "Statuses, the 48-hour window and locking",
+      "badge": "Incidents",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Evidence and reports attach to the active incident. The core treats an incident as active only while it is not inactive or locked and is less than 48 hours old, counted from when it was opened. The app prompts at 48 hours so that a person decides whether active operations stand down.",
+      "keyPoints": [
+        "Statuses include ACTIVE_DISPATCH, CONTAINMENT_IN_PROGRESS, INACTIVE_OPEN, INACTIVE and RESOLVED_LOCKED.",
+        "✓ MARK AS INACTIVE (STILL OPEN) stands down active operations while the investigation continues.",
+        "KEEP ACTIVE (AUTHORISE EXTENSION) only hides the prompt on that device and records nothing; REACTIVATE does not restart the 48-hour clock.",
+        "CONTAIN & LOCK has no confirmation step, and the core still accepts evidence for a locked incident."
+      ],
+      "operationalProcedures": [
+        "1. Launch an incident with a clear title, priority, location and summary.",
+        "2. At the 48-hour prompt, decide and record the decision in the case notes.",
+        "3. Use CONTAIN & LOCK only when you are sure; there is no confirmation."
+      ],
+      "takeaways": [
+        "An extension is a decision that must be written down; the app does not record it.",
+        "A locked incident can still receive evidence, so check what was added after locking."
+      ],
+      "guides": [
+        "launch-an-incident",
+        "manage-an-incident"
+      ],
+      "quiz": [
+        {
+          "question": "From when does the 48-hour active window run?",
+          "options": [
+            "From the last REACTIVATE",
+            "From when the incident was opened",
+            "From the last evidence capture",
+            "From midnight each day"
+          ],
+          "correctIndex": 1,
+          "explanation": "The core counts from the incident's creation time."
+        },
+        {
+          "question": "What does KEEP ACTIVE (AUTHORISE EXTENSION) record?",
+          "options": [
+            "A signed extension on the core",
+            "A new 48-hour window",
+            "Nothing; it only hides the prompt on that device",
+            "A note in the docket"
+          ],
+          "correctIndex": 2,
+          "explanation": "Record the decision yourself in the case notes."
+        },
+        {
+          "question": "What should you know before clicking CONTAIN & LOCK?",
+          "options": [
+            "It asks for a commander's confirmation",
+            "It deletes the docket",
+            "It can only be undone by the core administrator",
+            "It has no confirmation step and the core still accepts evidence afterwards"
+          ],
+          "correctIndex": 3,
+          "explanation": "There is no confirmation dialog, and the core's evidence upload does not check the status."
+        }
+      ]
+    },
+    {
+      "id": "opsystem-05-ai-under-review",
+      "moduleNumber": 5,
+      "title": "AI output is a draft for a person",
+      "subtitle": "Reports, auto-fill and their limits",
+      "badge": "AI review",
+      "duration": "10 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "OpSystem can draft reports from an incident's evidence through the core, and AI AUTO-FILL can fill the incident form from a typed brief. Both produce drafts. A person reads and corrects them before anything is relied on.",
+      "keyPoints": [
+        "Report buttons work only when the core has an AI provider configured; otherwise the header says AI NOT CONFIGURED ON CORE and no report is produced.",
+        "Reports cite evidence IDs and separate what is verified from what is reported.",
+        "AI AUTO-FILL sends the brief from the device to an external AI service, not through the core.",
+        "Fields the model leaves out are filled with fixed defaults: CRITICAL priority, a default Gauteng location and coordinates, and a 15 km radius."
+      ],
+      "operationalProcedures": [
+        "1. Before launching from AI AUTO-FILL, check every field, especially priority, location and radius.",
+        "2. When reading a report, follow its evidence IDs back to the docket.",
+        "3. Do not paste sensitive personal information into the AI brief unless your unit's policy allows it."
+      ],
+      "takeaways": [
+        "An AI default is not a fact: CRITICAL and the default location appear when the model said nothing.",
+        "Every conclusion in a report must be traceable to cited evidence."
+      ],
+      "guides": [
+        "run-ai-reports",
+        "launch-an-incident"
+      ],
+      "quiz": [
+        {
+          "question": "AI AUTO-FILL returned CRITICAL priority and a location you never mentioned. Why?",
+          "options": [
+            "They are fixed defaults for fields the model left empty",
+            "The core escalated the incident",
+            "Another operator edited the form",
+            "The location came from the device GPS"
+          ],
+          "correctIndex": 0,
+          "explanation": "Correct those fields by hand."
+        },
+        {
+          "question": "Where does AI AUTO-FILL send your brief?",
+          "options": [
+            "Through OpSystem Core",
+            "Directly from the device to an external AI service",
+            "Nowhere; it runs offline",
+            "To the commander for approval"
+          ],
+          "correctIndex": 1,
+          "explanation": "It bypasses the core, so mind what you type."
+        },
+        {
+          "question": "What happens when the core has no AI provider configured?",
+          "options": [
+            "The app writes a template report",
+            "Reports are produced offline",
+            "The report buttons are disabled and no report is produced",
+            "The app uses the AUTO-FILL service instead"
+          ],
+          "correctIndex": 2,
+          "explanation": "The header shows AI NOT CONFIGURED ON CORE."
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,8 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadGuides, guidesIndex, guidesCount, renderGuidesUI, scriptJSON, SYSTEM_ORDER } from "./guides.js";
+import { loadCourses, findLesson, coursesIndex, ANCOPS_COURSE_ID } from "./courses.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, "..");
@@ -10,12 +12,37 @@ const CURRICULUM_FILE = path.join(DATA_DIR, "curriculum.json");
 const VIDEOS_DIR = path.join(DATA_DIR, "videos");
 const POSTERS_DIR = path.join(DATA_DIR, "posters");
 const SCREENSHOTS_DIR = path.join(DATA_DIR, "screenshots");
+const GUIDES_DIR = path.join(DATA_DIR, "guides");
+const COURSES_DIR = path.join(DATA_DIR, "courses");
 
 const PORT = parseInt(process.env.PORT || "3155", 10);
 const HOST = process.env.ACADEMY_HOST || (process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
 
 // Load curriculum
 let curriculum = JSON.parse(fs.readFileSync(CURRICULUM_FILE, "utf8"));
+
+// Load how-to guides; a file that fails validation is skipped and reported.
+const guideLoad = loadGuides(GUIDES_DIR);
+const guideSystems = guideLoad.systems;
+for (const err of guideLoad.errors) console.error(`[academy] guides: ${err}`);
+
+// Load courses: ANC CC Ops (curriculum.json) first, then one per Govtech system.
+const courseLoad = loadCourses(curriculum, COURSES_DIR, SYSTEM_ORDER);
+const courses = courseLoad.courses;
+for (const err of courseLoad.errors) console.error(`[academy] courses: ${err}`);
+
+// Guide links shown under each lesson: { lessonId: [{ href, title }] }.
+function lessonGuideLinks(course) {
+  const sys = guideSystems.find(s => s.id === course.system);
+  const links = {};
+  for (const l of course.lessons) {
+    links[l.id] = (l.guides || [])
+      .map(id => sys && sys.guides.find(g => g.id === id))
+      .filter(Boolean)
+      .map(g => ({ href: `/guides/${sys.id}/${g.id}`, title: g.title }));
+  }
+  return links;
+}
 
 // Seat allocations (10 seats, first-come first-served)
 let seatsState = {
@@ -125,8 +152,51 @@ export function createApp() {
         timestamp: new Date().toISOString(),
         lessonsCount: curriculum.lessons.length,
         videosCount: curriculum.lessons.filter(l => l.video).length,
-        seatsRemaining: seatsState.total - seatsState.claimed
+        seatsRemaining: seatsState.total - seatsState.claimed,
+        coursesCount: courses.length,
+        guideSystems: guideSystems.length,
+        guidesCount: guidesCount(guideSystems)
       }));
+    }
+
+    // API: Courses
+    if (pathname === "/api/courses" && req.method === "GET") {
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ courses: coursesIndex(courses) }));
+    }
+
+    if (pathname.startsWith("/api/courses/") && req.method === "GET") {
+      const course = courses.find(c => c.id === decodeURIComponent(pathname.replace("/api/courses/", "")));
+      if (!course) {
+        res.writeHead(404, { "content-type": "application/json" });
+        return res.end(JSON.stringify({ error: "Course not found" }));
+      }
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ academy: course.academy, lessons: course.lessons }));
+    }
+
+    // API: How-to guides
+    if (pathname === "/api/guides" && req.method === "GET") {
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ systems: guidesIndex(guideSystems), guidesCount: guidesCount(guideSystems) }));
+    }
+
+    if (pathname.startsWith("/api/guides/") && req.method === "GET") {
+      const [sysId, guideId] = pathname.replace("/api/guides/", "").split("/").map(decodeURIComponent);
+      const sys = guideSystems.find(s => s.id === sysId);
+      const body = sys && guideId ? sys.guides.find(g => g.id === guideId) : sys;
+      if (!body) {
+        res.writeHead(404, { "content-type": "application/json" });
+        return res.end(JSON.stringify({ error: "Guide not found" }));
+      }
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify(body));
+    }
+
+    // How-to guides UI (client-side routing below /guides)
+    if (pathname === "/guides" || pathname.startsWith("/guides/")) {
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      return res.end(renderGuidesUI(guideSystems, curriculum.academy));
     }
 
     // API: Curriculum
@@ -138,7 +208,7 @@ export function createApp() {
     // API: Single Lesson
     if (pathname.startsWith("/api/lessons/") && req.method === "GET") {
       const lessonId = pathname.replace("/api/lessons/", "");
-      const lesson = curriculum.lessons.find(l => l.id === lessonId);
+      const lesson = findLesson(courses, lessonId)?.lesson;
       if (!lesson) {
         res.writeHead(404, { "content-type": "application/json" });
         return res.end(JSON.stringify({ error: "Lesson not found" }));
@@ -198,7 +268,7 @@ export function createApp() {
     // API: Submit Quiz
     if (pathname.startsWith("/api/quiz/") && req.method === "POST") {
       const lessonId = pathname.replace("/api/quiz/", "");
-      const lesson = curriculum.lessons.find(l => l.id === lessonId);
+      const lesson = findLesson(courses, lessonId)?.lesson;
       if (!lesson) {
         res.writeHead(404, { "content-type": "application/json" });
         return res.end(JSON.stringify({ error: "Lesson not found" }));
@@ -308,10 +378,26 @@ export function createApp() {
       return res.end(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><clipPath id="r"><rect x="3" y="3" width="58" height="58" rx="13"/></clipPath></defs><g clip-path="url(#r)"><rect x="3" y="3" width="58" height="19.33" fill="#060d0a"/><rect x="3" y="22.33" width="58" height="19.33" fill="#007a3d"/><rect x="3" y="41.66" width="58" height="19.34" fill="#ffc72c"/></g><rect x="3" y="3" width="58" height="58" rx="13" fill="none" stroke="#ffc72c" stroke-opacity="0.8" stroke-width="2.5"/><circle cx="32" cy="32" r="10" fill="#0b1f2a" stroke="#ffc72c" stroke-width="1.5"/><text x="32" y="36" font-family="system-ui, sans-serif" font-weight="900" font-size="11" fill="#ffc72c" text-anchor="middle">CC</text></svg>`);
     }
 
-    // Render Web UI
-    if (pathname === "/" || pathname.startsWith("/lesson/")) {
+    // Course catalogue
+    if (pathname === "/courses") {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      return res.end(renderAcademyUI(curriculum, seatsState));
+      return res.end(renderCoursesUI(courses, curriculum.academy));
+    }
+
+    // Render Web UI: "/" is the ANC CC Ops course; /course/<id> any course
+    const courseMatch = pathname.match(/^\/course\/([^/]+)\/?$/);
+    if (pathname === "/" || pathname.startsWith("/lesson/") || courseMatch) {
+      const course = courseMatch ? courses.find(c => c.id === decodeURIComponent(courseMatch[1])) : courses[0];
+      if (!course) {
+        res.writeHead(404, { "content-type": "text/plain" });
+        return res.end("Course not found");
+      }
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      return res.end(renderAcademyUI({ academy: course.academy, lessons: course.lessons }, seatsState, {
+        courseId: course.id,
+        coursesCount: courses.length,
+        guideLinks: lessonGuideLinks(course)
+      }));
     }
 
     res.writeHead(404, { "content-type": "text/plain" });
@@ -319,17 +405,80 @@ export function createApp() {
   };
 }
 
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+// Course catalogue page
+function renderCoursesUI(list, academy) {
+  const cards = list.map(c => `
+      <a class="card" href="${c.id === ANCOPS_COURSE_ID ? "/" : `/course/${encodeURIComponent(c.id)}`}">
+        <h3>${escapeHtml(c.name)}</h3>
+        <p class="tag">${escapeHtml(c.tagline)}</p>
+        <p class="clamp">${escapeHtml(c.summary)}</p>
+        <div class="meta">${c.lessons.length} modules${c.lessons.some(l => l.video) ? ` · ${c.lessons.filter(l => l.video).length} videos` : ""}</div>
+      </a>`).join("");
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>All Courses · ${escapeHtml(academy.name)}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    :root { --green: #007a3d; --gold: #ffc72c; --bg: #060d0a; --card: #14241d; --border: #213d31; --text: #f8fafc; --muted: #94a3b8; --dim: #64748b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; }
+    header { background: rgba(11,31,42,0.97); border-bottom: 2px solid var(--green); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    header .brand { display: flex; align-items: center; gap: 12px; }
+    header img { width: 36px; height: 36px; }
+    header h1 { font-size: 17px; font-weight: 800; }
+    header p { font-size: 12px; color: var(--muted); }
+    header nav { display: flex; gap: 16px; flex-wrap: wrap; }
+    header nav a { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600; white-space: nowrap; }
+    header nav a:hover, header nav a.on { color: var(--gold); }
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+    h2 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+    .lead { color: var(--muted); margin-bottom: 22px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .grid > * { min-width: 0; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-decoration: none; color: var(--text); display: block; transition: border-color .15s, transform .15s; }
+    .card:hover { border-color: var(--gold); transform: translateY(-1px); }
+    .card h3 { font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
+    .card .tag { color: var(--gold); font-size: 13px; margin: 2px 0 8px; }
+    .card p { font-size: 13px; color: var(--muted); }
+    .clamp { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .meta { margin-top: 10px; font-size: 12px; color: var(--dim); }
+    @media (max-width: 600px) { main { padding: 20px 16px 48px; } header { padding: 10px 16px; } h2 { font-size: 22px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><img src="/favicon.svg" alt=""><div><h1>All Courses</h1><p>${escapeHtml(academy.name)}</p></div></div>
+    <nav><a href="/">ANC CC Ops Course</a><a href="/courses" class="on">All Courses</a><a href="/guides">How-to Guides</a></nav>
+  </header>
+  <main>
+    <h2>Courses for every Govtech system</h2>
+    <p class="lead">${list.length} courses, ${list.reduce((n, c) => n + c.lessons.length, 0)} modules. Each module ends with a knowledge check and links to the how-to guides for the tasks it teaches.</p>
+    <div class="grid">${cards}</div>
+  </main>
+</body>
+</html>`;
+}
+
 // HTML UI Renderer with ANC & CEDEC Branding
-function renderAcademyUI(data, seats) {
+function renderAcademyUI(data, seats, opts = {}) {
   const c = data.academy;
-  const initialLesson = data.lessons[0];
+  const courseId = opts.courseId || ANCOPS_COURSE_ID;
+  const isAncops = courseId === ANCOPS_COURSE_ID;
+  const storeKey = isAncops ? "ancops_academy_completed" : `academy_completed_${courseId}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>${c.name} · ${c.tagline}</title>
+  <title>${escapeHtml(c.name)} · ${escapeHtml(c.tagline)}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     :root {
@@ -422,6 +571,7 @@ function renderAcademyUI(data, seats) {
     .crest-icon {
       width: 44px;
       height: 44px;
+      flex-shrink: 0;
       border-radius: 8px;
       border: 1px solid var(--anc-gold);
       box-shadow: 0 0 12px rgba(255, 199, 44, 0.2);
@@ -978,6 +1128,9 @@ function renderAcademyUI(data, seats) {
 
     /* Responsive */
     @media (max-width: 900px) {
+      header.main-header { flex-wrap: wrap; gap: 10px; padding: 10px 16px; }
+      .header-links { flex-wrap: wrap; gap: 8px 14px; }
+      .top-banner { flex-wrap: wrap; }
       .app-shell {
         grid-template-columns: 1fr;
       }
@@ -993,11 +1146,11 @@ function renderAcademyUI(data, seats) {
 <body>
 
   <!-- Top Alert Banner -->
-  <div class="top-banner">
+  ${isAncops ? `<div class="top-banner">
     <span class="badge">Limited Enrolment</span>
     <span>⚡ 10 Sponsored Student Seats (First-Come, First-Served) — <strong id="seatsCount">${seats.total - seats.claimed} Seats Remaining</strong></span>
     <button onclick="openEnrolModal()">Claim Student Seat</button>
-  </div>
+  </div>` : ""}
 
   <!-- Header Navigation -->
   <header class="main-header">
@@ -1013,14 +1166,16 @@ function renderAcademyUI(data, seats) {
         <text x="32" y="36" font-family="system-ui" font-weight="900" font-size="10" fill="#ffc72c" text-anchor="middle">CC</text>
       </svg>
       <div class="brand-titles">
-        <h1>${c.name} <span class="pill">CEDEC AFRICA</span></h1>
-        <p>${c.tagline}</p>
+        <h1>${escapeHtml(c.name)} <span class="pill">CEDEC AFRICA</span></h1>
+        <p>${escapeHtml(c.tagline)}</p>
       </div>
     </div>
     <div class="header-links">
-      <a href="https://ancops.cedec.io" target="_blank" rel="noopener">ANC CC Ops Portal ↗</a>
+      <a href="/courses">All Courses (${opts.coursesCount || 1})</a>
+      <a href="/guides">How-to Guides</a>
+      ${isAncops ? `<a href="https://ancops.cedec.io" target="_blank" rel="noopener">ANC CC Ops Portal ↗</a>
       <a href="https://chat.wevoteanc.cedec.io" target="_blank" rel="noopener">WeVote Chatbot ↗</a>
-      <a href="#enroll" class="btn-cta" onclick="openEnrolModal()">Enrol Cadre</a>
+      <a href="#enroll" class="btn-cta" onclick="openEnrolModal()">Enrol Cadre</a>` : ""}
     </div>
   </header>
 
@@ -1030,12 +1185,12 @@ function renderAcademyUI(data, seats) {
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h2>Command Curriculum</h2>
+        <h2>${isAncops ? "Command Curriculum" : "Course Lessons"}</h2>
         <div class="progress-bar-container">
           <div class="progress-bar-fill" id="curriculumProgressFill"></div>
         </div>
         <div class="progress-label">
-          <span id="progressCompletedText">0 of 15 Modules Completed</span>
+          <span id="progressCompletedText">0 of ${data.lessons.length} Modules Completed</span>
           <span id="progressPercentText">0%</span>
         </div>
       </div>
@@ -1045,10 +1200,10 @@ function renderAcademyUI(data, seats) {
           <div class="lesson-item ${idx === 0 ? 'active' : ''}" id="lessonTab-${l.id}" onclick="selectLesson('${l.id}')">
             <div class="lesson-num">${l.moduleNumber}</div>
             <div class="lesson-meta">
-              <h3>${l.title}</h3>
-              <p>${l.subtitle}</p>
+              <h3>${escapeHtml(l.title)}</h3>
+              <p>${escapeHtml(l.subtitle)}</p>
               <div class="lesson-tags">
-                <span class="lesson-tag">${l.badge}</span>
+                <span class="lesson-tag">${escapeHtml(l.badge)}</span>
                 ${l.video ? `<span class="lesson-tag vid">▶ Video (${l.duration})</span>` : ''}
               </div>
             </div>
@@ -1120,9 +1275,13 @@ function renderAcademyUI(data, seats) {
   </div>
 
   <script>
-    const CURRICULUM = ${JSON.stringify(data)};
-    let activeLessonId = "${initialLesson.id}";
-    let completedLessons = JSON.parse(localStorage.getItem("ancops_academy_completed") || "[]");
+    const CURRICULUM = ${scriptJSON(data)};
+    const GUIDE_LINKS = ${scriptJSON(opts.guideLinks || {})};
+    const STORE_KEY = ${scriptJSON(storeKey)};
+    const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    let activeLessonId = CURRICULUM.lessons[0].id;
+    let completedLessons = [];
+    try { completedLessons = JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch {}
     let quizSelections = {};
 
     function updateProgress() {
@@ -1169,7 +1328,7 @@ function renderAcademyUI(data, seats) {
           <div class="video-card">
             <div class="video-frame-wrap">
               <video id="lessonVideoPlayer" controls poster="/media/posters/\${l.poster || 'ancops-intro.jpg'}" preload="metadata">
-                <source src="/media/videos/\${l.video}" type="video/mp4">
+                <source src="/media/videos/\${l.video}" type="\${/\.webm$/i.test(l.video) ? 'video/webm' : 'video/mp4'}">
                 Your browser does not support HTML5 video streaming.
               </video>
             </div>
@@ -1197,8 +1356,8 @@ function renderAcademyUI(data, seats) {
       if (l.screenshots && l.screenshots.length > 0) {
         screenshotsSection = \`
           <div class="info-card">
-            <h4>Live Command Interface Retinas</h4>
-            <p>Retina captures from the live deployment corresponding to this operational module:</p>
+            <h4>Interface Screens</h4>
+            <p>Screens from the system that this module covers:</p>
             <div class="screenshot-gallery">
               \${l.screenshots.map(s => \`
                 <div class="screenshot-thumb" onclick="openImageModal('/media/screenshots/\${s}', '\${s}')">
@@ -1222,11 +1381,11 @@ function renderAcademyUI(data, seats) {
             <form id="quizForm" onsubmit="submitQuiz(event, '\${l.id}')">
               \${l.quiz.map((q, qIdx) => \`
                 <div class="question-block" id="qBlock-\${qIdx}">
-                  <div class="question-title">\${qIdx + 1}. \${q.question}</div>
+                  <div class="question-title">\${qIdx + 1}. \${esc(q.question)}</div>
                   <div class="quiz-options">
                     \${q.options.map((opt, oIdx) => \`
                       <div class="quiz-option" id="opt-\${qIdx}-\${oIdx}" onclick="selectOption(\${qIdx}, \${oIdx})">
-                        <span>\${String.fromCharCode(65 + oIdx)}.</span> \${opt}
+                        <span>\${String.fromCharCode(65 + oIdx)}.</span> \${esc(opt)}
                       </div>
                     \`).join('')}
                   </div>
@@ -1243,11 +1402,11 @@ function renderAcademyUI(data, seats) {
         <div class="lesson-header">
           <div class="lesson-badges">
             <span class="badge-pill">Module \${l.moduleNumber}</span>
-            <span class="badge-pill" style="background:#0b1f2a; border-color:#f2b233;">\${l.badge}</span>
-            <span style="font-size:12px; color:#64748b; margin-left:auto;">Estimated: \${l.duration}</span>
+            <span class="badge-pill" style="background:#0b1f2a; border-color:#f2b233;">\${esc(l.badge)}</span>
+            <span style="font-size:12px; color:#64748b; margin-left:auto;">Estimated: \${esc(l.duration)}</span>
           </div>
-          <h2>\${l.title}</h2>
-          <p class="subtitle">\${l.subtitle}</p>
+          <h2>\${esc(l.title)}</h2>
+          <p class="subtitle">\${esc(l.subtitle)}</p>
         </div>
 
         \${videoSection}
@@ -1255,25 +1414,33 @@ function renderAcademyUI(data, seats) {
         <div class="content-grid">
           <div class="info-card">
             <h4>Strategic Context & Overview</h4>
-            <p>\${l.overview}</p>
+            <p>\${esc(l.overview)}</p>
             <h4>Key Architectural Principles</h4>
             <ul>
-              \${(l.keyPoints || []).map(p => \`<li>\${p}</li>\`).join('')}
+              \${(l.keyPoints || []).map(p => \`<li>\${esc(p)}</li>\`).join('')}
             </ul>
           </div>
 
           <div class="info-card">
             <h4>Standard Operational Procedures</h4>
             <ul>
-              \${(l.operationalProcedures || []).map(p => \`<li>\${p}</li>\`).join('')}
+              \${(l.operationalProcedures || []).map(p => \`<li>\${esc(p)}</li>\`).join('')}
             </ul>
             <h4>Critical Operational Non-Negotiables</h4>
             <ul>
-              \${(l.takeaways || []).map(t => \`<li style="color:#ffc72c; font-weight:600;">⚠️ \${t}</li>\`).join('')}
+              \${(l.takeaways || []).map(t => \`<li style="color:#ffc72c; font-weight:600;">⚠️ \${esc(t)}</li>\`).join('')}
             </ul>
           </div>
 
           \${screenshotsSection}
+
+          \${(GUIDE_LINKS[l.id] || []).length ? \`
+          <div class="info-card">
+            <h4>How-to Guides for This Module</h4>
+            <ul>
+              \${GUIDE_LINKS[l.id].map(g => \`<li><a href="\${esc(g.href)}" style="color:#ffc72c;">\${esc(g.title)}</a></li>\`).join('')}
+            </ul>
+          </div>\` : ''}
         </div>
 
         \${quizSection}
@@ -1345,11 +1512,11 @@ function renderAcademyUI(data, seats) {
             if (r.isCorrect) {
               feedback.style.background = "rgba(16, 185, 129, 0.2)";
               feedback.style.color = "#34d399";
-              feedback.innerHTML = "<strong>✓ Correct!</strong> " + r.explanation;
+              feedback.innerHTML = "<strong>✓ Correct!</strong> " + esc(r.explanation);
             } else {
               feedback.style.background = "rgba(239, 68, 68, 0.2)";
               feedback.style.color = "#f87171";
-              feedback.innerHTML = "<strong>✗ Incorrect.</strong> " + r.explanation;
+              feedback.innerHTML = "<strong>✗ Incorrect.</strong> " + esc(r.explanation);
             }
 
             block.querySelectorAll(".quiz-option").forEach((opt, oIdx) => {
@@ -1362,7 +1529,7 @@ function renderAcademyUI(data, seats) {
         if (data.passed) {
           if (!completedLessons.includes(lessonId)) {
             completedLessons.push(lessonId);
-            localStorage.setItem("ancops_academy_completed", JSON.stringify(completedLessons));
+            localStorage.setItem(STORE_KEY, JSON.stringify(completedLessons));
             updateProgress();
           }
           alert("🎉 Congratulations! You scored " + data.scorePercent + "% on this module and passed!");
@@ -1380,7 +1547,7 @@ function renderAcademyUI(data, seats) {
       } else {
         completedLessons.push(id);
       }
-      localStorage.setItem("ancops_academy_completed", JSON.stringify(completedLessons));
+      localStorage.setItem(STORE_KEY, JSON.stringify(completedLessons));
       updateProgress();
       renderLesson(CURRICULUM.lessons.find(l => l.id === id));
     }
@@ -1390,7 +1557,7 @@ function renderAcademyUI(data, seats) {
       if (idx !== -1 && idx < CURRICULUM.lessons.length - 1) {
         selectLesson(CURRICULUM.lessons[idx + 1].id);
       } else {
-        alert("🎖️ You have reached the end of the ANC CC Ops command curriculum!");
+        alert("🎖️ You have reached the end of " + CURRICULUM.academy.name + "!");
       }
     }
 
@@ -1454,6 +1621,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     console.log(`[academy] ANC CC Ops Academy listening on http://${HOST}:${PORT}`);
     console.log(`[academy] Canonical prod domain: https://academy.cedec.io`);
     console.log(`[academy] Loaded ${curriculum.lessons.length} curriculum modules`);
+    console.log(`[academy] Loaded ${courses.length} courses and ${guidesCount(guideSystems)} how-to guides across ${guideSystems.length} systems`);
   });
 
   process.on("SIGTERM", () => {

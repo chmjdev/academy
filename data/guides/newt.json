@@ -1,0 +1,358 @@
+{
+  "id": "newt",
+  "name": "Binteca Newt Asset Management",
+  "fullName": "Statutory Asset Management & CIDMS Register",
+  "category": "Public finance",
+  "summary": "One asset register for South African government covering movable assets (vehicles, plant, equipment) and immovable assets (land, buildings, engineering infrastructure), geolocated and searchable, with CIDMS condition and criticality grading, an offline field verification app, GRAP valuation and an append-only change history. Asset managers, custodians, field officers and auditors use it.",
+  "audience": ["Asset manager", "Custodian", "Field officer (capturer)", "Auditor (viewer)", "Register administrator"],
+  "surfaces": ["Register dashboard (web)", "Admin portal (web)", "Field verification app (installable web app)", "REST API"],
+  "gettingAccess": "Newt identifies every user and device by an API key issued by the asset management office. Each key is a named identity with one role: viewer (read the register, its valuation and history), capturer (also record verifications, flag assets missing and send telemetry — the field officer role), custodian (also register and import assets) or admin (also derecognise assets and manage access). An admin issues keys from the admin portal's “System Access — API Keys” panel; a key is shown once and stored only as a hash. On a demonstration deployment the sign-in box also lists synthetic viewer, field officer and custodian identities with a “Use …” button that fills the key for you.",
+  "sources": [
+    "README.md",
+    "demo-access.json",
+    "frontend/index.html",
+    "frontend/app.js",
+    "frontend/session.js",
+    "frontend/common.js",
+    "frontend/admin/index.html",
+    "frontend/admin/admin.js",
+    "frontend/field/index.html",
+    "frontend/field/field.js",
+    "frontend/map.html",
+    "frontend/map.js",
+    "frontend/audit.html",
+    "frontend/audit.js",
+    "frontend/stats.html",
+    "frontend/stats.js",
+    "main.go",
+    "auth.go"
+  ],
+  "guides": [
+    {
+      "id": "sign-in",
+      "title": "Sign in to the register and admin portal",
+      "goal": "You are signed in with your API key, and the header shows the name and role your changes will be recorded against.",
+      "role": "Any user with an issued API key",
+      "level": "Basic",
+      "before": ["An API key issued by your asset management office."],
+      "steps": [
+        "Open the register. When you are not signed in, the “Sign in to the register” box asks for the API key issued by your asset management office.",
+        "On a demonstration deployment, read “Demo sign-in details” and press “Use …” beside the synthetic identity you want; it fills the key.",
+        "Enter the key in “API key” and press “Sign in” (or press Enter).",
+        "Check the header: it shows your name · role. Every change you make is recorded against that name.",
+        "Use the section bar to move between “Register”, “Asset map”, “Audit trail” and “Statistics”, and the header link “Admin” to open the admin portal (it uses the same sign-in).",
+        "Press “sign out” in the header when you finish."
+      ],
+      "result": "The register loads and the header shows your identity instead of “not signed in”.",
+      "troubleshooting": [
+        { "problem": "“That key was not accepted.”", "fix": "Check the key, or ask the office whether it has been revoked." },
+        { "problem": "The header shows “unauthenticated mode”.", "fix": "The deployment has no API keys configured, so changes cannot be attributed. Tell the operator; this is only permissible in development." }
+      ],
+      "sources": ["frontend/session.js", "frontend/demo-access.js", "frontend/common.js", "frontend/index.html", "README.md"]
+    },
+    {
+      "id": "search-the-register",
+      "title": "Search and filter the register and export the results",
+      "goal": "You have found the assets you need — for example the never-verified or worst-condition ones — and exported them.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open “Register”. “Register Overview” shows Total assets, Immovable, Movable, Replacement cost, Carrying value, At risk, Never verified, No SG key and Flagged missing, with the condition profile.",
+        "In “Search the Register”, type in “Search assets” — asset code, name, SG key, erf, title deed, ward, custodian, department, barcode or serial.",
+        "Narrow with “Asset kind”, “Asset class”, “Province”, “Custodian” and “Condition”, and tick “Never verified” or “Flagged missing”.",
+        "Choose a “Sort order”: asset code, risk exposure, worst condition, replacement cost or name.",
+        "Read the count of matching assets, then page through “Register entries” with “Previous” and “Next”.",
+        "Press “Export page (CSV)” to download the rows on the current page.",
+        "Press “Reset” to clear every filter."
+      ],
+      "result": "A file named asset-register-page-<n>.csv is downloaded with code, name, kind, class, location, custodian, grades, risk, values, last verified and flagged status.",
+      "troubleshooting": [
+        { "problem": "“No assets match these filters.”", "fix": "Clear a filter, or use “reset them all”." },
+        { "problem": "“There is nothing on this page to export.”", "fix": "Change the filters so the page has rows, then export." }
+      ],
+      "sources": ["frontend/index.html", "frontend/app.js", "README.md"]
+    },
+    {
+      "id": "read-an-asset",
+      "title": "Open an asset's record, valuation and history, and email its status",
+      "goal": "You have read everything the register holds about one asset and, if needed, sent its status report by email.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "In “Register entries”, click the asset's code. A flag symbol beside a code means it is flagged missing.",
+        "On the “Record” tab, read Classification, Location (coordinates, SG key, erf, ward), Custody, Life cycle grades and, for a facility, its Components — GRAP 17 requires significant components to be recognised and depreciated separately.",
+        "On the “Valuation” tab, read the standard the asset is measured under, the impairment standard and any impairment indicators.",
+        "On the “History” tab, read every recorded change, newest first, with when it was recorded and, for field captures, when it was observed.",
+        "Press “Close” to return to the register.",
+        "To email the asset's status report, press “Email” in its row, enter the recipient address when asked, and confirm."
+      ],
+      "result": "The toast “Asset status report sent.” confirms the email.",
+      "troubleshooting": [
+        { "problem": "The History tab says there are no recorded changes.", "fix": "The asset was loaded with the register rather than captured through the system." },
+        { "problem": "Sending the email fails.", "fix": "The deployment has no mail relay provisioned; the register never reports a send it did not make. Ask the operator." }
+      ],
+      "sources": ["frontend/index.html", "frontend/app.js", "README.md"]
+    },
+    {
+      "id": "register-an-asset",
+      "title": "Register a new asset",
+      "goal": "A new asset or component is on the register, classified against the accounting hierarchy and located.",
+      "role": "custodian or admin",
+      "level": "Intermediate",
+      "before": ["The asset's code, name, class and location."],
+      "steps": [
+        "Open “Admin” and, under “Register & Access”, press “Register an asset”. The form opens in its own window.",
+        "Under Identity, enter “Asset code *”, “Asset name *” and, if it has one, the “Legacy / source system code”.",
+        "Under Classification, choose “Select asset class *” and then the asset group type. “Kind” follows from the class.",
+        "Under Location, choose Point, Line or Polygon, and enter “Latitude *” and “Longitude *” — or press “Use my GPS” when standing at the asset. Add the SG 21-character key, erf / farm portion, ward, municipality and province.",
+        "Under “Custody & life cycle”, enter the custodian department, user department, tenure, title deed number, condition grade, criticality grade, replacement cost, residual value and expected useful life.",
+        "Press “Add to register”."
+      ],
+      "result": "The asset appears in “Register Entries” and its creation is recorded in the change history.",
+      "troubleshooting": [
+        { "problem": "Coordinates are refused.", "fix": "0,0 and any point outside South Africa are rejected; check the latitude and longitude." },
+        { "problem": "The asset code is refused as a duplicate.", "fix": "Codes are compared without regard to case or surrounding spaces; the register already holds that code." },
+        { "problem": "The class is refused.", "fix": "Choose a class from the list; only classes in the accounting hierarchy are accepted." },
+        { "problem": "A value is refused.", "fix": "Grades run 1–5, financial figures cannot be negative and the residual value cannot exceed the replacement cost." },
+        { "problem": "“This device cannot provide a GPS position.”", "fix": "Type the coordinates instead." }
+      ],
+      "sources": ["frontend/admin/index.html", "frontend/admin/admin.js", "README.md"]
+    },
+    {
+      "id": "verify-or-flag-from-admin",
+      "title": "Record a verification or flag an asset missing from the admin portal",
+      "goal": "The asset's last verification date, observed condition or missing status is updated and attributed to you.",
+      "role": "capturer, custodian or admin",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open “Admin” and find the asset with “Search the register by any field”.",
+        "Press “Verify” in its row.",
+        "Enter the condition grade observed on site (1 very good – 5 very poor), or leave it blank to record the visit only, and confirm.",
+        "To mark an asset that cannot be found, press “Flag”; press “Unflag” when it is found again."
+      ],
+      "result": "A toast confirms “Asset <id> verified.” or “flagged missing” / “unflagged”, and the change history records it.",
+      "troubleshooting": [
+        { "problem": "“Condition grade must be a whole number from 1 to 5.”", "fix": "Enter 1, 2, 3, 4 or 5, or leave it blank." },
+        { "problem": "The action is refused.", "fix": "Your key is a viewer key; verifications need the capturer role or higher." }
+      ],
+      "sources": ["frontend/admin/admin.js", "README.md"]
+    },
+    {
+      "id": "remove-an-asset",
+      "title": "Derecognise (remove) an asset",
+      "goal": "An asset no longer held is taken off the register while its full history is kept.",
+      "role": "admin",
+      "level": "Intermediate",
+      "before": ["Any components of the asset have been removed first."],
+      "steps": [
+        "Open “Admin” and find the asset.",
+        "Press “Remove” in its row.",
+        "Confirm “Remove asset <id> from the register?”."
+      ],
+      "result": "The toast “Asset <id> removed.” appears. The asset leaves the register, but its history — including its full state at derecognition — stays in the change history.",
+      "troubleshooting": [
+        { "problem": "The removal is refused while the asset still has components.", "fix": "Remove the child components first, then the parent." },
+        { "problem": "The removal is refused for your role.", "fix": "Only admin keys may derecognise assets." }
+      ],
+      "sources": ["frontend/admin/admin.js", "README.md"]
+    },
+    {
+      "id": "set-up-field-device",
+      "title": "Set up a phone or tablet for field verification",
+      "goal": "The field verification app is installed on the device and signed in with its device key.",
+      "role": "capturer (field officer)",
+      "level": "Basic",
+      "before": ["A device key issued by your asset management office with the capturer role or higher."],
+      "steps": [
+        "On the device, open the field app at /field/ on your register's address. It is an installable web app: add it to the home screen from the browser; there is no app-store package.",
+        "On “Set up this device”, enter the “Device key”. It is stored on that device only.",
+        "On a demonstration deployment you can instead press “Use …” beside a synthetic identity listed under “Demo sign-in details”.",
+        "Press “Save and continue”."
+      ],
+      "result": "The “Find an asset” screen opens and the header shows who the device is signed in as, whether it is online and how many captures are queued.",
+      "troubleshooting": [
+        { "problem": "“That device key was not accepted.”", "fix": "Check the key with the office." },
+        { "problem": "“This key can view the register but not record verifications.”", "fix": "A viewer key cannot be used for setup; ask for a capturer key." }
+      ],
+      "sources": ["frontend/field/index.html", "frontend/field/field.js", "frontend/field/manifest.json", "demo-access.json", "README.md"]
+    },
+    {
+      "id": "verify-in-the-field",
+      "title": "Verify an asset on site with the field app, online or offline",
+      "goal": "The physical verification — condition, position and notes — is recorded with the time you stood at the asset, even without signal.",
+      "role": "capturer (field officer)",
+      "level": "Basic",
+      "before": ["A device set up with a device key."],
+      "steps": [
+        "On “Find an asset”, press “Scan” and point the camera at the asset barcode, or type the asset code, serial number or name.",
+        "Choose the asset from the results. Check its class, location, SG key, custodian, recorded condition and last verified date.",
+        "Under “Condition observed on site”, tap 1 Very good to 5 Very poor.",
+        "Under “Position”, press “Capture GPS” and wait for the coordinates and accuracy.",
+        "Under “Notes”, write what you found.",
+        "Press “Record verification”. If you cannot find the asset, press “Cannot find asset” and confirm the report.",
+        "Without signal the app says the capture is saved on this device. It appears under “Waiting to sync”; press “Try to sync now” when you have a signal, or let it upload by itself.",
+        "Press “← Back to search” for the next asset."
+      ],
+      "result": "“Verification recorded.” (or “Asset reported missing.”) online; offline, the capture uploads later carrying the time you observed the asset.",
+      "troubleshooting": [
+        { "problem": "“This device cannot scan barcodes — type the code instead.”", "fix": "Type the code; scanning needs a browser with a barcode detector." },
+        { "problem": "“Choose the condition you observed.”", "fix": "Tap a condition grade before recording." },
+        { "problem": "“No match on this device.”", "fix": "Offline, only assets you have opened before are available; search again when online." },
+        { "problem": "“… captures rejected by the office.”", "fix": "The register refused them, for example a position outside South Africa; recapture on site." },
+        { "problem": "“This device key is no longer accepted.”", "fix": "Queued captures stay on the device; set the device up again with a new key." }
+      ],
+      "sources": ["frontend/field/index.html", "frontend/field/field.js", "README.md"]
+    },
+    {
+      "id": "use-the-map",
+      "title": "Find assets on the map and export a view",
+      "goal": "You have located assets geographically, filtered them, and shared or exported the view.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open “Asset map”.",
+        "Under “Filter the map”, use the same search and filters as the register (kind, class, province, custodian, condition, “Never verified”, “Flagged missing”). The scope line shows the active filters; “Reset filters” clears them.",
+        "Pan and zoom. At low zoom assets are clustered; click a cluster (it shows immovable and movable counts, average condition and how many are poor) to zoom in.",
+        "Click an asset, line or polygon for its popup and press “Open in register” to open its record.",
+        "Press “National view” to return to the whole country.",
+        "Press “Copy link to view” to share exactly what you see.",
+        "Zoom in until individual assets show, then press “Export view (CSV)”."
+      ],
+      "result": "The CSV holds the assets in view with code, name, kind, class, geometry, condition, risk, flagged status and coordinates.",
+      "troubleshooting": [
+        { "problem": "“Zoom in until individual assets are shown, then export.”", "fix": "Export works on individual assets, not clusters; zoom in further." },
+        { "problem": "“Copy failed — the link is in the address bar.”", "fix": "Copy the address bar yourself." }
+      ],
+      "sources": ["frontend/map.html", "frontend/map.js"]
+    },
+    {
+      "id": "review-audit-trail",
+      "title": "Review the change history",
+      "goal": "You can show an auditor who changed what, when and from where, and that no event is missing.",
+      "role": "Any signed-in user",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open “Audit trail”. “Change history” summarises the events and “Integrity” says whether history is written to durable storage.",
+        "Under “Filter the trail”, choose an Actor and an Action and set From and To dates.",
+        "Read “Recorded changes”: Seq, Recorded at, Actor, Action, Asset and What changed (a field-level before/after).",
+        "Check the integrity verdict for the page: contiguous sequence numbers, or a gap detected.",
+        "Click an asset code to open it in the register.",
+        "Page with “Previous” and “Next”, and press “Export page (CSV)” to download the events on the page."
+      ],
+      "result": "The exported CSV carries sequence, recorded and observed times, actor and role, source, action, asset, changes and note.",
+      "troubleshooting": [
+        { "problem": "“Gap detected” on a page.", "fix": "A sequence number is missing; report it to the register administrator as an integrity finding." },
+        { "problem": "History is not on durable storage.", "fix": "The register is running in memory and history is lost on restart; tell the operator." }
+      ],
+      "sources": ["frontend/audit.html", "frontend/audit.js", "README.md"]
+    },
+    {
+      "id": "statistics-and-risk-audit",
+      "title": "Report progress and download the risk-audit extract",
+      "goal": "You have the verification, condition and valuation position for reporting, and the per-asset risk-audit file for an auditor or accounting platform.",
+      "role": "Any signed-in user",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open “Statistics”. “Register at a Glance” shows totals, replacement cost, accumulated depreciation, carrying amount, impairment loss, high risk and flagged missing.",
+        "Read “Verification Progress”: verified in the last 12 months, verification overdue, and never verified.",
+        "Read “Condition Profile”, “Capture Activity — Last 30 Days” and “Largest Asset Classes”.",
+        "Under “Risk-Audit Extract”, optionally set “As at” to a reporting date, and press “Download CSV”."
+      ],
+      "result": "“Extract downloaded.” and a file named newt_risk_audit_<date>.csv: one row per asset with classification, custody, grading, verification state, the GRAP valuation position and audit-trail integrity.",
+      "troubleshooting": [
+        { "problem": "The extract fails.", "fix": "Sign in again; the extract needs your key." }
+      ],
+      "sources": ["frontend/stats.html", "frontend/stats.js", "README.md"]
+    },
+    {
+      "id": "manage-api-keys",
+      "title": "Issue and revoke API keys",
+      "goal": "Each person and device has its own named key with the right role, and keys that are no longer needed stop working.",
+      "role": "admin",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open “Admin”. Admins see “System Access — API Keys” below the register.",
+        "Press “Issue an API key”.",
+        "Enter the “Full name of the person or device” and choose the role: viewer (read the register, auditor access), capturer (field verification and telemetry), custodian (register and import assets) or admin (full control, including access management).",
+        "Press “Issue key”. Record the key now with “Copy” — it is shown once and stored only as a hash — then press “Done”.",
+        "To revoke, press “Revoke” in the key's row and confirm. The key stops working immediately; the identity stays in the audit trail."
+      ],
+      "result": "The table lists each identity with its role, key ID, source, issue date and status; issuing and revoking are events in the change history.",
+      "troubleshooting": [
+        { "problem": "Environment keys have no “Revoke” button.", "fix": "They come from the deployment's configuration and are managed by the operator." },
+        { "problem": "Issuing or revoking is refused.", "fix": "On a locked UAT environment key issuance through the system is turned off." },
+        { "problem": "You do not see the panel.", "fix": "Only admin keys see System Access." }
+      ],
+      "sources": ["frontend/admin/index.html", "frontend/admin/admin.js", "README.md"]
+    },
+    {
+      "id": "import-existing-register",
+      "title": "Import an existing register from a CSV export or in bulk",
+      "goal": "An inherited register is loaded, with each bad row reported rather than the whole file refused.",
+      "role": "custodian or admin",
+      "level": "Advanced",
+      "before": ["A custodian or admin API key.", "The register exported as CSV, or as JSON assets."],
+      "steps": [
+        "Send the CSV file as the body of POST /api/assets/import-csv with your key in the X-API-Key header (or Authorization: Bearer). There is no upload screen; this is an API task.",
+        "Use the column headings your export already has: common wordings such as Asset No, Old Asset Number, Description, Latitude, Longitude, SG Code, Erf, Custodian Department, Condition, Replacement Cost, Residual Value, Last Verified and Vesting Status are recognised. Day-month-year dates are accepted.",
+        "Alternatively send JSON to POST /api/assets/bulk as {\"assets\": [ … ]}.",
+        "Read the per-row outcomes in the response; correct the refused rows and import them again."
+      ],
+      "result": "Accepted rows are on the register and in the change history with the source of the import; refused rows are listed with their reason.",
+      "troubleshooting": [
+        { "problem": "“Could not read a header row from the CSV”, or a header but no data rows.", "fix": "Check the file is a CSV with a header row and at least one data row." },
+        { "problem": "Rows refused for coordinates, duplicates, class or values.", "fix": "The same validation as single registration applies: no 0,0 or out-of-country points, no duplicate codes, a class from the hierarchy, grades 1–5, no negative figures." },
+        { "problem": "A date is refused.", "fix": "The row names the value; use a recognised date format." }
+      ],
+      "sources": ["README.md", "main.go", "auth.go"]
+    },
+    {
+      "id": "send-telemetry",
+      "title": "Send positions from tracking devices",
+      "goal": "Movable assets' positions are updated from tracking devices, attributed to the device's identity.",
+      "role": "capturer (the device's key)",
+      "level": "Advanced",
+      "before": ["A key issued to the device with the capturer role."],
+      "steps": [
+        "POST to /api/telemetry with the device key in X-API-Key and a JSON body {\"readings\": [ … ]}, each reading naming the asset_code with lat and lng, and optionally speed_kph and heading_deg.",
+        "Send up to 5000 readings in one batch.",
+        "Read the response: received, accepted, rejected and a result per reading.",
+        "Read current positions of movable assets from GET /api/tracking."
+      ],
+      "result": "Accepted readings update the asset and land in the change history like a hand capture.",
+      "troubleshooting": [
+        { "problem": "A reading is rejected.", "fix": "Readings at 0,0, outside South Africa, with an impossible speed or heading, a future timestamp, or for an immovable asset are refused; the rest of the batch still applies." }
+      ],
+      "sources": ["README.md", "main.go"]
+    },
+    {
+      "id": "query-the-api",
+      "title": "Query the register, valuation and receivables through the API",
+      "goal": "An ERP, GIS or accounting system reads the register and its accounting position directly.",
+      "role": "viewer or higher",
+      "level": "Advanced",
+      "before": ["An API key for the integrating system."],
+      "steps": [
+        "Send the key as X-API-Key (or Authorization: Bearer) on every request; GET /api/whoami returns the identity and capabilities of the key.",
+        "Search with GET /api/assets using filters such as q, kind, asset_class, province, municipality, ward, custodian, flagged, unverified, condition_min, criticality_min and risk_min, with sort (code, risk, condition, value, name, updated), page and page_size.",
+        "Read one asset with GET /api/assets/{id}, its components with /components and its history with /history.",
+        "Query a map viewport with GET /api/map and the bounding-box parameters; it returns clusters at low zoom and features at high zoom.",
+        "Read the GRAP 17/16/103/31 valuation and GRAP 21/26 impairment from GET /api/valuation (or /api/assets/{id}/valuation).",
+        "Read GRAP 104 expected credit loss and the SPPI test over lease and disposal receivables from GET /api/receivables. Statutory receivables (rates and service charges) are reported separately with no ECL.",
+        "Read the risk-audit extract from GET /api/reports/risk-audit (CSV, or ?format=json, with ?as_of=YYYY-MM-DD for a reporting date), and the change history from GET /api/history."
+      ],
+      "result": "The integrating system receives JSON (or CSV for the extract) that matches what the web screens show.",
+      "troubleshooting": [
+        { "problem": "“A valid API key is required.”", "fix": "Send the key as X-API-Key or Authorization: Bearer." }
+      ],
+      "sources": ["README.md", "main.go", "auth.go"]
+    }
+  ]
+}

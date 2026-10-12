@@ -1,0 +1,661 @@
+{
+  "course": {
+    "id": "policeops",
+    "system": "policeops",
+    "name": "PoliceOps National Police Command Center Course",
+    "tagline": "Understand how PoliceOps records incidents, keeps evidence originals, reviews sources with independent models and governs access — and what its records do and do not establish.",
+    "summary": "PoliceOps (The National Police Command Center) is a command terminal for violent crime and public order, used on web, desktop and Android against an independently configured command server. This course explains operators and enrolment, incidents and case notices, evidence custody, independent model review, social and missing-person work, police data imports, desktop and Android operation, and accountable use. It is for officers, analysts and super users.",
+    "audience": [
+      "Officer",
+      "Analyst",
+      "Super user (command administrator)"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "policeops-01-orientation",
+      "moduleNumber": 1,
+      "title": "What PoliceOps Is: Terminals, Command Server and Workspaces",
+      "subtitle": "One command server, three kinds of terminal, and a record that starts empty",
+      "badge": "Foundations",
+      "duration": "13 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The National Police Command Center (service name policeops) is a command terminal for violent crime and public order. Operators record incident reports, capture video, broadcast, social and modem evidence with exact byte custody, run independently reviewed case analysis, manage missing-person cases and retain police dataset originals. It runs as a web console, a desktop app (macOS and Linux) and an Android app, all talking to a command server that is configured independently. The independent command backend starts with no operators, incidents, statistics or example sources: nothing is pre-loaded, and generated police data is excluded from operational imports. Terminals never guess a server: a native terminal has no address until you supply the exact command server URL or an enrolment link, and when a request fails the terminal keeps your settings rather than switching to another server.",
+      "keyPoints": [
+        "Two workspaces: 'Command operations' and 'Crime data and reporting'.",
+        "Views include Recorded case notices, Quad view, Three panels, Dual view, Video grid, Case social sources, Social sources, Incident map, National map, Missing persons, Analysis desk and Administration.",
+        "The header shows 'Backend connected' or 'Backend unavailable', your name, LO number, role, recorded clearance, station and the SAST clock.",
+        "'Command status unavailable: …' means the status request failed or did not validate — not that the server is offline.",
+        "Empty states say what they mean, for example 'This does not establish that there are no incidents.'",
+        "Feeds for neighbouring countries are deferred work; no coverage is claimed."
+      ],
+      "operationalProcedures": [
+        "1. Open the terminal and connect to the exact command server URL you were given.",
+        "2. Choose a workspace at the top, then a view from 'Tactical Command View Layout'.",
+        "3. Focus a panel with 'FULL VIEW FOCUS' and return with 'RESTORE MULTI-VIEW'.",
+        "4. Read every empty state literally: it describes loaded records, not the world."
+      ],
+      "takeaways": [
+        "The terminal never guesses or switches servers; a wrong URL fails rather than redirects.",
+        "An empty installation has no example accounts or evidence, by design.",
+        "A failed status check is not proof the server is down."
+      ],
+      "guides": [
+        "sign-in-or-enrol",
+        "choose-command-view"
+      ],
+      "quiz": [
+        {
+          "question": "A native PoliceOps terminal has no server URL configured. What does it do?",
+          "options": [
+            "Connects to a default production server",
+            "Connects to the local machine",
+            "Refuses network access until you supply an exact server URL or enrolment link",
+            "Uses the last server any operator used"
+          ],
+          "correctIndex": 2,
+          "explanation": "Native terminals must not guess loopback or production endpoints; requests are refused until an exact URL is supplied."
+        },
+        {
+          "question": "The view shows 'Command status unavailable: …'. What is the correct conclusion?",
+          "options": [
+            "The status request failed or did not validate; it does not mean the server is offline",
+            "The server is offline",
+            "All incidents are closed",
+            "Your account was disabled"
+          ],
+          "correctIndex": 0,
+          "explanation": "A response validation failure does not establish that a server is offline."
+        },
+        {
+          "question": "What does a newly installed independent command backend contain?",
+          "options": [
+            "Sample incidents for training",
+            "A national crime baseline",
+            "Preset operator accounts",
+            "No operators, incidents, statistics or example sources until they are actually recorded"
+          ],
+          "correctIndex": 3,
+          "explanation": "The runtime starts empty; the initial administrator is onboarded explicitly and example data is never loaded."
+        }
+      ]
+    },
+    {
+      "id": "policeops-02-operators-enrolment",
+      "moduleNumber": 2,
+      "title": "Operators, Roles, Enrolment and Devices",
+      "subtitle": "How people get access, what each role can do, and how access is withdrawn",
+      "badge": "Access & Governance",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "There are no preset accounts. The service operator onboards the first super user on the command server; from then on a signed-in super user invites each operator from the Analysis desk's team panel with the role OFFICER, ANALYST or SUPER_USER. An invitation produces a one-use enrolment link that expires (twelve hours in the code checked); the new operator pastes it into 'Enrol device'. Existing operators sign in with their email or LO number and their own password. Each sign-in issues a device session that expires (seven days in the code checked) and can be revoked. Where the server sits behind an access gate, the gate key is issued separately — and the gate does not authenticate an operator: you still need your own account. Operator profiles must come back from the server; a cached profile or a forged identity is never accepted.",
+      "keyPoints": [
+        "OFFICER, ANALYST and SUPER_USER are the only roles; a role must be stated explicitly.",
+        "Retaining and reviewing national dataset originals is limited to SUPER_USER and ANALYST.",
+        "A SUPER_USER can see all incidents; other operators see incidents they are assigned to.",
+        "Only a SUPER_USER sees the team panel ('TEAM — OPERATORS & DEVICES'), can invite, disable and re-enable operators, and can assign missing-person case access.",
+        "An enrolment link carries the server address and gate key, so it must travel only over a trusted channel.",
+        "'Disconnect this device (revokes its token)' and 'Revoke this device' cut off a terminal; the server address is kept."
+      ],
+      "operationalProcedures": [
+        "1. Super user: open the Analysis desk settings ('Core connection and team'), enter email, name and LO number, choose the role and press 'INVITE'.",
+        "2. Copy the enrolment link with 'COPY' and send it over a channel you trust.",
+        "3. New operator: press 'Enrol device', paste the whole link and submit it.",
+        "4. When a terminal is lost or retired, use 'Revoke this device'; disable the operator if they should lose all access.",
+        "5. Sign out at the end of every shift."
+      ],
+      "takeaways": [
+        "Keys, passwords, tokens and enrolment links are never written into documentation, cases or chat logs.",
+        "The gate key opens the door to the server; only your own account identifies you.",
+        "Revoke lost devices immediately — a session otherwise lasts until it expires."
+      ],
+      "guides": [
+        "sign-in-or-enrol",
+        "invite-operators-and-admin",
+        "missing-person-case"
+      ],
+      "quiz": [
+        {
+          "question": "An operator's enrolment link no longer works. What is the likely reason and fix?",
+          "options": [
+            "The link is one-use and expires; the super user issues a fresh invitation",
+            "The server is down; wait a day",
+            "The operator must use the gate key instead",
+            "The link must be shortened before pasting"
+          ],
+          "correctIndex": 0,
+          "explanation": "Links are one-use and expire; inviting again issues a fresh one."
+        },
+        {
+          "question": "Which roles may retain police dataset originals?",
+          "options": [
+            "Any operator",
+            "OFFICER only",
+            "SUPER_USER and ANALYST",
+            "Only the service operator"
+          ],
+          "correctIndex": 2,
+          "explanation": "The dataset store refuses retention unless the actor is a SUPER_USER or ANALYST."
+        },
+        {
+          "question": "What does the server access key (gate key) establish?",
+          "options": [
+            "Your identity as an operator",
+            "Your clearance level",
+            "That your device is enrolled",
+            "Only that the request may reach the server; operator access still requires your own account"
+          ],
+          "correctIndex": 3,
+          "explanation": "The gate does not authenticate an operator; actual requests require both gate and operator access."
+        }
+      ]
+    },
+    {
+      "id": "policeops-03-incidents-notices",
+      "moduleNumber": 3,
+      "title": "Incidents, Categories and Recorded Case Notices",
+      "subtitle": "Creating a report exactly, working an assigned case, and what an area on the map is",
+      "badge": "Incidents",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "An incident report holds what an operator actually records: title, command callsign, threat priority, location name, an operator-defined area, requested search terms and a summary. Categories only prepare the form — they set a classification and editable search vocabulary, never facts, and an unknown category is refused rather than defaulted. AI AUTO-FILL may draft fields from a short brief through independent source review, but every drafted field must be checked. When you press 'Create report', the terminal freezes your exact draft, checks that the server's returned report matches it, and only then selects it; if anything differs, the report is kept but not selected, and it is never created twice. Recorded case notices are the open cases assigned to you, each bound to an exact snapshot: opening a notice selects that existing case and never creates or dispatches another incident. The operator-defined area is an operational geofence, never a verified incident location.",
+      "keyPoints": [
+        "Threat priority (Critical, High, Medium, Low) is an operator assessment, not proof of a critical event.",
+        "The area comes from the 'OPERATOR AREA PICKER', an OpenStreetMap search candidate, or typed WGS-84 coordinates and a radius; zero coordinates are kept as entered.",
+        "Only one notice action runs at a time; 'Dismiss this version' hides that exact version of the notice for you.",
+        "'Mark inactive', 'Reactivate' and 'Contain & lock' change state and are recorded against your account; 'Contain & lock' resolves and locks the case.",
+        "A state change is refused if the case changed since you loaded it.",
+        "Maps plot recorded areas and records with an eligible recorded point; missing locations are never filled with a city coordinate."
+      ],
+      "operationalProcedures": [
+        "1. Press 'Prepare incident report', optionally choose a category or situation type.",
+        "2. Fill in the actual title, callsign, priority, location name, area, search terms and summary; review anything AI AUTO-FILL drafted.",
+        "3. Press 'Create report' and confirm it becomes the selected incident; if it does not, select it from Recorded case notices.",
+        "4. Work notices with 'Open exact case', 'Refresh case' and the state buttons.",
+        "5. Use 'Incident map' or 'National map' with 'Refresh incident feed' to see recorded areas."
+      ],
+      "takeaways": [
+        "A category is vocabulary, never evidence.",
+        "An area on the map is where you chose to look, not where something is proven to have happened.",
+        "Never re-create a report that was created but not selected."
+      ],
+      "guides": [
+        "create-incident-report",
+        "manage-selected-incident",
+        "incident-and-national-maps"
+      ],
+      "quiz": [
+        {
+          "question": "A report is created on the server but the terminal does not select it. What should you do?",
+          "options": [
+            "Create it again",
+            "Select it from Recorded case notices; the created report is kept",
+            "Edit the database directly",
+            "Wait for automatic retry"
+          ],
+          "correctIndex": 1,
+          "explanation": "The created report is retained; re-creating it would duplicate it, and nothing retries automatically."
+        },
+        {
+          "question": "What does the operator-defined area plotted for an incident represent?",
+          "options": [
+            "The verified location of the event",
+            "The reporting officer's station",
+            "The nearest police precinct",
+            "An operational area the operator defined, not a verified incident location"
+          ],
+          "correctIndex": 3,
+          "explanation": "A recorded geofence is an operational area, never proof of an incident location."
+        },
+        {
+          "question": "You choose a quick report category. What does that do?",
+          "options": [
+            "Sets the category and editable search terms only; it creates no incident and fills no facts",
+            "Creates an incident with preset details",
+            "Dispatches units",
+            "Fills in callsign and location automatically"
+          ],
+          "correctIndex": 0,
+          "explanation": "Categories only prepare the form; preset titles, callsigns, places and narratives were removed."
+        }
+      ]
+    },
+    {
+      "id": "policeops-04-evidence-custody",
+      "moduleNumber": 4,
+      "title": "Evidence Custody: Originals, Receipts and the Docket",
+      "subtitle": "Byte custody is not verification",
+      "badge": "Evidence",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "PoliceOps keeps every capture as an unchanged original with a separate provenance record. A camera snapshot is the decoded frame saved as a PNG and sealed with SHA-256; a video clip is recorded as WebM; a broadcast replay retains the native segments and their provenance separately from the viewing clip made from them. Each capture is owned by the operator and incident that started it, and a capture ID cannot be reused for another case. The docket reads the exact retained bytes and checks identity, full checksum and length before showing or exporting them, and an export is only reported as complete after it has been read back and compared. The docket itself states the governing rule: checksums verify recorded byte integrity; they do not establish source truth, incident relevance or legal compliance. Recorded custody time is not broadcast event time, and a configured broadcast URL is shown as 'availability unverified'.",
+      "keyPoints": [
+        "A camera frame or supported WebM clip is queued for independent review automatically after upload; a replay review is queued after upload too.",
+        "Local originals stay retained if the upload or the server fails; they are not relabelled as server evidence.",
+        "Recording stops if the source, case or operator changes; nothing is retried automatically.",
+        "'Export originals' gives the exact retained bytes; 'Export records' is metadata only and says so.",
+        "'Exported and byte-checked.' appears only after the export matches the retained hash and length; 'View export receipt' shows filename, hash and length.",
+        "A tuner being present does not mean a decoded stream is available ('DVB STREAM UNAVAILABLE')."
+      ],
+      "operationalProcedures": [
+        "1. Capture with 'GRAB SNAPSHOT', 'RECORD CLIP' or, after about 15 seconds of playback, 'Capture Last 15s'.",
+        "2. Wait for the upload confirmation and follow the queued review under CASE REPORTS.",
+        "3. Open the docket ('Open retained evidence docket') and inspect 'View source and custody record'.",
+        "4. Export with 'Export originals' and confirm 'Exported and byte-checked.' before relying on the copy.",
+        "5. If an upload fails, reconnect and upload again; do not discard the local original."
+      ],
+      "takeaways": [
+        "Byte custody is not verification: a matching hash proves the bytes are unchanged, not that they show what they appear to show.",
+        "Originals, provenance and viewing clips are separate records; keep them separate.",
+        "A cancelled or failed export is never a successful export."
+      ],
+      "guides": [
+        "capture-video-evidence",
+        "capture-broadcast-replay",
+        "evidence-docket"
+      ],
+      "quiz": [
+        {
+          "question": "A docket item's checksum and byte length match its retained record. What does that establish?",
+          "options": [
+            "The footage shows a real crime",
+            "The item is relevant to the incident",
+            "The item is legally compliant evidence",
+            "The bytes are unchanged since they were recorded"
+          ],
+          "correctIndex": 3,
+          "explanation": "Checksums verify recorded byte integrity only; they do not establish source truth, relevance or legal compliance."
+        },
+        {
+          "question": "An upload of a camera clip fails. What has happened to the capture?",
+          "options": [
+            "The local original is still retained; reconnect and upload again",
+            "It was deleted",
+            "It was replaced with the last successful clip",
+            "It was uploaded to a different case"
+          ],
+          "correctIndex": 0,
+          "explanation": "Local originals remain retained after upload or server failure."
+        },
+        {
+          "question": "For a broadcast replay, what is the relationship between the native segments and the viewing clip?",
+          "options": [
+            "The viewing clip replaces the segments",
+            "They are the same file",
+            "The native segments and their provenance are retained separately; the viewing clip is a derivative",
+            "Only the viewing clip is kept"
+          ],
+          "correctIndex": 2,
+          "explanation": "Native segments and provenance are kept as originals; a separate viewing clip is made from them."
+        }
+      ]
+    },
+    {
+      "id": "policeops-05-independent-review-ai",
+      "moduleNumber": 5,
+      "title": "Independent Review, Model Gateways and Case Analysis",
+      "subtitle": "How AI is used, how it is checked, and what a reviewed report still is not",
+      "badge": "AI & Analysis",
+      "duration": "17 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "PoliceOps uses language models only through independent review. The server must be configured with explicit processing, translation and review gateways — OpenRouter or OrcaRouter — and the code refuses to start if processing and review use the same gateway; the two models also come from different publishers. Every stage works on the unchanged original sources. The reviewer checks every claim, its association and its translation; a complete rejection permits one correction pass and a fresh review, and a second rejection stays held. Network failures, missing credentials, malformed output or a reported fallback route never trigger another model or retry. On the Analysis desk, SITREP, ACTION PLAN, TIMELINE, ENTITIES, OSINT LEADS and ASK each run in their own worker against a frozen snapshot of the case's sources. Only claims that passed review are shown, each tied to its source and original-language quotation. Action plans and leads are proposals for human review — never evidence or dispatch orders. Configured credentials show as configured but unverified: live provider accuracy has not been established.",
+      "keyPoints": [
+        "'Independent review of this Core report is not established. Its conclusions are held.' means no valid independent review exists; do not rely on the conclusions.",
+        "Original-language claims are kept beside a separately bound English translation.",
+        "Missing model credentials hold jobs; they never cause a switch to another model.",
+        "SOURCE ANALYSIS keys entered in 'Analysis provider settings' apply to the session only and are cleared when the gateway changes.",
+        "Image review reads directly visible text only; it never performs face matching.",
+        "'Associations are not established from the supplied sources.' means the sources do not support an association; unknown facts stay empty."
+      ],
+      "operationalProcedures": [
+        "1. On the Analysis desk, open CASE REPORTS and check the header says analysis is configured.",
+        "2. Collect a public source with 'FETCH', or search recorded case sources.",
+        "3. Run a task or 'ASK', then open the finished report and expand 'View original source claims'.",
+        "4. Treat ACTION PLAN and OSINT LEADS output as proposals for a person to decide on.",
+        "5. Download 'Review audit' when you need the exact inputs, models and completions behind a report."
+      ],
+      "takeaways": [
+        "Model review checks support in the sources; it does not establish truth or location.",
+        "Held means held — never act on a held conclusion.",
+        "No model output is a dispatch order."
+      ],
+      "guides": [
+        "analysis-desk-case-reports",
+        "source-analysis-desk",
+        "social-sources"
+      ],
+      "quiz": [
+        {
+          "question": "An administrator configures the same gateway for processing and review. What happens?",
+          "options": [
+            "Reviews run faster",
+            "The server refuses to start, because processing and review must use different gateways",
+            "A warning is logged and work continues",
+            "The reviewer is skipped"
+          ],
+          "correctIndex": 1,
+          "explanation": "The server requires explicit, different processor and reviewer gateways."
+        },
+        {
+          "question": "The reviewer rejects a draft completely, the processor corrects it once, and the reviewer rejects it again. What is the outcome?",
+          "options": [
+            "The result stays held, with the full rejected audit retained",
+            "The draft is published with a warning",
+            "Another model is tried automatically",
+            "The operator's draft replaces it"
+          ],
+          "correctIndex": 0,
+          "explanation": "One correction pass is allowed; a second rejection stays held."
+        },
+        {
+          "question": "How must an ACTION PLAN from the Analysis desk be treated?",
+          "options": [
+            "As a dispatch order",
+            "As verified evidence",
+            "As a proposal for human review",
+            "As an official statistic"
+          ],
+          "correctIndex": 2,
+          "explanation": "Action plans and leads are labelled proposals for human review, separate from recorded facts and dispatch orders."
+        }
+      ]
+    },
+    {
+      "id": "policeops-06-social-and-missing-persons",
+      "moduleNumber": 6,
+      "title": "Social Sources and Missing-Person Cases",
+      "subtitle": "Retaining originals, reviewing them, and keeping assessments separate from facts",
+      "badge": "Case Work",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Two workspaces apply the same discipline to sensitive material. In Social sources, an operator retains an original API response for a post — with its exact post ID and URL — against an assigned case. Importing it, or assigning it to a case, does not authenticate the provider or establish relevance. Independent review must approve the whole post against the same raw response and the exact case before it enters the reviewed feed, and only then can it be recorded in the docket. In Missing persons, an operator records an actual report: the reported name, last-seen time and place, circumstances and priority, plus only the optional details actually known. Photographs and lead sources are retained as separate originals and can be independently reviewed. The case state — ACTIVE_SEARCH, LEAD_FOUND, POTENTIALLY_CONCLUSIVE, LOCATED or CLOSED — is the operator's assessment, never a verified identity or sighting. Automatic searches and official border feeds are not configured.",
+      "keyPoints": [
+        "A held social post stays held; it is never replaced with another record.",
+        "Unknown metrics, account status, locations and media stay absent rather than estimated.",
+        "Recorded account preferences are not coverage or identity verification.",
+        "Missing-person priorities are CRITICAL, HIGH or STANDARD; unknown contact details, age, station or geography stay blank.",
+        "Image review in missing-person cases reads visible text only and never matches faces.",
+        "Only a SUPER_USER can assign another operator access to a missing-person case."
+      ],
+      "operationalProcedures": [
+        "1. Open a case from Recorded case notices before working its social sources.",
+        "2. Retain the original with 'Retain original', then 'Launch review'; docket only reviewed text with 'Record in docket'.",
+        "3. In Missing persons, use 'Record case' with the facts you actually have.",
+        "4. Retain photographs or leads with 'Retain original' and start 'Launch review'.",
+        "5. Update the state with 'Record state' and export with 'Export original dossier'."
+      ],
+      "takeaways": [
+        "Importing is not authenticating.",
+        "A case state is your assessment; record it honestly and never present it as confirmation.",
+        "Do not fill gaps in a person's record with guesses."
+      ],
+      "guides": [
+        "social-sources",
+        "missing-person-case"
+      ],
+      "quiz": [
+        {
+          "question": "A social post has been imported and assigned to a case but not yet reviewed. What has been established?",
+          "options": [
+            "Only that the original response was retained; not provider authenticity or relevance",
+            "That the post is authentic",
+            "That the post is relevant to the case",
+            "That the author's identity is confirmed"
+          ],
+          "correctIndex": 0,
+          "explanation": "Importing or assigning a case does not authenticate a provider or establish relevance."
+        },
+        {
+          "question": "A missing-person case is set to POTENTIALLY_CONCLUSIVE. What does that state mean?",
+          "options": [
+            "The person's identity has been verified by face matching",
+            "The person has been located",
+            "It is the operator's recorded assessment, not a verified identity or sighting",
+            "An official border feed matched the person"
+          ],
+          "correctIndex": 2,
+          "explanation": "Case state is an operator assessment; review never performs face matching and border feeds are not configured."
+        },
+        {
+          "question": "The reporting family does not know the missing person's age. What goes in the age field?",
+          "options": [
+            "An estimate based on the photograph",
+            "Nothing; unknown details stay absent",
+            "Zero",
+            "The average age for similar cases"
+          ],
+          "correctIndex": 1,
+          "explanation": "Unknown details must stay absent rather than be inferred."
+        }
+      ]
+    },
+    {
+      "id": "policeops-07-police-data-imports",
+      "moduleNumber": 7,
+      "title": "Police Data Originals, Review and Statistical Mapping",
+      "subtitle": "Why uploads never become crime statistics on their own",
+      "badge": "Sources & Data",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The 'Crime data and reporting' workspace ('Police data originals') stores complete police publications — PDF, XLSX workbook, UTF-8 CSV or UTF-8 text — as unchanged originals with their exact publisher URL, bytes, SHA-256 and the recording operator. They arrive labelled 'Unreviewed original · statistics not published'. A collection job can fetch a publication from the publisher instead; it keeps the full response, headers and redirect chain, and a failed or unsupported response is retained for inspection but never becomes a dataset. An operator-supplied URL does not authenticate the publisher. Independent review reads CSV fields with their record and column numbers and workbook cells with their sheet and cell; formulas are never evaluated and cached values are marked unverified, and unsupported workbook parts hold the whole review. A statistical mapping then ties one observation's value, measure, unit, period, subject, optional geography and caveats to its source claims. Even a supported mapping is one observation: no national total, verified location or official publication is established. In the 2026-10-10 source-readiness check the publisher's crime-statistics page failed certificate validation, the checks were not disabled, and no statistics were retrieved or imported.",
+      "keyPoints": [
+        "Retaining and reviewing originals is limited to SUPER_USER and ANALYST; other operators can inspect retained originals.",
+        "'No police dataset originals have been retained. This is not a zero-crime statistic.'",
+        "Uploads never populate crime totals, station statistics or geography.",
+        "Collection jobs can run in parallel and can be cancelled; nothing is retried automatically.",
+        "Blank or missing values stay distinct from zero.",
+        "A mapping review checks that all dimensions belong to the same observation and that no applicable caveat is omitted."
+      ],
+      "operationalProcedures": [
+        "1. Retain an original with 'Retain original file', or start a 'Launch collection job' with the exact publisher document URL.",
+        "2. Inspect collection jobs with 'Inspect capture', including headers, redirects and the response body.",
+        "3. Start an independent review with 'Start independent review' and read the claims in English and original text.",
+        "4. Map one observation under 'Review one statistical observation', include each applicable caveat and press 'Start mapping review'.",
+        "5. Keep 'Download original and audit' for any figure you will report."
+      ],
+      "takeaways": [
+        "An empty dataset is not a zero-crime statistic.",
+        "A reviewed observation is one supported number, not an official release.",
+        "Never type figures into the system that its sources do not support."
+      ],
+      "guides": [
+        "retain-dataset-originals",
+        "review-dataset-and-map-statistic"
+      ],
+      "quiz": [
+        {
+          "question": "A complete police PDF has just been uploaded. Will it update crime totals on the dashboard?",
+          "options": [
+            "Yes, immediately",
+            "Yes, after a day",
+            "Only for super users",
+            "No; uploads never populate totals, station statistics or geography"
+          ],
+          "correctIndex": 3,
+          "explanation": "Uploads remain unreviewed originals; statistics stay unpublished until an observation is independently reviewed and mapped."
+        },
+        {
+          "question": "A collection job receives an unsupported file format from the publisher. What happens?",
+          "options": [
+            "The response is kept for inspection, does not become a dataset, and nothing is retried",
+            "It is converted to CSV",
+            "Another source is tried",
+            "It is imported with a warning"
+          ],
+          "correctIndex": 0,
+          "explanation": "Failed or unsupported responses are retained without becoming datasets and never trigger a retry or another source."
+        },
+        {
+          "question": "A mapping review supports one value, measure, unit, period and subject. What does that establish?",
+          "options": [
+            "A national total",
+            "An official statistical release",
+            "One source-supported observation, and no total, verified location or official publication",
+            "A verified map location"
+          ],
+          "correctIndex": 2,
+          "explanation": "A supported mapping is one observation only."
+        }
+      ]
+    },
+    {
+      "id": "policeops-08-desktop-android",
+      "moduleNumber": 8,
+      "title": "Desktop, Android and Modem Operation",
+      "subtitle": "What each terminal can do, and what has not been checked on real hardware",
+      "badge": "Operations",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The three terminals share one interface but not every capability. The desktop app adds a modem bridge: the 'Cellular modem readings' panel shows exactly what an attached modem reports — the operator name and numeric operator from COPS, the CSQ signal reading, cell ID and location area code from CREG, and the access-technology codes kept separate. A listed serial interface does not mean a modem is connected; missing or malformed responses stay unknown rather than zero. An SMS submitted through the modem is sealed before it is sent and its result kept separately, and modem acceptance does not establish delivery. The Android app keeps evidence in app-private storage excluded from backup and cloud or device transfer; each original has its own custody receipt and is never overwritten. Exports go to a destination you choose in the system document picker, and success is reported only after the saved document is read back and every byte compared. The project's own records are clear that a debug APK has been built and inspected but not installed or run on a device, and that real-device networking, physical modems and USB behaviour are unverified.",
+      "keyPoints": [
+        "The web console has no modem bridge; the Android USB modem adapter is not available in this project.",
+        "Signal changes, registration loss and cell identifiers cannot establish jamming, RF integrity, geography or event truth.",
+        "An SMS is never retried automatically; submit again only if you intend a second message.",
+        "The command server must list the Android app's origin among its allowed origins; that permission is transport, not operator identity.",
+        "On Android, cancelling the picker, a changed file or a failed read-back is never a successful export.",
+        "Camera and microphone permissions reflect the actual device permission state."
+      ],
+      "operationalProcedures": [
+        "1. On the desktop app, focus 'Cellular modem readings' and check 'Reported serial interfaces'.",
+        "2. Expand 'View original modem responses' and use 'Export command snapshot' when you need the record.",
+        "3. Submit an SMS only when intended, and record the result as 'accepted by the modem', not 'delivered'.",
+        "4. On Android, export from the docket, choose a destination, and wait for 'Exported and byte-checked.'",
+        "5. Report any terminal that cannot reach the server to your operator; do not change servers to work around it."
+      ],
+      "takeaways": [
+        "Hardware presence is not hardware function.",
+        "Accepted by the modem is not delivered to the recipient.",
+        "Physical-device behaviour has not been verified; report anything unexpected rather than assuming it is normal."
+      ],
+      "guides": [
+        "modem-readings-and-sms",
+        "evidence-docket",
+        "sign-in-or-enrol"
+      ],
+      "quiz": [
+        {
+          "question": "The modem reports the SMS as accepted, but the recipient says nothing arrived. What is true?",
+          "options": [
+            "The system has failed",
+            "Modem acceptance does not establish delivery; there is no automatic retry",
+            "The message was delivered and deleted",
+            "The message was sent twice"
+          ],
+          "correctIndex": 1,
+          "explanation": "SMS custody keeps modem acceptance distinct from delivery, and nothing is retried automatically."
+        },
+        {
+          "question": "The modem's CSQ response is missing. What does the panel show?",
+          "options": [
+            "Zero signal",
+            "The last known value",
+            "A value estimated from the cell ID",
+            "The value as unknown"
+          ],
+          "correctIndex": 3,
+          "explanation": "Missing or malformed responses stay unknown; nothing is filled with zero or estimated."
+        },
+        {
+          "question": "According to the project's records, how far has the Android app been validated?",
+          "options": [
+            "The debug APK has been built and inspected, but not installed or run on a physical device",
+            "It is deployed to field officers",
+            "It has passed device certification",
+            "It has been verified on all Android versions"
+          ],
+          "correctIndex": 0,
+          "explanation": "The project records package checks only; device networking and physical behaviour remain unverified."
+        }
+      ]
+    },
+    {
+      "id": "policeops-09-accountable-use",
+      "moduleNumber": 9,
+      "title": "Accountable and Lawful Use of the Record",
+      "subtitle": "What PoliceOps establishes, what it never does, and where judgement stays human",
+      "badge": "Governance",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every part of PoliceOps separates four things that are easy to confuse: byte integrity (the bytes are unchanged), model review (the sources support a claim), source truth (the claim is true) and verified geography (the event happened at a place). The system can establish the first and record the second; it never establishes the last two on its own. It also never decides whether an action is lawful: the docket says plainly that checksums do not establish legal compliance, and nothing in the code checks an operator's legal authority. Accountability comes from attribution — every capture, report, state change, review and export is tied to the authenticated operator and exact case that initiated it. The project records itself as not released, with deployment, live provider accuracy, official data acquisition and physical devices unverified. Operators therefore carry the judgement: collect, search, share and act only within their organisation's lawful mandate, and describe every record no more strongly than the system does.",
+      "keyPoints": [
+        "Integrity, model review, source truth and verified geography are distinct and must be reported separately.",
+        "Every action is attributed to the authenticated operator, device and case.",
+        "The SQLite store protects originals through the application; it is not external notarisation and not protection against a privileged database administrator.",
+        "No automatic retries, substitutions or fallbacks: failures stay visible.",
+        "Proposals, assessments and categories are never orders or findings.",
+        "The project is not released; nothing in it is certified as deployed or operationally verified."
+      ],
+      "operationalProcedures": [
+        "1. Before acting on a record, name which of the four it establishes: integrity, model review, truth or location.",
+        "2. Use the language the system uses — 'operator-defined area', 'accepted by the modem', 'proposal for human review'.",
+        "3. Export originals with their receipts and audits when a record must be relied on elsewhere.",
+        "4. Confirm your lawful mandate before collecting, searching or sharing personal information.",
+        "5. Report gaps, failures and suspected misuse to your super user rather than working around them."
+      ],
+      "takeaways": [
+        "The system records what you did; it does not decide whether you were permitted to do it.",
+        "Never describe a record more strongly than the system does.",
+        "Byte custody is not verification."
+      ],
+      "guides": [
+        "evidence-docket",
+        "analysis-desk-case-reports",
+        "invite-operators-and-admin",
+        "incident-and-national-maps"
+      ],
+      "quiz": [
+        {
+          "question": "Which of these does PoliceOps establish by itself for a retained original?",
+          "options": [
+            "That its bytes are unchanged since retention",
+            "That the event it shows happened",
+            "Where the event happened",
+            "That retaining it was lawful"
+          ],
+          "correctIndex": 0,
+          "explanation": "Byte integrity is established; source truth, geography and legal compliance are not."
+        },
+        {
+          "question": "How is the command store's protection of originals described in the project's documentation?",
+          "options": [
+            "An external notarisation service",
+            "Protection through the application, not external notarisation and not protection against a privileged database administrator",
+            "Tamper-proof against any user",
+            "A government-certified evidence vault"
+          ],
+          "correctIndex": 1,
+          "explanation": "SQLite transactions and immutable-record triggers protect records through the application only."
+        },
+        {
+          "question": "A colleague asks whether an export receipt proves the material is admissible. What is the correct answer?",
+          "options": [
+            "Yes, a receipt certifies admissibility",
+            "Yes, if a super user exported it",
+            "Only for missing-person dossiers",
+            "No; it confirms the exported bytes match the retained hash and length, not legal compliance"
+          ],
+          "correctIndex": 3,
+          "explanation": "Checksums and receipts verify byte integrity; they do not establish legal compliance."
+        }
+      ]
+    }
+  ]
+}

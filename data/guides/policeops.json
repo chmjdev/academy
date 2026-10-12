@@ -1,0 +1,385 @@
+{
+  "id": "policeops",
+  "name": "PoliceOps",
+  "fullName": "The National Police Command Center",
+  "category": "Policing and public safety",
+  "summary": "A command terminal for violent crime and public order: operators record incident reports, capture video, broadcast, social and modem evidence with exact byte custody, run independently reviewed case analysis, manage missing-person cases and retain police dataset originals. It runs as a web console, a desktop app and an Android app against an independently configured command server.",
+  "audience": ["Officer", "Analyst", "Super user (command administrator)"],
+  "surfaces": ["Web console", "Desktop app (macOS and Linux, Electron)", "Android app", "Command server API"],
+  "gettingAccess": "There are no preset accounts. The first super user is onboarded on the command server by the service operator; after that, a signed-in super user invites each operator from the Analysis desk's team panel, choosing the role OFFICER, ANALYST or SUPER_USER. The invitation produces a one-use enrolment link that expires, which the new operator pastes into \"Enrol device\" on their terminal; existing operators sign in with their email or LO number and their own password. Where the server sits behind an access gate, the server access key is issued separately by the operator. Keys, passwords, tokens and enrolment links are never written in documentation and should be sent only over a channel you trust.",
+  "sources": [
+    "README.md",
+    "AGENTS.md",
+    "product.json",
+    "jcds.config",
+    "electron-builder.yml",
+    "docs/data-import.md",
+    "docs/android-evidence.md",
+    "docs/independent-command-runtime.md",
+    "docs/model-gateways.md",
+    "docs/video-capture.md",
+    "docs/sms-custody.md",
+    "docs/modem-readings.md",
+    "docs/csv-source-review.md",
+    "docs/statistic-mapping.md",
+    "docs/incident-category-custody.md",
+    "docs/notice-action-custody.md",
+    "src/renderer/src/App.tsx",
+    "src/renderer/src/components/"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-or-enrol",
+      "title": "Sign in or enrol a terminal",
+      "goal": "Connect a web, desktop or Android terminal to your command server and open the command workspace under your own operator profile.",
+      "role": "Any operator (OFFICER, ANALYST or SUPER_USER)",
+      "level": "Basic",
+      "before": [
+        "You have the exact command server URL from your operator, and the server access key if the server is gated.",
+        "Either you have an active account (email or LO number and password), or a super user has sent you a one-use enrolment link."
+      ],
+      "steps": [
+        "Open the web console, the desktop app (\"The National Police Command Center\") or the Android app. The \"Operator sign-in\" screen appears.",
+        "If you have an account, keep \"Sign in\" selected and fill in \"Command server URL\", \"Server access key, if required\", \"Email or LO number\" and \"Password\". Press \"Connect and sign in\" (it shows \"Checking account…\").",
+        "If you were invited, press \"Enrol device\", paste the link into \"Enrolment link\" and press \"Submit enrolment link\". The link carries the server address and gate key, so you do not type them.",
+        "Once signed in, choose a workspace at the top: \"Command operations\" or \"Crime data and reporting\".",
+        "Check the header: it shows \"Backend connected\" or \"Backend unavailable\", your name, LO number, role, recorded clearance and station, and the SAST clock.",
+        "To finish, press \"Sign out\". On the Analysis desk, the disconnect button (\"Disconnect this device (revokes its token)\") also revokes this terminal's token. Your server address is kept for next time."
+      ],
+      "result": "The command workspace opens with your operator profile as returned by the server.",
+      "troubleshooting": [
+        { "problem": "\"The enrolment link is invalid.\"", "fix": "Paste the whole link exactly as received. Links are one-use and expire; ask the super user for a new invitation." },
+        { "problem": "Sign-in fails after entering the URL", "fix": "The terminal never guesses or switches servers. Check the URL is exactly the one you were given, and that the access key is entered if the server is gated." },
+        { "problem": "The Android app cannot reach the server", "fix": "The server must list the Android app's origin in its allowed origins. Ask your operator; real-device networking has not yet been checked." }
+      ],
+      "sources": ["src/renderer/src/components/TacticalWebLogin.tsx", "src/renderer/src/App.tsx", "src/renderer/src/components/HeaderTacticalBar.tsx", "docs/android-evidence.md", "docs/independent-command-runtime.md", "README.md"]
+    },
+    {
+      "id": "choose-command-view",
+      "title": "Choose a command view and arrange the panels",
+      "goal": "Switch between the multi-panel grid and the dedicated workspaces.",
+      "role": "Any signed-in operator",
+      "level": "Basic",
+      "before": ["You are signed in to \"Command operations\"."],
+      "steps": [
+        "Open the \"Tactical Command View Layout\" list in the header and choose a view: Recorded case notices, Quad view, Three panels, Dual view, Video grid, Case social sources, Social sources, Incident map, National map, Missing persons, Analysis desk or Administration.",
+        "In a multi-panel view, use a panel's focus button to show it full size (\"FULL VIEW FOCUS\"), and \"RESTORE MULTI-VIEW\" to go back. In Dual view, \"Swap left and right dual panels\" swaps the two sides.",
+        "From a full-page workspace, press \"Back to grid\" (or \"RETURN TO GRID\" / \"Back to command grid\") to return to Quad view.",
+        "On the desktop app, use the fullscreen button (\"Toggle fullscreen\").",
+        "Read the publisher source ticker at the bottom, which lists each item's published time, source ID and source URL."
+      ],
+      "result": "The panels you need are on screen.",
+      "troubleshooting": [
+        { "problem": "\"Tactical Grid Fault\"", "fix": "Use the reset action on the fault panel; it returns you to Quad view." },
+        { "problem": "\"Command status unavailable: …\"", "fix": "The status request failed or did not validate. This does not mean the server is offline; refresh and check your connection." }
+      ],
+      "sources": ["src/renderer/src/components/HeaderTacticalBar.tsx", "src/renderer/src/components/MultiViewGrid.tsx", "src/renderer/src/components/ChyronOcrTicker.tsx", "src/renderer/src/App.tsx"]
+    },
+    {
+      "id": "create-incident-report",
+      "title": "Prepare and create an incident report",
+      "goal": "Record a new incident with its title, callsign, priority and operator-defined area.",
+      "role": "Any signed-in operator",
+      "level": "Intermediate",
+      "before": ["You have the actual report facts. Categories only prepare the form; they never create an incident or fill in facts."],
+      "steps": [
+        "Press \"Prepare incident report\" in the selected-incident bar to open \"Create incident report\".",
+        "Optionally pick a \"Quick report category\" and press \"PREPARE REPORT\", or choose a \"SITUATION TYPE\". This only sets the category and editable search terms.",
+        "Optionally type a short brief into \"AI SITUATION ASSIST // RAPID INCIDENT ENRICHMENT\" and press \"AI AUTO-FILL\" to draft fields through independent source review. Check every field it drafts.",
+        "Fill in TACTICAL INCIDENT TITLE, COMMAND CALLSIGN, THREAT PRIORITY (Critical, High, Medium or Low) and OPERATIONAL LOCATION NAME.",
+        "Define the operational area: click or drag on the \"OPERATOR AREA PICKER\" map, or search with \"FIND\" and pick an OpenStreetMap candidate, or type LATITUDE (WGS-84), LONGITUDE (WGS-84) and GEOFENCE RADIUS.",
+        "Enter \"Requested search terms (comma-separated)\" and the \"TACTICAL INCIDENT SUMMARY\", then press \"Create report\"."
+      ],
+      "result": "The server creates the case, the terminal checks the returned report matches your draft exactly, and only then selects it as the active incident.",
+      "troubleshooting": [
+        { "problem": "The report is created but not selected", "fix": "The returned case did not match the draft, or the view changed while it was saving. The created report is kept; select it from Recorded case notices instead of creating it again." },
+        { "problem": "An unknown category is refused", "fix": "Pick a category from the list. There is no default category." },
+        { "problem": "The map shows a location the incident did not happen at", "fix": "The area is an operator-defined operational area, never a verified incident location. Enter the coordinates you actually intend." }
+      ],
+      "sources": ["src/renderer/src/components/IncidentLauncherModal.tsx", "docs/incident-category-custody.md"]
+    },
+    {
+      "id": "manage-selected-incident",
+      "title": "Work the selected incident and the recorded case notices",
+      "goal": "Open an assigned case from the notice queue and change its recorded state.",
+      "role": "Any signed-in operator",
+      "level": "Basic",
+      "before": ["Cases are assigned to you on the command server."],
+      "steps": [
+        "Choose \"Recorded case notices\" in the view list. Each notice is an open case assigned to you; expand \"Recorded context and integrity\" to see its recorded details.",
+        "Press \"Open exact case\" to make it the selected incident, or \"Dismiss this version\" to hide this version of the notice for you. Only one notice action runs at a time.",
+        "In the selected-incident bar, expand the incident title to see the Incident ID, Recorded callsign, Reporting LO, Recorded location and Operator-defined area.",
+        "Use \"Refresh case\" to reload it and \"Show recorded areas\" to open the map of recorded areas.",
+        "Change the state with \"Mark inactive\", \"Reactivate\" or \"Contain & lock\". \"Contain & lock\" resolves and locks the case."
+      ],
+      "result": "The bar shows the case's recorded priority and status, and state changes are recorded against your operator account.",
+      "troubleshooting": [
+        { "problem": "\"No undismissed open case records. This does not establish that there are no incidents.\"", "fix": "No assigned open cases are waiting for you. Press \"Refresh notices\" to check again." },
+        { "problem": "A state change is refused", "fix": "The case changed since you loaded it. Press \"Refresh case\" and try again on the current version." }
+      ],
+      "sources": ["src/renderer/src/components/ActiveAlertsPanel.tsx", "src/renderer/src/components/ActiveIncidentBar.tsx", "docs/notice-action-custody.md", "AGENTS.md"]
+    },
+    {
+      "id": "capture-video-evidence",
+      "title": "Capture a camera snapshot or video clip as evidence",
+      "goal": "Save a frame or clip from a selected video source with its hash, and queue it for independent review.",
+      "role": "Any signed-in operator",
+      "level": "Intermediate",
+      "before": ["An incident is selected.", "A camera or network video source is available to this terminal."],
+      "steps": [
+        "In the \"TACTICAL VIDEO STREAM & OPTICAL SURVEILLANCE\" panel, choose a source with \"Select from additional tactical video feeds\". Use \"Rescan cameras\" if a camera was just connected.",
+        "Press \"GRAB SNAPSHOT\" to save the current decoded frame as a PNG sealed with SHA-256.",
+        "Press \"RECORD CLIP\" to record a WebM clip; the button shows \"RECORDING\" while it runs.",
+        "Wait for the upload confirmation. The terminal keeps the original and a separate provenance record, uploads them to the case, and a camera frame or supported WebM clip is queued for independent review automatically.",
+        "Follow the review on the Analysis desk under CASE REPORTS."
+      ],
+      "result": "The original capture and its provenance are retained locally and on the server with matching hash and length, and a review job is queued.",
+      "troubleshooting": [
+        { "problem": "\"TACTICAL FEED OFFLINE // DEVICE NOT CONNECTED\"", "fix": "No encoder or device is connected for that feed. Choose another source or connect the device and rescan." },
+        { "problem": "Recording stops by itself", "fix": "Recording stops if the source, case or operator changes, or the track ends. Start a new recording; nothing is retried automatically." },
+        { "problem": "Upload fails", "fix": "The local original is still retained. Check the server connection and upload again; a capture ID cannot be reused for a different case." }
+      ],
+      "sources": ["src/renderer/src/components/VideoFeedsPanel.tsx", "docs/video-capture.md", "docs/native-webm-review.md"]
+    },
+    {
+      "id": "capture-broadcast-replay",
+      "title": "Capture a broadcast replay or frame",
+      "goal": "Save the last 15 seconds of a configured broadcast source, or a frame from the video grid, to the selected case.",
+      "role": "Any signed-in operator",
+      "level": "Intermediate",
+      "before": ["An incident is selected.", "A configured broadcast source plays in the broadcast panel or the Video grid."],
+      "steps": [
+        "In the broadcast panel, choose a source with \"Select from additional broadcast channels\". The overlay reads \"Configured source: … · availability unverified\".",
+        "Let the stream play for about 15 seconds until the capture log shows \"REPLAY BUFFER AVAILABLE\".",
+        "Press \"Capture Last 15s\". The native segments and their provenance are retained, a separate viewing clip is made, and an independent replay review is queued after upload.",
+        "To capture a still from the Video grid, use the frame button (\"Capture decoded video frame and record SHA-256\") on a tile.",
+        "To look a frame up, press \"OSINT REVERSE\" (broadcast panel) or \"Investigate Frame in OSINT\" (video grid); the frame opens in the Analysis desk's SOURCE ANALYSIS.",
+        "On the Analysis desk, under CASE REPORTS, use \"Review audit\" to download a review's audit and \"New replay review\" or \"New frame review\" to start a fresh review of the same retained original."
+      ],
+      "result": "The replay or frame is retained with its exact source, run and timing provenance, and its review appears under CASE REPORTS.",
+      "troubleshooting": [
+        { "problem": "\"Capture Last 15s\" is disabled", "fix": "The replay buffer is not ready. Keep the stream playing; the panel reads \"Replay buffer warming up — allow 15 seconds of playback.\"" },
+        { "problem": "\"DVB STREAM UNAVAILABLE\"", "fix": "A tuner may be present but no decoded stream is available for that source. Choose a configured network source instead." }
+      ],
+      "sources": ["src/renderer/src/components/BroadcastDvbPanel.tsx", "src/renderer/src/components/NewsStreamGrid.tsx", "src/renderer/src/components/AnalysisView.tsx", "README.md"]
+    },
+    {
+      "id": "evidence-docket",
+      "title": "Open the evidence docket and export originals",
+      "goal": "Check what is retained for the selected incident and export exact copies with a verified receipt.",
+      "role": "Any signed-in operator",
+      "level": "Intermediate",
+      "before": ["An incident is selected."],
+      "steps": [
+        "Press the docket button in the header (\"Open retained evidence docket\"); it shows the number of evidence items.",
+        "For each item use \"View recorded text\" or \"View source and custody record\" to see its identifiers, hash and provenance.",
+        "Press \"Export originals\" to export the exact retained bytes, or \"Export records\" for the metadata-only export.",
+        "On Android, choose where to save in the system document picker. The app reads the saved document back and compares every byte before reporting success.",
+        "When the docket reads \"Exported and byte-checked.\", open \"View export receipt\" to see the export's filename, hash and length.",
+        "Close the docket with the close button (\"Close evidence docket\")."
+      ],
+      "result": "You hold exact copies of the originals, each confirmed against its retained hash and byte length.",
+      "troubleshooting": [
+        { "problem": "\"Evidence docket unavailable: …\"", "fix": "The docket could not be read. Locally retained originals are not lost; reconnect and reopen the docket." },
+        { "problem": "Export does not finish", "fix": "Cancelling the picker, a changed file or a failed read-back is never treated as a successful export. Start the export again and choose a destination." }
+      ],
+      "sources": ["src/renderer/src/components/EvidenceDocketModal.tsx", "src/renderer/src/components/HeaderTacticalBar.tsx", "docs/android-evidence.md"]
+    },
+    {
+      "id": "social-sources",
+      "title": "Import a social post and have it reviewed",
+      "goal": "Retain an original social post response for a case, have it independently reviewed, and record it in the docket.",
+      "role": "Any signed-in operator",
+      "level": "Advanced",
+      "before": ["An assigned case is selected.", "You have the exact post ID, its URL and the original API JSON response file."],
+      "steps": [
+        "Choose \"Social sources\" in the view list. Use the Originals, Reviewed text and Accounts buttons to switch views.",
+        "Under \"Import an original response\", enter \"Exact X post ID\", \"Exact post URL\", choose the \"Original API JSON file\" and optionally a \"Recorded account\", then press \"Retain original\".",
+        "In Originals, use \"View unreviewed original text\" or \"Download original\", and press \"Launch review\" to start an independent review against the case.",
+        "In Reviewed text, read the reviewed post, \"Download review\", and press \"Record in docket\" to add it to the case docket.",
+        "In Accounts, record an account for the case with \"Record account\".",
+        "For an overview of the case's recorded items and a web search, choose \"Case social sources\": press \"Refresh records\", or enter a \"Source search query\" under \"Web source search\". Open an item with \"Open original source\" or add it with \"Record in docket\"."
+      ],
+      "result": "The original response is retained with its hash; once the review approves the whole post it appears in the reviewed feed and can be docketed.",
+      "troubleshooting": [
+        { "problem": "\"No independently reviewed text is available for this case.\"", "fix": "Launch a review on the original. A held post stays held; importing does not establish relevance or authenticity." },
+        { "problem": "\"Select an assigned case to work with original social sources.\"", "fix": "Open a case from Recorded case notices first." }
+      ],
+      "sources": ["src/renderer/src/components/SocialMonitorPanel.tsx", "src/renderer/src/components/SocialAttentionStream.tsx", "AGENTS.md"]
+    },
+    {
+      "id": "analysis-desk-case-reports",
+      "title": "Collect sources and run case analysis on the Analysis desk",
+      "goal": "Search a case's sources, collect a public source, and produce an independently reviewed SITREP, plan, timeline, entity list or answer.",
+      "role": "Analyst or officer",
+      "level": "Advanced",
+      "before": ["An incident is selected.", "The command server has its processing and review model gateways configured; otherwise analysis shows as unavailable."],
+      "steps": [
+        "Choose \"Analysis desk\" in the view list and open CASE REPORTS. The header shows the command server and whether analysis is configured.",
+        "Search the case with \"Search recorded case sources\". To collect a new page, enter its address in \"Original public source URL\" under \"COLLECT OSINT SOURCE\" and press \"FETCH\".",
+        "Watch the job list. For each job use \"Review audit\" to download its audit, \"Original\" for the collected source, or \"Cancel\" while it is queued or running.",
+        "Press a task: SITREP, ACTION PLAN, TIMELINE, ENTITIES or OSINT LEADS. Or type a question in \"Ask the dossier: …\" and press \"ASK\". Each runs in its own worker against a frozen snapshot of the case's sources.",
+        "Select the finished report. A reviewed report shows the processing and review gateways and models; expand \"View original source claims\" to see each claim with its source, language and original quotation.",
+        "Press \"DOSSIER\" to export the exact recorded dossier."
+      ],
+      "result": "Reports whose claims passed independent review are shown; action plans and leads are marked as proposals for human review, not evidence or dispatch orders.",
+      "troubleshooting": [
+        { "problem": "\"Independent review of this Core report is not established. Its conclusions are held.\"", "fix": "The report has no valid independent review. Its original output is under \"View original unreviewed Core output\"; do not rely on its conclusions." },
+        { "problem": "Task buttons are disabled", "fix": "Select an incident, and check the header does not read \"Dossier analysis unavailable\". Missing model credentials hold jobs rather than switching models." }
+      ],
+      "sources": ["src/renderer/src/components/AnalysisView.tsx", "docs/model-gateways.md", "AGENTS.md"]
+    },
+    {
+      "id": "source-analysis-desk",
+      "title": "Investigate an image, document or identifier in SOURCE ANALYSIS",
+      "goal": "Run a reverse-image, document or identifier lookup and seal the result to the docket.",
+      "role": "Analyst or officer",
+      "level": "Advanced",
+      "before": ["An incident is selected for sealing results."],
+      "steps": [
+        "On the Analysis desk, open SOURCE ANALYSIS (\"RAPID OSINT & MULTI-MODAL INVESTIGATION DESK\").",
+        "Open \"Analysis provider settings\" and choose the \"Processing gateway\" (OpenRouter or OrcaRouter). Keys entered there apply to this session only and are cleared when the gateway changes.",
+        "Choose a \"QUERY MODE\": REVERSE IMAGE LOOKUP (FACIAL / WEAPON / TATTOO), DOCUMENTS & STATEMENTS (PDF / OCR / AFFIDAVIT), PERSON / SUSPECT FULL NAME, NATIONAL ID / PASSPORT NUMBER, PHONE NUMBER (MSISDN / CELL), VEHICLE LICENSE PLATE or SOCIAL MEDIA HANDLE.",
+        "For images use \"UPLOAD EVIDENCE IMAGE / PHOTO\" and press \"REVERSE LOOKUP & INSPECT\"; the one-click engines (GOOGLE LENS, BING VISUAL, TINEYE, YANDEX IMAGE) open in the browser. For documents use \"UPLOAD STATEMENT / DOCKET FILE\" or \"Use pasted text\" and press \"PARSE & EXTRACT INTEL\". For identifiers, enter the value and press \"QUERY\".",
+        "Read the results under SOURCE REVIEW / INDEPENDENT SOURCE REVIEW, use \"View original\" for original-language text, and \"Download original sources and review audit\" to keep the audit.",
+        "Press \"SEAL TO DOCKET\" to add the result to the selected incident's docket."
+      ],
+      "result": "The lookup's sources, review and SHA-256 seal are kept with the incident.",
+      "troubleshooting": [
+        { "problem": "\"Associations are not established from the supplied sources.\"", "fix": "The sources do not support any association. Unknown facts stay empty; supply more sources rather than inferring." }
+      ],
+      "sources": ["src/renderer/src/components/OsintSuspectModule.tsx", "src/renderer/src/components/GatewaySessionFields.tsx", "docs/model-gateways.md"]
+    },
+    {
+      "id": "missing-person-case",
+      "title": "Record and work a missing-person case",
+      "goal": "Record a missing-person report, retain photographs or lead sources, update the case state and export the dossier.",
+      "role": "Any signed-in operator (assigning access is SUPER_USER only)",
+      "level": "Intermediate",
+      "before": ["You have the actual report details from the reporting party or station."],
+      "steps": [
+        "Choose \"Missing persons\" in the view list. Use Cases, New case and Selected case to switch views.",
+        "In New case (\"Record an actual missing-person report\"), fill in Reported full name, Reported last-seen time (local), Reported last-seen location, Reported circumstances and Case priority (CRITICAL, HIGH or STANDARD). Add any optional fields you actually have, such as ID or passport number, age, height, clothing, reporting officer and station. Press \"Record case\".",
+        "In Cases, press \"Open case\" on a case. Expand \"View complete recorded case information\" to check it.",
+        "To add an original, under \"Retain a separate original\" choose Record kind (Photograph or Lead source), the actual \"Recorded file content type\", the \"Exact original source\", a Record title, optional detail and reported location, choose the \"Complete original file\" and press \"Retain original\".",
+        "Press \"Launch review\" on a retained original to start an independent review. Use \"View review\", \"Download review audit\" or \"Cancel review\" on the review jobs.",
+        "Update \"Operator-recorded case state\" (ACTIVE_SEARCH, LEAD_FOUND, POTENTIALLY_CONCLUSIVE, LOCATED or CLOSED) and press \"Record state\". Press \"Export original dossier\" to export it.",
+        "A super user can give another operator access by entering their \"Exact operator ID\" and pressing \"Assign access\"."
+      ],
+      "result": "The case holds the recorded report, its retained originals and any reviewed source support, all attributed to the reporting operator.",
+      "troubleshooting": [
+        { "problem": "\"No missing-person cases are assigned to this operator.\"", "fix": "Record a new case, or ask a super user to assign you access to an existing one." },
+        { "problem": "Review does not identify the person", "fix": "Image review reads directly visible text only; it never performs face matching. Case state is your assessment, not a verified identity or sighting." }
+      ],
+      "sources": ["src/renderer/src/components/MissingPersonsPanel.tsx", "AGENTS.md", "README.md"]
+    },
+    {
+      "id": "retain-dataset-originals",
+      "title": "Retain a police dataset original or collect it from the publisher",
+      "goal": "Store a complete SAPS publication (PDF, workbook, CSV or text) with its hash, either by upload or by a publisher collection job.",
+      "role": "SUPER_USER or ANALYST (other operators can inspect retained originals)",
+      "level": "Intermediate",
+      "before": ["You have the complete publisher file, or the exact SAPS publisher document URL."],
+      "steps": [
+        "Choose \"Crime data and reporting\" at the top of the window. The page is \"Police data originals\".",
+        "To upload, under \"Retain a complete source original\" enter \"Recorded original title\" and \"Exact SAPS publisher document URL\", choose the \"Declared original file type\" (PDF, XLSX workbook, UTF-8 CSV or UTF-8 text), choose the \"Complete original publisher file\" and press \"Retain original file\".",
+        "To collect from the publisher, under \"Publisher collection jobs\" enter \"Collection title\", \"Publisher document URL\", \"Retained file name\" and \"Declared collection format\", then press \"Launch collection job\". Several jobs can run at once.",
+        "Use \"Refresh collection jobs\", then \"Inspect capture\" on a job to see its response, \"Response headers and redirects\", \"Download response body\" and \"Download capture audit\". Use \"Cancel collection\" to stop a running job.",
+        "Each retained original lists its Original ID, file, declared type, bytes, SHA-256, recording LO and time. Use \"Download exact original\" to get the file back."
+      ],
+      "result": "The original is retained unchanged and labelled \"Unreviewed original · statistics not published\"; a successful collection also queues an independent review.",
+      "troubleshooting": [
+        { "problem": "\"No police dataset originals have been retained. This is not a zero-crime statistic.\"", "fix": "Nothing has been retained yet. Retain or collect a publication." },
+        { "problem": "A collection job fails or returns an unsupported format", "fix": "The response is kept for inspection but does not become a dataset, and nothing is retried. Check the URL and format, then launch a new job." },
+        { "problem": "Crime totals do not appear", "fix": "Uploads never populate crime totals, station statistics or geography. Statistics stay unpublished until an observation is independently reviewed." }
+      ],
+      "sources": ["src/renderer/src/components/SapsCrimeReportingView.tsx", "src/renderer/src/components/PoliceDatasetCollectionPanel.tsx", "docs/data-import.md", "README.md", "AGENTS.md"]
+    },
+    {
+      "id": "review-dataset-and-map-statistic",
+      "title": "Review a dataset original and map a statistical observation",
+      "goal": "Have a retained original independently reviewed and record one source-supported statistical observation from it.",
+      "role": "SUPER_USER or ANALYST",
+      "level": "Advanced",
+      "before": ["A dataset original has been retained.", "Model gateways are configured on the command server."],
+      "steps": [
+        "On \"Police data originals\", find the original and, under \"Independent original review\", press \"Start independent review\".",
+        "Press \"Refresh review jobs\" and \"Inspect review\" on the job. Use \"Cancel this review\" while it runs, and \"Download original and audit\" to keep the exact input and audit.",
+        "Read the reviewed claims. CSV fields are shown as literal fields with record and column numbers; workbook cells with their sheet and cell. Toggle between English and the original text.",
+        "Under \"Review one statistical observation\", choose the source claims for value, measure, unit, period and subject, and optionally geography. Where a claim is a quotation, enter the exact value within it.",
+        "Add each applicable caveat with \"Applicable caveat\" and \"Include caveat\" (\"Remove this caveat\" takes one out), then press \"Start mapping review\"."
+      ],
+      "result": "A mapping review checks that all dimensions belong to the same observation. A supported mapping is one observation only: no national total, verified location or official publication is established.",
+      "troubleshooting": [
+        { "problem": "\"No reviewed findings are published for this job.\"", "fix": "The review was rejected, held or is still running. The original input and audit remain available; start a new review if needed." },
+        { "problem": "A workbook review is held", "fix": "Unsupported workbook parts or encodings hold the whole review. Formulas are never evaluated and cached values are marked unverified." }
+      ],
+      "sources": ["src/renderer/src/components/PoliceDatasetReviewPanel.tsx", "src/renderer/src/components/StatisticMappingForm.tsx", "docs/statistic-mapping.md", "docs/csv-source-review.md"]
+    },
+    {
+      "id": "modem-readings-and-sms",
+      "title": "Read cellular modem readings and submit an SMS",
+      "goal": "See what an attached modem reports and send an SMS through it with full custody of the request and result.",
+      "role": "Any signed-in operator on the desktop app",
+      "level": "Advanced",
+      "before": ["You are on the desktop app with a USB GSM/LTE modem connected.", "An incident is selected."],
+      "steps": [
+        "Find the \"Cellular modem readings\" panel in the grid, or use its focus button (\"Focus GSM Telemetry\").",
+        "Check \"Reported serial interfaces\". A listed interface does not mean a modem is connected or responding.",
+        "Read the values: recorded port, registration response, operator name and numeric operator reported by COPS, CSQ signal reading, cell ID and location area code reported by CREG, and the separate access-technology codes. Expand \"View original modem responses\" to see the raw responses.",
+        "Press \"Export command snapshot\" to save the snapshot as JSON.",
+        "To send a message, under \"Submit SMS to this modem\" enter the \"Recipient number\" and \"Message\" and press \"Submit SMS\". The request is sealed before it is sent and the modem's result is retained separately."
+      ],
+      "result": "Readings are shown exactly as the modem reported them, and an SMS shows whether the modem accepted it.",
+      "troubleshooting": [
+        { "problem": "\"This runtime has no modem bridge.\"", "fix": "Modem access needs the desktop app. The web console has no modem bridge, and the Android USB adapter is not available in this project." },
+        { "problem": "A value is blank", "fix": "Missing or malformed responses stay unknown; nothing is filled with zero or estimated." },
+        { "problem": "The SMS shows as accepted but the recipient did not get it", "fix": "Modem acceptance does not establish delivery to a recipient. There is no automatic retry; submit again only if you intend a second message." }
+      ],
+      "sources": ["src/renderer/src/components/GsmTelemetryPanel.tsx", "docs/modem-readings.md", "docs/sms-custody.md"]
+    },
+    {
+      "id": "incident-and-national-maps",
+      "title": "Use the incident map and the national map",
+      "goal": "See authorised incident records and operator-defined areas on the map.",
+      "role": "Any signed-in operator",
+      "level": "Basic",
+      "before": ["You are signed in."],
+      "steps": [
+        "Choose \"Incident map\" or \"National map\" in the view list. The page is \"Police incident map\".",
+        "Press \"Refresh incident feed\" to load authorised incident records from the command server.",
+        "Use the globe to look at source records and operator-defined areas. Press \"Reset view\" to recentre, or \"Retry map\" if it failed to load.",
+        "Select a record to see the selected incident's details.",
+        "Press \"Back to command grid\" to return."
+      ],
+      "result": "Recorded areas and records with an eligible recorded point are plotted.",
+      "troubleshooting": [
+        { "problem": "\"No records with an eligible recorded geographic point are loaded.\"", "fix": "No loaded record has a recorded point. Missing locations stay unknown and are never filled with a city coordinate." },
+        { "problem": "An area marker is taken as the incident location", "fix": "A plotted area is the operator-defined geofence centre, not a verified incident location." }
+      ],
+      "sources": ["src/renderer/src/components/SecurityThreatMapPanel.tsx", "src/renderer/src/components/CybermapSourceMap.tsx", "src/renderer/src/components/GautengMapHotspotsPanel.tsx", "README.md"]
+    },
+    {
+      "id": "invite-operators-and-admin",
+      "title": "Invite operators, revoke devices and set connection settings",
+      "goal": "Add an operator to the command server, control their devices, and adjust this terminal's connection.",
+      "role": "SUPER_USER",
+      "level": "Advanced",
+      "before": ["You are signed in as a SUPER_USER."],
+      "steps": [
+        "Open the Analysis desk and press the settings button (\"Core connection and team\"). The panel \"TEAM — OPERATORS & DEVICES\" appears.",
+        "Enter the new operator's email, name and LO number, choose the role (OFFICER, ANALYST or SUPER_USER) and press \"INVITE\".",
+        "Copy the \"Enrolment link for …\" with \"COPY\". It is one-use and shows its expiry. Send it over a channel you trust, because it carries this terminal's gate key; the operator pastes it into \"Enrol device\".",
+        "In the operator list, disable or re-enable an operator, and use \"Revoke this device\" to cut off a lost or retired terminal.",
+        "To change this terminal's connection, edit the server URL, device token and gate key fields in the same settings panel and press \"APPLY\". In \"Administration\", the \"CORE & CONNECTIVITY\" section offers the same with \"UPDATE CORE SETTINGS\".",
+        "In Administration, the \"AI & OSINT AGENTS\" section stores background-collection preferences with \"SAVE AI ENGINE SETTINGS\"."
+      ],
+      "result": "The invited operator can enrol their own terminal, and revoked devices can no longer reach the server.",
+      "troubleshooting": [
+        { "problem": "The TEAM panel does not appear", "fix": "It is shown only to SUPER_USER accounts." },
+        { "problem": "An invited operator's link has expired", "fix": "Invite them again to issue a fresh one-use link." }
+      ],
+      "sources": ["src/renderer/src/components/TeamPanel.tsx", "src/renderer/src/components/AnalysisView.tsx", "src/renderer/src/components/SystemAdminPage.tsx", "docs/independent-command-runtime.md"]
+    }
+  ]
+}

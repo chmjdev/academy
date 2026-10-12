@@ -1,0 +1,661 @@
+{
+  "course": {
+    "id": "newt",
+    "system": "newt",
+    "name": "Newt Asset Register Course",
+    "tagline": "Understand how a statutory asset register is classified, located, graded, verified and valued — and keep one an auditor can rely on.",
+    "summary": "Binteca Newt Asset Management is one asset register for South African government, covering movable assets (vehicles, plant, equipment) and immovable assets (land, buildings, engineering infrastructure), classified on National Treasury's CIDMS asset data model, geolocated, graded, verified in the field and valued under GRAP. This course is for asset managers, custodians, field officers, auditors and register administrators, and explains the concepts behind each screen so the register produces evidence that holds up.",
+    "audience": [
+      "Asset manager",
+      "Custodian",
+      "Field officer (capturer)",
+      "Auditor (viewer)",
+      "Register administrator"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "newt-01-orientation",
+      "moduleNumber": 1,
+      "title": "A register built for audit outcomes",
+      "subtitle": "Why one register, which laws shape it, and how the system is put together",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Incomplete and unverifiable asset registers are one of the most persistent causes of qualified audit opinions in South African government. Newt is designed around that problem rather than around tracking: a vehicle and a clinic are both entries in one register, distinguished by their class and by whether their location changes. Its fields answer to specific instruments — GIAMA's custodian and user split for immovable assets, the PFMA and MFMA duties to safeguard assets, mSCOA's requirement to record assets down to ward level, and the GRAP standards for componentisation, depreciation and impairment. The system has four surfaces: the register dashboard (register, map, audit trail and statistics), the admin portal, an installable field verification app, and a REST API. Every change is attributed to a named identity and kept in an append-only history, because a register that cannot say who changed a value, and when, has little evidentiary value.",
+      "keyPoints": [
+        "One register holds both movable and immovable assets; fleet tracking is a module, not the organising concept.",
+        "The classification follows National Treasury's CIDMS asset data model, which aligns to the GRAP accounting groups and to mSCOA.",
+        "GIAMA requires the custodian (who holds an asset) to be distinguished from the user department (who occupies or uses it).",
+        "mSCOA's regional segment resolves to ward, so ward is a reporting requirement, not an optional field.",
+        "Surfaces: register dashboard, admin portal, field verification app and REST API.",
+        "Under the strict contract the service refuses to start without operator-issued identities and a durable data directory.",
+        "A new production register starts empty and is populated by import; only a declared demonstration loads a showcase register of synthetic data."
+      ],
+      "operationalProcedures": [
+        "1. Sign in with the API key issued to you and check the header shows your name and role.",
+        "2. Use the section bar to move between “Register”, “Asset map”, “Audit trail” and “Statistics”, and “Admin” for the admin portal.",
+        "3. Read “Register Overview” for totals, value, condition, never-verified and flagged-missing counts.",
+        "4. If the header shows “unauthenticated mode”, stop and tell the operator: changes cannot be attributed."
+      ],
+      "takeaways": [
+        "The register sells audit outcomes; every feature exists to make the register verifiable.",
+        "Every change you make is recorded against your name."
+      ],
+      "guides": [
+        "sign-in",
+        "search-the-register"
+      ],
+      "quiz": [
+        {
+          "question": "Why does the GIAMA custody group carry both a custodian and a user department?",
+          "options": [
+            "Because GIAMA separates the department that holds an asset from the one that occupies or uses it",
+            "So that two departments can share one API key",
+            "Because mSCOA requires two cost centres per asset",
+            "To record the previous and current owner"
+          ],
+          "correctIndex": 0,
+          "explanation": "GIAMA's custodian/user split is built into the custody fields."
+        },
+        {
+          "question": "Why is ward recorded on an asset?",
+          "options": [
+            "It is an optional convenience for the map",
+            "It replaces the Surveyor-General key",
+            "mSCOA's regional segment records assets at ward level, so it is a reporting requirement",
+            "It decides which GRAP standard applies"
+          ],
+          "correctIndex": 2,
+          "explanation": "The mSCOA regional segment resolves to ward; ward is required for municipal reporting."
+        },
+        {
+          "question": "What happens if a production deployment is started without operator API keys or a data directory?",
+          "options": [
+            "It starts in read-only mode",
+            "It refuses to start, because it could not attribute changes or keep its history",
+            "It starts and uses the demonstration identities",
+            "It starts and keeps history in memory until keys are added"
+          ],
+          "correctIndex": 1,
+          "explanation": "The strict contract requires operator identities and a durable data directory; the service exits rather than produce unreliable evidence."
+        }
+      ]
+    },
+    {
+      "id": "newt-02-classification-and-components",
+      "moduleNumber": 2,
+      "title": "Classification and componentisation",
+      "subtitle": "The CIDMS hierarchy, and why the unit of account is the component",
+      "badge": "Register model",
+      "duration": "13 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Each asset is classified down a six-level hierarchy: accounting group, accounting subgroup and asset class (levels 1–3, from the CIDMS model), then asset group type, asset type and component type. Adopting CIDMS means a client's data maps to its chart of accounts without translation. The accounting groups are property, plant and equipment (infrastructure, community, other and movable assets), heritage assets, intangible assets and investment property; the movable-assets subgroup is the system's own addition, because CIDMS stops at infrastructure. The register refuses an asset class that is not in the hierarchy. The unit of account is the component, not the facility: GRAP 17 requires significant components to be recognised and depreciated separately, so a clinic is a parent record with its land, structure, roof and standby power as child records linked to it. A flat register hides a failing roof inside a facility graded fair; a componentised one surfaces it as the renewal that has to be budgeted.",
+      "keyPoints": [
+        "Levels: accounting group → accounting subgroup → asset class → asset group type → asset type → component type.",
+        "Only classes in the accounting hierarchy are accepted; “Kind” (movable or immovable) follows from the class.",
+        "Significant components are separate records linked to their parent; the parent's own record lists its components.",
+        "CIDMS prescribes how far to subdivide — buildings per floor and functional area, pipes and roads per street block, sewers manhole to manhole.",
+        "Asset codes are unique across the register, compared without regard to case or surrounding spaces.",
+        "A legacy or source-system code is kept, because inherited registers are reconciled against the old code.",
+        "An asset cannot be derecognised while it still has components; the children go first."
+      ],
+      "operationalProcedures": [
+        "1. Custodian or admin: open “Admin” → “Register an asset” and complete Identity and Classification.",
+        "2. Choose the asset class from the list, then the asset group type.",
+        "3. Record each significant component as its own asset linked to its parent.",
+        "4. On an asset's “Record” tab, read its Classification and Components.",
+        "5. Admin: to derecognise a facility, remove its components first, then the parent."
+      ],
+      "takeaways": [
+        "Register components, not just facilities — that is what GRAP 17 requires.",
+        "Keep the legacy code: it is the bridge to the register you inherited."
+      ],
+      "guides": [
+        "register-an-asset",
+        "read-an-asset",
+        "remove-an-asset"
+      ],
+      "quiz": [
+        {
+          "question": "Why is the unit of account a component rather than a facility?",
+          "options": [
+            "Because components are cheaper to verify",
+            "Because the map can only draw components",
+            "Because CIDMS forbids facility records",
+            "Because GRAP 17 requires significant components to be recognised and depreciated separately"
+          ],
+          "correctIndex": 3,
+          "explanation": "Componentisation is a GRAP 17 requirement and exposes renewals a facility-level grade would hide."
+        },
+        {
+          "question": "An admin tries to remove a facility that still has child components. What happens?",
+          "options": [
+            "The facility and all its components are removed together",
+            "The removal is refused until the components are removed first",
+            "The components are reassigned to another parent",
+            "The facility is hidden but its components remain on the register"
+          ],
+          "correctIndex": 1,
+          "explanation": "Derecognition of a parent is refused while it still has components."
+        },
+        {
+          "question": "A custodian registers “ABC-001” when the register already holds “abc-001 ”. What happens?",
+          "options": [
+            "The new asset is refused as a duplicate code",
+            "Both are kept because the case differs",
+            "The older asset is overwritten",
+            "The new code is renamed automatically"
+          ],
+          "correctIndex": 0,
+          "explanation": "Codes are compared case-insensitively and trimmed, because devices and auditors resolve an asset by its code."
+        }
+      ]
+    },
+    {
+      "id": "newt-03-location-and-custody",
+      "moduleNumber": 3,
+      "title": "Spatial identity and custody",
+      "subtitle": "Geometry, the Surveyor-General key, ward and tenure",
+      "badge": "Register model",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "A GPS pin is not enough to identify state property, because the authoritative record of a land parcel is cadastral. Newt stores the 21-character Surveyor-General key (the LPI code) beside the coordinates: characters 1–8 identify the SG office, registration division and township, 9–16 the erf or farm number, and 17–21 the portion. That key is what allows reconciliation against the Deeds Office and the Chief Surveyor-General. Geometry is modelled as it is in reality: a pump station is a point, a road is a line and a school site is a polygon. Every path that sets a position — registration, import, telemetry and an on-site correction — applies one coordinate rule: 0,0 is refused, and so is any point outside South Africa's extent, which is usually a swapped latitude and longitude. Custody fields record the custodian, the user department, tenure (owned, leased in, leased out, unregistered or vesting), title deed and vesting status.",
+      "keyPoints": [
+        "Geometry types: point, line and polygon; a line or polygon needs at least two coordinates.",
+        "The SG key is 21 characters: region (1–8), erf or farm number (9–16), portion (17–21).",
+        "Coordinates of 0,0 or outside South Africa are refused everywhere, so a stale phone fix cannot overwrite a good record.",
+        "Province, municipality and ward are carried for reporting; ward is the mSCOA regional level.",
+        "Tenure affects valuation: an asset leased out is treated as cash-generating for impairment.",
+        "On the map, assets cluster at low zoom; export works only on individual assets in view."
+      ],
+      "operationalProcedures": [
+        "1. When registering, choose Point, Line or Polygon under Location and enter coordinates, or press “Use my GPS” at the asset.",
+        "2. Enter the SG 21-character key, erf or farm portion, ward, municipality and province for immovable assets.",
+        "3. Complete “Custody & life cycle”: custodian department, user department, tenure and title deed number.",
+        "4. On “Asset map”, filter, open an asset's popup and use “Open in register”; share a view with “Copy link to view”."
+      ],
+      "takeaways": [
+        "Coordinates alone are not a legal identity for land — capture the SG key.",
+        "A position refused as outside South Africa is usually a swapped latitude and longitude; check before retrying."
+      ],
+      "guides": [
+        "register-an-asset",
+        "use-the-map"
+      ],
+      "quiz": [
+        {
+          "question": "Why does the register store the Surveyor-General key as well as coordinates?",
+          "options": [
+            "Because the map cannot display coordinates",
+            "Because it replaces the asset code",
+            "Because it ties the parcel to its registered title and allows reconciliation with the Deeds Office",
+            "Because GRAP 17 requires it for movable assets"
+          ],
+          "correctIndex": 2,
+          "explanation": "The 21-character SG key is the parcel's national cadastral identity."
+        },
+        {
+          "question": "A field officer's phone records a position of 51.5, −0.12 for a reservoir. What does the register do?",
+          "options": [
+            "Refuses it, because the point falls outside South Africa",
+            "Accepts it and flags the asset missing",
+            "Accepts it with a low confidence grade",
+            "Converts it to the nearest point in South Africa"
+          ],
+          "correctIndex": 0,
+          "explanation": "One coordinate rule applies to every path that sets a position; points outside the country are refused."
+        },
+        {
+          "question": "How should a road be modelled?",
+          "options": [
+            "As a single point at its midpoint",
+            "As a polygon around the road reserve only",
+            "As a movable asset",
+            "As a line"
+          ],
+          "correctIndex": 3,
+          "explanation": "Geometry follows reality: roads are lines, sites are polygons, pump stations are points."
+        }
+      ]
+    },
+    {
+      "id": "newt-04-grading-and-risk",
+      "moduleNumber": 4,
+      "title": "Condition, criticality and risk exposure",
+      "subtitle": "The CIDMS 1–5 grades, confidence grades and the 1–25 risk score",
+      "badge": "Life cycle",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every asset is graded on five 1–5 scales. Condition runs from 1 very good to 5 very poor, each grade carrying an indicative share of remaining useful life (grade 1 is 71–100% of expected useful life, grade 5 is 0–10%). Criticality describes the consequence of failure, from 1 cursory to 5 most critical. Performance, utilisation and cost of operation are graded on the same shape; together with condition they are the four failure modes CIDMS treats as parallel triggers for renewal. The register derives risk exposure as the worst failure mode multiplied by criticality, a 1–25 score that ranks a renewal programme: a failing asset nobody depends on scores low, a failing critical asset scores high. Fields ending in _cg are confidence grades — a 1–5 rating of how trustworthy the adjacent value is — which is how a register shows an auditor which values were verified and which were estimated.",
+      "keyPoints": [
+        "Condition labels: 1 Very good, 2 Good, 3 Fair, 4 Poor, 5 Very poor; ungraded shows “Not assessed”.",
+        "Criticality labels: 1 Cursory, 2 Non-critical, 3 Important, 4 Critical, 5 Most critical.",
+        "Risk exposure = worst of condition, performance, utilisation and cost of operation × criticality (1–25); it is 0 when either side is ungraded.",
+        "Confidence grades (_cg) rate the reliability of a value, not the asset itself.",
+        "Grades outside 1–5 are refused on registration and import.",
+        "The register can be sorted by risk exposure or worst condition to build a renewal list."
+      ],
+      "operationalProcedures": [
+        "1. In “Search the Register”, filter by condition and sort by “risk exposure” or “worst condition”.",
+        "2. Open an asset's “Record” tab and read its Life cycle grades.",
+        "3. Read the “Condition Profile” on the Statistics page for the portfolio picture.",
+        "4. Use the API filters condition_min, criticality_min and risk_min to extract the worst, most critical assets."
+      ],
+      "takeaways": [
+        "Criticality without condition (or condition without criticality) gives no risk score — grade both.",
+        "A grade of 5 is “very poor” for condition but “most critical” for criticality; read the scale before entering a number."
+      ],
+      "guides": [
+        "search-the-register",
+        "read-an-asset",
+        "statistics-and-risk-audit"
+      ],
+      "quiz": [
+        {
+          "question": "An asset has condition 2, performance 4, utilisation 3, cost of operation 2 and criticality 5. What is its risk exposure?",
+          "options": [
+            "10",
+            "20",
+            "25",
+            "15"
+          ],
+          "correctIndex": 1,
+          "explanation": "The worst failure mode is performance at 4; 4 × criticality 5 = 20."
+        },
+        {
+          "question": "What does a confidence grade (a field ending in _cg) express?",
+          "options": [
+            "How critical the asset is",
+            "How old the asset is",
+            "How trustworthy the adjacent recorded value is",
+            "How often the asset must be verified"
+          ],
+          "correctIndex": 2,
+          "explanation": "Confidence grades let an auditor see which values were verified and which were estimated."
+        },
+        {
+          "question": "On the condition scale, what does grade 5 mean?",
+          "options": [
+            "Very good, 71–100% of useful life remaining",
+            "Most critical",
+            "Not assessed",
+            "Very poor, roughly 0–10% of useful life remaining"
+          ],
+          "correctIndex": 3,
+          "explanation": "Condition runs 1 very good to 5 very poor; criticality uses a different set of labels."
+        }
+      ]
+    },
+    {
+      "id": "newt-05-verification",
+      "moduleNumber": 5,
+      "title": "Physical verification in the field",
+      "subtitle": "The control that makes a register auditable, online or offline",
+      "badge": "Verification",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Physical verification — an official standing at the asset and confirming it exists, where it is and what condition it is in — is the control that makes a register auditable. Newt's field app is an installable web app rather than an app-store package, so it installs from the register's address with no sideloading and updates itself. A field officer finds an asset by scanning its barcode or typing its code, records the condition observed on site, captures a GPS position and notes, and records the verification — or reports the asset as not found. Without signal, the capture is saved on the device and uploads later. Each event carries two times: when the log recorded it, and when the officer actually observed the asset, so an offline capture keeps the true date of the visit. The Statistics page turns verifications into progress: assets verified within the last 365 days, overdue, and never verified.",
+      "keyPoints": [
+        "Verifying needs the capturer role or higher; a viewer key cannot set up a field device.",
+        "Offline captures are saved on the device, shown under “Waiting to sync”, and upload when a signal returns.",
+        "An event records both the log time and the observed time.",
+        "Offline, only assets the device has opened before can be found.",
+        "Flagging an asset missing is itself an impairment indicator in the valuation.",
+        "Statistics: verified in the last 12 months, verification overdue, and never verified; never-verified immovable assets are the classic audit gap.",
+        "A capture with a position outside South Africa is rejected by the register even if the device accepted it."
+      ],
+      "operationalProcedures": [
+        "1. Set up the device on “Set up this device” with a capturer key and “Save and continue”.",
+        "2. On “Find an asset”, press “Scan” or type the code, and check the asset's details.",
+        "3. Tap the observed condition, press “Capture GPS”, add notes and press “Record verification” — or “Cannot find asset”.",
+        "4. If offline, let the queue sync later or press “Try to sync now”.",
+        "5. From the admin portal, use “Verify” or “Flag” / “Unflag” when verifying without the field app.",
+        "6. Track progress on the Statistics page under “Verification Progress”."
+      ],
+      "takeaways": [
+        "A verification is evidence only if it is attributed and dated to the moment you stood at the asset.",
+        "Never type a condition you did not observe; leave it blank to record the visit only."
+      ],
+      "guides": [
+        "set-up-field-device",
+        "verify-in-the-field",
+        "verify-or-flag-from-admin",
+        "statistics-and-risk-audit"
+      ],
+      "quiz": [
+        {
+          "question": "A field officer verifies an asset offline on Monday and the capture syncs on Wednesday. What does the register record?",
+          "options": [
+            "Only Wednesday, the sync time",
+            "Both the log time and Monday as the time the asset was observed",
+            "Only Monday; the sync time is discarded",
+            "Nothing until the officer re-captures online"
+          ],
+          "correctIndex": 1,
+          "explanation": "Events carry both the log's time and the observed time, so offline captures keep the true visit date."
+        },
+        {
+          "question": "Which role is the minimum needed to record a verification?",
+          "options": [
+            "Capturer",
+            "Viewer",
+            "Custodian",
+            "Admin"
+          ],
+          "correctIndex": 0,
+          "explanation": "Capturer is the field officer role; viewers can only read."
+        },
+        {
+          "question": "How does the Statistics page classify an asset last verified 400 days ago?",
+          "options": [
+            "Never verified",
+            "Verified in the last 12 months",
+            "Flagged missing",
+            "Verification overdue"
+          ],
+          "correctIndex": 3,
+          "explanation": "Verifications older than 365 days count as overdue; assets with no verification date are never verified."
+        }
+      ]
+    },
+    {
+      "id": "newt-06-valuation-and-impairment",
+      "moduleNumber": 6,
+      "title": "Valuation and impairment under GRAP",
+      "subtitle": "GRAP 17, 16, 103 and 31 for measurement; GRAP 21 and 26 for impairment",
+      "badge": "Accounting",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The asset-side engine measures each asset under the standard that governs it: GRAP 103 for heritage assets, GRAP 16 for investment property, GRAP 31 for intangibles and GRAP 17 for everything else. Depreciation is straight-line: the depreciable amount (current replacement cost less residual value) divided by expected useful life, with consumed life taken as expected less remaining useful life, so a condition assessment that revises remaining life flows straight into the charge. Heritage assets and land are not depreciated, and an asset with no expected useful life cannot be depreciated until one is assessed. Impairment follows GRAP 26 for cash-generating assets (investment property, or anything leased out) and GRAP 21 for the rest — most of a government portfolio, held for service rather than return. The engine looks for impairment indicators from the register's own grades; where any exist, it estimates recoverable service amount by the depreciated-replacement-cost approach, tying it to the observed condition grade, and recognises a loss if the carrying amount exceeds it.",
+      "keyPoints": [
+        "Governing standard: heritage → GRAP 103, investment property → GRAP 16, intangibles → GRAP 31, otherwise GRAP 17.",
+        "Annual depreciation = (current replacement cost − residual value) ÷ expected useful life.",
+        "Not depreciated: heritage assets, land, and assets with no expected useful life recorded.",
+        "Impairment standard: GRAP 26 for investment property or assets leased out; GRAP 21 otherwise.",
+        "Indicators: condition 5, utilisation recorded as not in use, performance 5, cost of operation 5, remaining life exhausted, or flagged missing.",
+        "Recoverable service amount = replacement cost × a service factor for the condition grade (from 0.85 at grade 1 down to 0.05 at grade 5).",
+        "An asset with no condition assessment is treated as a data gap, not as impaired.",
+        "Impairment already on the record reduces the carrying amount before the test."
+      ],
+      "operationalProcedures": [
+        "1. Open an asset and read the “Valuation” tab: the governing standard, the impairment standard and any indicators.",
+        "2. On Statistics, read replacement cost, accumulated depreciation, carrying amount and impairment loss under “Register at a Glance”.",
+        "3. Download the risk-audit extract with an “As at” reporting date for the finance team.",
+        "4. Integrating systems read GET /api/valuation for the portfolio position and the largest impairments."
+      ],
+      "takeaways": [
+        "Missing condition grades understate nothing and overstate nothing — they show as gaps; fix them by verifying.",
+        "A missing asset is an impairment indicator; resolve flags before the reporting date.",
+        "GRAP 21/26 does the work people often expect from ECL on physical assets."
+      ],
+      "guides": [
+        "read-an-asset",
+        "statistics-and-risk-audit",
+        "query-the-api"
+      ],
+      "quiz": [
+        {
+          "question": "Which standard governs impairment of a building the department lets out to a tenant?",
+          "options": [
+            "GRAP 21",
+            "GRAP 104",
+            "GRAP 26",
+            "GRAP 103"
+          ],
+          "correctIndex": 2,
+          "explanation": "An asset leased out is treated as cash-generating, so GRAP 26 applies; most service assets fall under GRAP 21."
+        },
+        {
+          "question": "An asset has no condition grade recorded. How does the valuation treat it?",
+          "options": [
+            "As a data gap: no impairment is asserted",
+            "As fully impaired",
+            "As condition 3 by default",
+            "It is excluded from the carrying amount"
+          ],
+          "correctIndex": 0,
+          "explanation": "Without a condition assessment there is no basis for recoverable service amount, so the engine asserts no impairment."
+        },
+        {
+          "question": "Which of these assets is depreciated?",
+          "options": [
+            "A heritage monument",
+            "A land parcel",
+            "A vehicle with no expected useful life recorded",
+            "A reservoir with a recorded expected useful life"
+          ],
+          "correctIndex": 3,
+          "explanation": "Heritage assets and land are not depreciated, and an asset needs an expected useful life before it can be."
+        }
+      ]
+    },
+    {
+      "id": "newt-07-grap104-receivables",
+      "moduleNumber": 7,
+      "title": "GRAP 104 receivables, SPPI and ECL staging",
+      "subtitle": "Why ECL never applies to the assets themselves, and how the receivables engine works",
+      "badge": "Accounting",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "GRAP 104 is the standard for financial instruments. Expected credit loss and the SPPI test apply to receivables, loans and investments — never to buildings, vehicles or infrastructure. Newt keeps a separate GRAP 104 engine for the receivables its portfolio gives rise to: lessor finance lease receivables (brought in by paragraph 1.3(c)(i)), instalment-sale debtors from disposals, and loans granted. Statutory receivables — municipal rates and service charges — are GRAP 108, excluded by paragraph 1.3(g); the engine reports them separately and computes no ECL on them. For an in-scope receivable it first applies the SPPI test: payments that vary with the counterparty's turnover, leveraged interest, a conversion to equity or a negative rate fail it. Amortised cost needs both an SPPI pass and a hold-to-collect business model; anything else is at fair value and carries no ECL. For amortised-cost receivables the engine assigns a stage by days past due and measures ECL = EAD × PD × LGD.",
+      "keyPoints": [
+        "In scope: finance lease receivables, instalment-sale debtors, loans granted. Out of scope: statutory rates and service charges (GRAP 108).",
+        "Amortised cost requires SPPI pass and hold to collect; otherwise fair value, with no ECL.",
+        "An interest-free arrangement does not fail SPPI of itself.",
+        "Stage 1 performing (up to 30 days past due), stage 2 significant increase in credit risk (over 30 days), stage 3 credit-impaired (over 90 days) — the rebuttable presumptions.",
+        "Finance lease receivables use the simplified approach: lifetime ECL whatever the stage.",
+        "Other amortised-cost receivables use 12-month ECL in stage 1 and lifetime ECL in stages 2 and 3; the 12-month PD is the lifetime PD spread over the term in years.",
+        "PD comes from days-past-due bands that the code describes as a transparent stand-in for the entity's own loss history; LGD is reduced by recoverable collateral."
+      ],
+      "operationalProcedures": [
+        "1. Read GET /api/receivables with a viewer key or higher; there is no receivables screen in the web interface.",
+        "2. For each assessment, read scope, SPPI result and reasons, classification, stage and reason, and loss horizon.",
+        "3. Check the statutory (GRAP 108) total is reported separately with its note, and carries no ECL.",
+        "4. Reconcile in-scope gross, total ECL and net amount with the entity's financial statements."
+      ],
+      "takeaways": [
+        "Never run ECL over physical assets or over rates debtors — both produce numbers with no accounting meaning.",
+        "Fair-value instruments already reflect credit risk; they are not impaired again.",
+        "The PD bands are illustrative until calibrated on the entity's own history."
+      ],
+      "guides": [
+        "query-the-api"
+      ],
+      "quiz": [
+        {
+          "question": "Which balance does the GRAP 104 engine exclude from ECL?",
+          "options": [
+            "A finance lease receivable on a let commercial unit",
+            "Municipal property rates owed by ratepayers",
+            "An instalment-sale debtor from an asset disposal",
+            "A loan granted"
+          ],
+          "correctIndex": 1,
+          "explanation": "Rates and service charges are statutory receivables under GRAP 108, excluded by GRAP 104 paragraph 1.3(g)."
+        },
+        {
+          "question": "An amortised-cost instalment-sale debtor is 45 days past due. Which stage and horizon apply?",
+          "options": [
+            "Stage 1, 12-month",
+            "Stage 3, lifetime",
+            "Stage 2, lifetime",
+            "No stage; it is at fair value"
+          ],
+          "correctIndex": 2,
+          "explanation": "More than 30 days past due is the presumption of a significant increase in credit risk: stage 2, lifetime ECL."
+        },
+        {
+          "question": "A lease receivable's payments vary with the tenant's turnover. What follows?",
+          "options": [
+            "It fails SPPI, is measured at fair value and carries no ECL",
+            "It passes SPPI because it is a lease",
+            "It is moved to stage 3",
+            "It is treated as a statutory receivable"
+          ],
+          "correctIndex": 0,
+          "explanation": "Turnover-linked payments are not consideration for time value of money or credit risk, so SPPI fails and amortised cost is unavailable."
+        }
+      ]
+    },
+    {
+      "id": "newt-08-roles-and-history",
+      "moduleNumber": 8,
+      "title": "Identities, roles and the append-only history",
+      "subtitle": "Who may do what, and why no event can be edited or deleted",
+      "badge": "Controls",
+      "duration": "13 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every user and every device is a named identity holding one role, in increasing authority: viewer reads the register, its valuation and history; capturer also records verifications, flags assets missing and sends telemetry; custodian also registers and imports assets; admin also derecognises assets and manages access. An admin issues keys from the admin portal; a key is shown once and stored only as a hash, and revoking it stops it working at once while the identity stays in the history. Keys set in the deployment's configuration are operator-managed and cannot be revoked from the portal, and on a locked UAT environment issuing and revoking through the system is refused. Every mutation — create, verify, flag, derecognise, key issue and revoke — is an immutable event carrying the actor, their role, the source, the action and a field-level before/after diff. There is no code path that edits or deletes an event, and sequence numbers are contiguous, so a gap is evidence of loss or tampering. Derecognising an asset removes it from the register but keeps its history, including its full state at derecognition.",
+      "keyPoints": [
+        "Roles in order: viewer, capturer, custodian, admin; each includes the ones below it.",
+        "A key is disclosed once at issuance and stored only as a hash.",
+        "Each event records actor, role, source (api, ui, field, bulk or seed), action and a field-level diff.",
+        "The diff is produced by reflecting over the whole asset record, so a new field is covered automatically.",
+        "Contiguous sequence numbers make a gap detectable; the audit page shows the verdict per page.",
+        "With a data directory, each event is flushed to disk as it happens; the snapshot is a convenience, and on boot every later event is replayed onto it.",
+        "Without a data directory the register runs in memory and history is lost on restart — only permissible in development."
+      ],
+      "operationalProcedures": [
+        "1. Admin: open “System Access — API Keys”, press “Issue an API key”, name the person or device, choose the role and record the key with “Copy” before “Done”.",
+        "2. Admin: “Revoke” a key the moment a person leaves or a device is lost.",
+        "3. Open “Audit trail”, filter by actor, action and dates, and check the integrity verdict for each page.",
+        "4. Report any “Gap detected” to the register administrator as an integrity finding.",
+        "5. Export the trail page by page for the auditor with “Export page (CSV)”."
+      ],
+      "takeaways": [
+        "Issue one key per person and per device; shared keys destroy attribution.",
+        "The event log, not the snapshot, is the record of what happened.",
+        "Removing an asset never removes its history."
+      ],
+      "guides": [
+        "manage-api-keys",
+        "review-audit-trail",
+        "remove-an-asset"
+      ],
+      "quiz": [
+        {
+          "question": "Which is the lowest role allowed to register new assets?",
+          "options": [
+            "Viewer",
+            "Capturer",
+            "Admin",
+            "Custodian"
+          ],
+          "correctIndex": 3,
+          "explanation": "Custodian adds registering and importing assets to the capturer's verification rights."
+        },
+        {
+          "question": "The audit page shows “Gap detected”. What does that mean?",
+          "options": [
+            "A sequence number is missing, which is evidence of loss or tampering to report",
+            "The page has fewer than 50 events",
+            "An asset was derecognised",
+            "A field device has unsynced captures"
+          ],
+          "correctIndex": 0,
+          "explanation": "Events carry contiguous sequence numbers precisely so a gap is detectable."
+        },
+        {
+          "question": "If the register snapshot and the event log ever disagree, which is authoritative?",
+          "options": [
+            "The snapshot, because it is written atomically",
+            "The event log; boot replays every later event onto the snapshot",
+            "Whichever was written most recently",
+            "Neither; the operator must choose"
+          ],
+          "correctIndex": 1,
+          "explanation": "The snapshot records the sequence it reflects and the log is replayed onto it; the log is the record that matters."
+        }
+      ]
+    },
+    {
+      "id": "newt-09-data-in-and-out",
+      "moduleNumber": 9,
+      "title": "Getting data in and reporting out",
+      "subtitle": "Inheriting a register, device telemetry, and extracts for finance and audit",
+      "badge": "Integration",
+      "duration": "13 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Registers are almost always inherited, not created, and they arrive as spreadsheet exports in which some rows are always bad. Newt's imports therefore report an outcome for every row rather than refusing a whole file: the CSV import recognises the column headings real exports use and day-month-year dates, and the bulk JSON import takes a list of assets. Both apply exactly the validation single registration applies. Movable assets can be updated by tracking devices: each device holds its own capturer key and posts batches of readings, which pass through the same mutation path as a hand capture and so land in the audit history; one bad reading does not discard the batch. Going the other way, the risk-audit extract gives an ERP, accounting platform or auditor one row per asset with classification, custody, grading, verification state, the GRAP valuation position and audit-trail integrity, optionally as at a reporting date.",
+      "keyPoints": [
+        "CSV import: POST /api/assets/import-csv; bulk JSON: POST /api/assets/bulk — custodian or admin, with per-row outcomes.",
+        "Imported rows face the same rules: no 0,0 or out-of-country points, no duplicate codes, a class from the hierarchy, grades 1–5, no negative figures, residual value not above replacement cost, no future verification date.",
+        "Telemetry: POST /api/telemetry with a capturer key, up to 5000 readings per batch, each reported individually.",
+        "Readings are rejected at 0,0, outside South Africa, with an impossible speed or heading, a future timestamp, or for an immovable asset.",
+        "Risk-audit extract: GET /api/reports/risk-audit as CSV or JSON, with an optional as-at date; the Statistics page downloads the same file.",
+        "Asset status reports can be emailed only where a mail relay is provisioned; otherwise the send fails rather than claiming success."
+      ],
+      "operationalProcedures": [
+        "1. Prepare the inherited register as CSV with its existing headings; keep the old asset codes.",
+        "2. Send it to the CSV import with a custodian or admin key and read the per-row outcomes.",
+        "3. Correct the refused rows and import them again; accepted rows appear in the history with the import as their source.",
+        "4. Issue each tracking device its own capturer key before it sends telemetry.",
+        "5. At each reporting date, download the risk-audit extract with “As at” set."
+      ],
+      "takeaways": [
+        "A refused row is information about your inherited register — fix the data, do not loosen the rules.",
+        "A device is an identity: its readings are attributed to it like a person's captures."
+      ],
+      "guides": [
+        "import-existing-register",
+        "send-telemetry",
+        "statistics-and-risk-audit",
+        "query-the-api"
+      ],
+      "quiz": [
+        {
+          "question": "An imported CSV has 1,000 rows, 12 of which have coordinates of 0,0. What happens?",
+          "options": [
+            "The whole file is refused",
+            "The 12 rows are imported with a warning",
+            "The 988 good rows are accepted and the 12 are reported with their reason",
+            "The 12 rows are placed at the municipality's centre"
+          ],
+          "correctIndex": 2,
+          "explanation": "Imports report per-row outcomes so one bad row does not block an inherited register."
+        },
+        {
+          "question": "A tracking device sends a reading for a building. What happens to that reading?",
+          "options": [
+            "It is rejected, because immovable assets do not take telemetry",
+            "It updates the building's coordinates",
+            "It converts the building to a movable asset",
+            "The whole batch is rejected"
+          ],
+          "correctIndex": 0,
+          "explanation": "Only movable assets carry telemetry; the reading is rejected and the rest of the batch still applies."
+        },
+        {
+          "question": "What does the risk-audit extract contain?",
+          "options": [
+            "Only assets flagged missing",
+            "The API keys and their roles",
+            "The full event log",
+            "One row per asset with classification, custody, grading, verification state, GRAP valuation position and audit integrity"
+          ],
+          "correctIndex": 3,
+          "explanation": "The extract is built for an ERP, accounting platform or auditor to run risk audits on the register."
+        }
+      ]
+    }
+  ]
+}

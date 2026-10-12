@@ -1,0 +1,670 @@
+{
+  "id": "gaecm",
+  "name": "Binteca Grap ECL Model",
+  "fullName": "GRAP 104 Automated ECL Calculation Model",
+  "category": "Public finance",
+  "summary": "A GRAP 104 (Revised 2019) expected credit loss engine and control portal: it calibrates a provision matrix from monthly aged debtor data, screens a forward-looking macroeconomic overlay against four acceptance gates, measures the ECL on receivables and on cash and cash equivalents, and issues the statutory report from one auditable pipeline. Preparers run valuations, reviewers issue them, auditors read them and administrators look after access and the municipality's data.",
+  "audience": [
+    "Preparer",
+    "Reviewer / approver",
+    "Viewer / auditor",
+    "Administrator"
+  ],
+  "surfaces": [
+    "Web portal",
+    "Command line (engine)"
+  ],
+  "gettingAccess": "Every account holds exactly one of four roles: Preparer, Reviewer / approver, Viewer / auditor or Administrator. An administrator issues your account under Controls → Access and gives you a temporary password by a separate channel; you replace it at your first sign-in. Administrators and reviewers must, by default, also set up an authenticator app (multi-factor authentication) before the workspace opens. On a demonstration deployment the sign-in page lists one synthetic demo account per role with a “Use” button that fills the form; those accounts are fixed and are for sample data only. The portal holds its accounts locally and contacts no external identity provider.",
+  "sources": [
+    "README.md",
+    "docs/README.md",
+    "docs/security/PERMISSION-MATRIX.md",
+    "docs/operations/BACKUP-RECOVERY.md",
+    "demo-access.json",
+    "src/templates/AppTemplate.tsx",
+    "src/components/Login.tsx",
+    "src/modules/",
+    "server.ts",
+    "server/routes.ts"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-and-find-your-way",
+      "title": "Sign in and find your way around the portal",
+      "goal": "You are signed in, know which modules your licence and role give you, and can move between instances and runs.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [
+        "An account issued by an administrator (or, on a demonstration deployment, one of the synthetic demo accounts)."
+      ],
+      "steps": [
+        "Open the portal. The “Sign in” page shows who the deployment is licensed to, or “Actuarial engine control portal” when no licence is installed.",
+        "If the page shows an “Evaluation mode” banner, no licence file is installed: every module is open and reports are watermarked as unissued. A “Licence problem” banner gives the reason the installed licence was rejected.",
+        "On a demonstration deployment, find the “Demo sign-in details” panel and press “Use” beside the role you want; it fills the Username and Password fields for you.",
+        "Enter your Username and Password and press “Sign in”.",
+        "If your account has multi-factor authentication, the page changes to “Second factor”. Enter the six-digit code your authenticator shows now, or one unused recovery code, in “Code” and press “Verify”. “Start again” returns to the password step.",
+        "If you are asked to “Finish setting up your account”, choose a new password and/or set up an authenticator (see “Secure your account”); the workspace opens once this is done.",
+        "Use the module bar to move between “Executive Dashboard”, “Data Ingestion”, “Actuarial EDA”, “Pipeline Control”, “Statutory Reports”, “Policy Alignment” and “Controls”. A lock icon marks a module the installed licence does not cover.",
+        "Use the “Instance” selector at the top of every page to switch between the reference book and, where offered, the Mogale City demonstration; you stay in the same module.",
+        "Press “Refresh” (“Reload the run list and this run”) to pick up a run another user has just completed.",
+        "Copy the address bar to share a view: the instance, the run (?run=…), the view and any filter are all in the URL, so a reload or a copied link opens the same view of the same run.",
+        "Read the footer for the engine version and the licence: “Licensed to … · … support · expires …”, or “Unlicensed — evaluation use only”.",
+        "Sign out with the “Sign out” button in the header."
+      ],
+      "result": "The workspace opens on the Executive Dashboard of the selected instance, and the header shows your account.",
+      "troubleshooting": [
+        {
+          "problem": "“This deployment is not licensed” or “<module> is not licensed”.",
+          "fix": "The installed licence does not cover that module. Ask your administrator to obtain a licence that lists it from Binteca; a licence listing no modules covers none."
+        },
+        {
+          "problem": "“Licence expires soon” banner.",
+          "fix": "Tell your administrator so a renewed licence file can be installed before the expiry date."
+        },
+        {
+          "problem": "“No instance named … on this deployment” or “There is no page at this address”.",
+          "fix": "The link names an instance or view this deployment does not have. Use the link offered to open the instance's dashboard."
+        },
+        {
+          "problem": "A link names a run that is not here.",
+          "fix": "The run is not in this deployment's history; choose one from Statutory Reports."
+        },
+        {
+          "problem": "The code is refused as expired.",
+          "fix": "The second-factor challenge has timed out; press “Start again” and sign in once more."
+        }
+      ],
+      "sources": [
+        "src/components/Login.tsx",
+        "src/templates/AppTemplate.tsx",
+        "src/components/InstanceChrome.tsx",
+        "src/lib/routes.ts",
+        "README.md"
+      ]
+    },
+    {
+      "id": "secure-your-account",
+      "title": "Change your password and set up multi-factor authentication",
+      "goal": "Your password is your own and your account is protected by an authenticator app and recovery codes.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [
+        "An authenticator app (time-based, six digits) on a device you control."
+      ],
+      "steps": [
+        "Open “Controls” and the “My account” tab (or press the account button in the header).",
+        "Check “Your account”: Username, Name, Role and how the account was created.",
+        "To change your password, go to “Change your password”, fill in “Current password”, “New password” and “New password again” (at least 12 characters, not the one you have now) and press “Change password”. Other sessions of the account are signed out.",
+        "To turn on MFA, go to “Multi-factor authentication” and press “Set up an authenticator”.",
+        "In your authenticator app, add an account by entering the key shown (or open “Or use the setup link”).",
+        "Enter the code the app shows now in “Code” and press “Turn on MFA”.",
+        "When the recovery codes appear, press “Download the codes”, store them safely, then press “I have kept them — continue”.",
+        "To replace lost or used recovery codes later, enter a “Code from your authenticator” and press “New recovery codes”; the old codes stop working."
+      ],
+      "result": "The Multi-factor authentication card shows “Enrolled”, and later sign-ins ask for a second factor.",
+      "troubleshooting": [
+        {
+          "problem": "“Set up multi-factor authentication to continue” and nothing else opens.",
+          "fix": "Your role requires MFA. Complete the set-up; the workspace opens afterwards."
+        },
+        {
+          "problem": "“The two new passwords differ.”",
+          "fix": "Type the same new password in both fields."
+        },
+        {
+          "problem": "“Access details are locked in this environment”.",
+          "fix": "On a locked UAT environment credentials are final and nobody enrols; use the credentials you were issued."
+        },
+        {
+          "problem": "“Not available for this account” under MFA.",
+          "fix": "Synthetic demo accounts are fixed and do not enrol."
+        },
+        {
+          "problem": "You lost your authenticator and your recovery codes.",
+          "fix": "Ask an administrator to “Reset MFA” for you; an administrator cannot reset their own."
+        }
+      ],
+      "sources": [
+        "src/modules/controls/AccountPage.tsx",
+        "docs/security/PERMISSION-MATRIX.md",
+        "README.md"
+      ]
+    },
+    {
+      "id": "upload-extracts",
+      "title": "Upload a monthly extract and check the quality gates",
+      "goal": "Your aged debtor extract, macro series and optional schedules are uploaded and you know which rows the quality gates excluded and why.",
+      "role": "Preparer (other roles except Administrator can read the list of uploads)",
+      "level": "Intermediate",
+      "before": [
+        "An aged debtor extract with the columns category, month, year, bucket, balance (one row per category, month and ageing bucket).",
+        "Optionally: macroeconomic indicators (year plus one column per variable and default_rate_<CATEGORY> series), segment definitions, cash and cash equivalents, ledger and rate assumptions, other financial assets."
+      ],
+      "steps": [
+        "Open “Data Ingestion” and make sure the “Instance” selector shows the book you are working on. On the demonstration instance the dataset is fixed and uploads apply to the Reference book.",
+        "In “Upload a monthly extract”, drop the files on the box or click it to browse. CSV, TSV and Excel (.xlsx, .xls) files are accepted, and several at once.",
+        "Each file is recognised by its header: “Aged debtor extract”, “Macroeconomic indicators”, “Other financial assets”, “Cash and cash equivalents”, “Segment definitions” or “Ledger and rate assumptions”. The box lists the columns each one needs.",
+        "Optionally add the debtor columns component (excludes VAT and prepayments from the ECL population) and default_flag / default_reason (marks an account defaulted on qualitative grounds, which carries a 100% loss rate).",
+        "Wait for the “Upload complete” banner. The uploaded file appears in the list with what it was “Recognised as”, its size and when it was uploaded.",
+        "After a run, scroll to “Quality gates” to see, for each gate, its Scope (Population or Calibration), Rule, rows Removed and rows Out.",
+        "Click a gate to open its detail: rows in, removed, rows out, scope, the rule and the rationale for it.",
+        "Read the “Aged debtor extract” and “Macroeconomic indicators” profile cards for what was loaded."
+      ],
+      "result": "The extract is listed and selectable in Pipeline Control; after a run, each excluded row is accounted for by a named gate.",
+      "troubleshooting": [
+        {
+          "problem": "“Upload rejected — Only CSV, TSV, or Excel (.xlsx, .xls) extracts can be uploaded.”",
+          "fix": "Save the extract in one of those formats and upload again."
+        },
+        {
+          "problem": "A file is not recognised.",
+          "fix": "Check the header row against the required columns listed in the upload box for that schedule."
+        },
+        {
+          "problem": "“Uploaded extracts are not listed for your role”, or there is no upload box.",
+          "fix": "Only a preparer uploads; other roles read. Ask a preparer to upload the file."
+        },
+        {
+          "problem": "“No uploaded extracts”.",
+          "fix": "Until a client extract is uploaded the pipeline falls back to the shipped demonstration dataset."
+        }
+      ],
+      "sources": [
+        "src/modules/DataIngestion.tsx",
+        "src/lib/uploads.ts",
+        "docs/security/PERMISSION-MATRIX.md",
+        "README.md"
+      ]
+    },
+    {
+      "id": "run-a-valuation",
+      "title": "Run a valuation in Pipeline Control (including the demonstration)",
+      "goal": "The seven-step GRAP 104 pipeline has run, been validated and produced a statutory report for the entity and reporting date you named.",
+      "role": "Preparer",
+      "level": "Intermediate",
+      "before": [
+        "For a client valuation: the extract and schedules uploaded in Data Ingestion."
+      ],
+      "steps": [
+        "Open “Pipeline Control”. The card “Execute the GRAP 104 pipeline” holds every setting.",
+        "Under “Engine mode” choose “Reference” to emit the signed 31 March 2026 book verbatim, or “Compute” to recalibrate the provision matrix from the loaded extract and apply it to the closing exposures.",
+        "Under “Measurement basis” keep “Migration probability” (the signed valuation's basis). “Time value of money” is a sensitivity run and shows the warning “Not the signed valuation's basis”.",
+        "For a Compute run, fill in “The valuation”: Entity, Short name, Reporting date, Issue month and “Calendar years excluded from calibration”.",
+        "Choose the schedules to use for “Segment definitions”, “Cash and cash equivalents” and “Ledger and rate assumptions”, or leave them on “Not supplied”; the report says what was not supplied.",
+        "Under “Reporting framework” set the “Entity type” and “Financial year starts” date, and tick “The entity adopted the revised Standard early” only if it did.",
+        "Choose the “Report template version”, and optionally write an “Introduction note” and “Conclusion note” under “Report notes (optional)”.",
+        "Choose the “Cash application when calibrating roll rates”: “Aggregate — as the signed valuation” or “Oldest bucket first — as the accounting policy”.",
+        "Choose the “Aged debtor extract”, “Macro indicators” and “Other financial assets (optional)” files, or leave the shipped demonstration dataset.",
+        "Tick “Render PDF”, and optionally “Append engine validation record” (Appendix C) and “Append policy alignment” (Appendix D).",
+        "Press “Run pipeline”. Watch “Seven-step methodology” log each step as it completes, and read “Engine log” for the engine's output.",
+        "Read “Validation”: Checks, Passed, Known and Failed. Any check that is not a pass is listed with its delta and reference.",
+        "On a demonstration deployment, select the Mogale City demonstration in the “Instance” selector instead: Pipeline Control shows “The demonstration valuation” (Entity, Reporting date, Dataset, Macroeconomic series) and a single “Run the demonstration valuation” button. It runs in compute mode on the fixed synthetic dataset only; the server refuses any upload, name or date for it, and every page of its report carries the synthetic-data notice."
+      ],
+      "result": "The run is listed in Statutory Reports with its report, and the Executive Dashboard shows its reporting position. “Every check reconciled exactly.” appears when nothing failed.",
+      "troubleshooting": [
+        {
+          "problem": "“Runs are prepared by a preparer”.",
+          "fix": "Your role cannot run valuations; ask a preparer."
+        },
+        {
+          "problem": "“The framework check refused this run”.",
+          "fix": "The financial year falls before the revised GRAP 104, or the entity is a national or provincial department (Modified Cash Standard). Correct the entity type or year, or declare early adoption if the entity adopted early."
+        },
+        {
+          "problem": "“The run reported an error”.",
+          "fix": "Read the message and the Engine log; a category not defined by the segment schedule, for example, is refused rather than guessed."
+        },
+        {
+          "problem": "Validation shows Failed checks.",
+          "fix": "Do not issue the report until the failures are resolved; open each check from the Executive Dashboard's validation banner."
+        },
+        {
+          "problem": "No PDF was produced.",
+          "fix": "The deployment has no PDF backend; the HTML report is print-ready."
+        },
+        {
+          "problem": "“The demonstration valuation has not been run on this deployment”.",
+          "fix": "Run it from Pipeline Control as above."
+        },
+        {
+          "problem": "The demonstration is not in the instance list.",
+          "fix": "A licensed client deployment lists its own books, not the demonstration."
+        },
+        {
+          "problem": "Policy Alignment says “No entity policy supplied”.",
+          "fix": "Expected: the demonstration ships no accounting policy of its own."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "docs/GRAP-2026.md",
+        "src/components/InstanceChrome.tsx",
+        "src/modules/DataIngestion.tsx",
+        "src/modules/PipelineControl.tsx"
+      ]
+    },
+    {
+      "id": "read-the-dashboard",
+      "title": "Read the reporting position and drill into a figure",
+      "goal": "You understand the total ECL, how it splits by category and counterparty, the movement for the year, and can trace any total to its detail.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [
+        "A completed run for the instance."
+      ],
+      "steps": [
+        "Open “Executive Dashboard”. Use “Refresh” or a ?run= link to choose the run.",
+        "Read the validation banner first: if the book does not reconcile, do not issue the report. Click the banner to open every check, filtered by status and family.",
+        "Read “ECL exposure by debtor category” and click a category to open its provision-matrix row, roll rates, terminal rate, exposure and screen.",
+        "Click a receivables tile to open every category × bucket with balance, rate and ECL.",
+        "Read “Cash and cash equivalents” (PD × LGD × EAD, general approach) and click it for each counterparty's PD, LGD, EAD and ECL.",
+        "Read “Movement for the year” (the Appendix B roll-forward: Opening (restated), Closing allowance, Movement) and click it for the proposed journal entries.",
+        "Read “Forward-looking screen”, “Data quality”, “Other financial assets”, “Coverage ratios” and “Adequacy & charge analysis”; each summary opens its detail.",
+        "Use the browser's back and forward buttons to walk your own path through the details."
+      ],
+      "result": "Each detail page shows the figures that add up to the dashboard total you clicked.",
+      "troubleshooting": [
+        {
+          "problem": "“No cash schedule supplied” or “No opening allowance supplied”.",
+          "fix": "The run had no cash or assumptions schedule; upload one and run again."
+        },
+        {
+          "problem": "A detail says the book does not carry what it would show.",
+          "fix": "The run predates what the engine now records; re-run the valuation if you need that detail."
+        }
+      ],
+      "sources": [
+        "src/modules/ExecutiveDashboard.tsx",
+        "src/modules/DashboardDetails.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "review-screen-and-policy",
+      "title": "Review the forward-looking screen and policy alignment",
+      "goal": "You can explain why a forward-looking overlay was or was not applied, and where the entity's accounting policy and the valuation differ.",
+      "role": "Any signed-in user",
+      "level": "Advanced",
+      "before": [
+        "A completed run."
+      ],
+      "steps": [
+        "Open “Actuarial EDA” and the “Macro correlation matrix” tab to read the Pearson correlation of each category's annual default rate against each macro factor at lag 0 and lag 1.",
+        "Open the “Screening gates” tab. “Acceptance gates” explains the four conjunctive gates: A significance, B economic sign, C collinearity, D leave-one-out R². A candidate must clear every gate.",
+        "Compare “Table B2 — best candidate per category” with “This run's screen”, and click a category to see every candidate tested and the gates it failed.",
+        "Open the “Transition analysis” tab for “Cumulative provision rates” and the “Discounting assessment” of non-interest-bearing segments.",
+        "Open “Policy Alignment”. Check whether the run used the decided basis or is a sensitivity run.",
+        "Read “Both bases over the same exposures” to compare Migration and TVM per category.",
+        "Read the “Divergence register”; a banner reports any divergence that still requires an actuarial decision.",
+        "Read “Concentration of credit risk”, “Maximum exposure to credit risk”, “Other financial assets” and “Accounts in default on qualitative grounds”."
+      ],
+      "result": "You can state the gate each candidate failed and each policy divergence with what the engine did about it.",
+      "troubleshooting": [
+        {
+          "problem": "“No default-rate series in the extract”.",
+          "fix": "The macro file has no default_rate_<CATEGORY> columns, so no screen ran; add them and run again."
+        },
+        {
+          "problem": "“No entity policy supplied”.",
+          "fix": "No accounting policy register was supplied for this entity, so no divergence can be listed."
+        }
+      ],
+      "sources": [
+        "src/modules/ActuarialEDA.tsx",
+        "src/modules/PolicyAlignment.tsx",
+        "docs/POLICY-ALIGNMENT.md",
+        "README.md"
+      ]
+    },
+    {
+      "id": "download-the-report",
+      "title": "Read and download a statutory report",
+      "goal": "You have the GRAP 104 report for a run as HTML or PDF.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [
+        "A completed run."
+      ],
+      "steps": [
+        "Open “Statutory Reports”. The “Report” tab is selected.",
+        "In “Run history” pick the run; each row shows the Mode, Receivables ECL, Cash ECL, Validation and which artefacts (HTML, PDF) exist.",
+        "Check the status line above the tabs: the run, its reporting date, the template version and whether it is “issued” or “not issued”.",
+        "Read the report inline under “Statutory report”, or press “Open” to view it in a new tab.",
+        "Press “HTML” or “PDF” to download it."
+      ],
+      "result": "The report file is downloaded with the entity's short name and GRAP104 in its name.",
+      "troubleshooting": [
+        {
+          "problem": "“No reports yet”.",
+          "fix": "Run the pipeline from Pipeline Control and it will be listed here."
+        },
+        {
+          "problem": "“No PDF for this run”.",
+          "fix": "Re-run the pipeline with “Render PDF” ticked on a deployment with a PDF backend, or print the HTML."
+        },
+        {
+          "problem": "An “Evaluation mode” banner on the report.",
+          "fix": "Reports generated without a licence are for evaluation only and must not be issued."
+        }
+      ],
+      "sources": [
+        "src/modules/StatutoryReports.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "issue-a-report",
+      "title": "Review and issue a report",
+      "goal": "A reviewer who did not prepare the run has issued the current rendition, and the audit trail records it.",
+      "role": "Reviewer / approver",
+      "level": "Intermediate",
+      "before": [
+        "A run prepared through the portal by someone else, whose validation reconciles."
+      ],
+      "steps": [
+        "Open “Statutory Reports” and choose the run.",
+        "Open the “Review & issue” tab and read “Preparation” to see who ran it.",
+        "In “Issue”, press “Issue rendition <n>”.",
+        "Read the confirmation: the rendition, template and SHA-256. The record cannot be withdrawn; a later rendition is issued separately.",
+        "Optionally add a “Note (optional)”, then press “Issue the report” (or “Cancel”)."
+      ],
+      "result": "The card shows “Issued” and who issued which rendition and when, with the issued report's SHA-256. Issuing records the release; it signs and sends nothing.",
+      "troubleshooting": [
+        {
+          "problem": "No issue button for you.",
+          "fix": "Only reviewers issue, and never a run they prepared — even if they have since changed role."
+        },
+        {
+          "problem": "“The preparer is not recorded”.",
+          "fix": "The run was made outside the portal, so segregation cannot be shown and it cannot be issued. Re-run it in Pipeline Control."
+        },
+        {
+          "problem": "“The report has since been re-rendered … that rendition is not issued.”",
+          "fix": "A template upgrade made a new rendition; issue it separately if it is to be released."
+        }
+      ],
+      "sources": [
+        "src/modules/reports/IssuePanel.tsx",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "upgrade-a-template",
+      "title": "Preview, regression-test and accept a report template upgrade",
+      "goal": "A run's report is re-rendered under a newer template version only after a passing regression and a reviewer's acceptance.",
+      "role": "Preview: Preparer or Reviewer. Regression: Reviewer or Administrator. Accept: Reviewer (never for their own run).",
+      "level": "Advanced",
+      "before": [
+        "A run rendered under a versioned template, with a later version available."
+      ],
+      "steps": [
+        "Open “Statutory Reports” and the “Template” tab.",
+        "Read “Pinned template”: the template, version, rendition, when it was rendered, the engine and the template file set SHA-256. Use “View” on any rendition to open it.",
+        "Under “Available upgrades”, find the later version and its change notes.",
+        "Press “Preview the upgrade”. Open the preview with “Open the preview” and read what changes: Sections, Disclosures, Figures and Customisations.",
+        "Press “Run the reference-case regression” for that version (reviewer or administrator).",
+        "Under “Accept the upgrade”, once the regression has passed, press “Accept <version>”."
+      ],
+      "result": "The report is re-rendered as a new rendition under the new version; earlier renditions are kept and the new one is issued separately.",
+      "troubleshooting": [
+        {
+          "problem": "“Run the reference-case regression … first”.",
+          "fix": "An upgrade is accepted only after its regression passes on this engine."
+        },
+        {
+          "problem": "A reason is shown instead of the accept button.",
+          "fix": "You prepared this run or your role cannot accept; a different reviewer must."
+        },
+        {
+          "problem": "“This run predates template versioning”.",
+          "fix": "Older runs keep the version they were rendered with and cannot be upgraded."
+        },
+        {
+          "problem": "“The report is on the newest version of its template”.",
+          "fix": "Nothing to upgrade."
+        }
+      ],
+      "sources": [
+        "src/modules/reports/TemplatePanel.tsx",
+        "docs/security/PERMISSION-MATRIX.md",
+        "docs/GRAP-2026.md"
+      ]
+    },
+    {
+      "id": "disclosures-and-mscoa",
+      "title": "Check disclosure coverage and the mSCOA mapping",
+      "goal": "You know which revised GRAP 104 disclosures the run produced, and the journal lines carry the deployment's mSCOA segments.",
+      "role": "Any signed-in user to read; Administrator to supply a mapping",
+      "level": "Advanced",
+      "before": [
+        "A completed run with a reporting framework recorded."
+      ],
+      "steps": [
+        "Open “Statutory Reports” and the “Disclosures” tab.",
+        "Read “Reporting framework”: the edition, entity type, financial year and whether the revised Standard applies, is early-adopted or was refused.",
+        "Read “Disclosure coverage”: for each impairment item, whether it was produced, partly produced or not supplied, where it appears and what was missing.",
+        "Open the “mSCOA” tab. The mapping table shows each journal line's segments; values not yet confirmed are marked “to be confirmed”.",
+        "To supply this deployment's own mapping (administrators), press “Supply this deployment’s mapping” and choose the JSON file.",
+        "Read “This run's journal lines” with their mSCOA segments, debit and credit."
+      ],
+      "result": "The banner reports how many segment values are confirmed and how many are to be confirmed; runs from then on use the saved mapping.",
+      "troubleshooting": [
+        {
+          "problem": "“The mapping does not validate”.",
+          "fix": "Correct the JSON file against the shipped mapping's shape and supply it again."
+        },
+        {
+          "problem": "“mSCOA does not apply to this entity”.",
+          "fix": "Expected for entities that are not municipalities."
+        },
+        {
+          "problem": "Every segment says “to be confirmed”.",
+          "fix": "The shipped mapping supplies no codes; confirm them against the mSCOA 7.1 chart and supply your own mapping."
+        }
+      ],
+      "sources": [
+        "src/modules/reports/DisclosuresPanel.tsx",
+        "src/modules/reports/MscoaPanel.tsx",
+        "docs/GRAP-2026.md"
+      ]
+    },
+    {
+      "id": "manage-access",
+      "title": "Issue accounts, change roles and set the MFA policy",
+      "goal": "Each person has their own account with the right role, and the roles that must use MFA are set.",
+      "role": "Administrator",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open “Controls” and the “Access” tab.",
+        "Under “Issue an account”, enter a Username (lower case; letters, digits, . - _), a Name and a Role; the hint describes what the role may do. Press “Issue account”.",
+        "Copy the temporary password from the “Issued: <username>” card and give it to the user by a separate channel. It is shown only now. Press “Done”.",
+        "In “Accounts and roles”, change a user's Role from the selector, or use “Reset password”, “Reset MFA” and “Disable” / “Enable”. A changed role or status ends that user's sessions at once.",
+        "Under “MFA policy”, tick the roles whose accounts must enrol an authenticator and press “Save the policy”."
+      ],
+      "result": "The banner confirms each change, and the audit trail records it.",
+      "troubleshooting": [
+        {
+          "problem": "You cannot change your own role, status, password or MFA.",
+          "fix": "By design another administrator must do it."
+        },
+        {
+          "problem": "“Access details are locked in this environment”.",
+          "fix": "On a locked UAT environment issued credentials are final and nobody can enrol, so the MFA policy is not enforced there."
+        }
+      ],
+      "sources": [
+        "src/modules/controls/AccessPage.tsx",
+        "src/lib/permissions.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "audit-trail",
+      "title": "Search, verify and export the audit trail",
+      "goal": "You have checked that the trail is intact and extracted the events you need.",
+      "role": "Reviewer, Viewer / auditor or Administrator (export: Viewer / auditor or Administrator)",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open “Controls” and the “Audit trail” tab.",
+        "Under “Integrity”, press “Verify the chain”. A green banner gives the number of events and the head hash; a red one names the event where the chain is broken.",
+        "Under “Events”, filter by User, Action (for example “Valuation runs”, “Report issue”, “Access changes and refusals”), From and To, then press “Apply”.",
+        "Page through with “Newer” and “Older”.",
+        "Press “Export CSV” or “Export JSON” to download the trail."
+      ],
+      "result": "The events are listed newest first, each with its actor, role, target and hash.",
+      "troubleshooting": [
+        {
+          "problem": "“No events match”.",
+          "fix": "Change the filter, or clear it."
+        },
+        {
+          "problem": "“The chain is broken at event …”.",
+          "fix": "An event was altered, removed or reordered. Record an incident and inform your administrator."
+        }
+      ],
+      "sources": [
+        "src/modules/controls/AuditPage.tsx",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "data-exports-and-exit",
+      "title": "Export the municipality's data, deliver quarterly packages and run an exit",
+      "goal": "The municipality holds complete, verifiable exports of its instance, with deliveries recorded, and an exit at contract end is controlled.",
+      "role": "Administrator (Viewer / auditor reads the registers)",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Open “Controls” and the “Data” tab. Check “Protection and schedule” for encryption at rest, the monthly export, backups and failure e-mail; “Run due jobs now” runs any job that is due.",
+        "Read and “Acknowledge” any open alert for a failed scheduled job.",
+        "Under “Exports”, choose the Instance and Kind (“On demand” or “Monthly, for a month” with its Month) and press “Export now”. Each export carries a SHA-256; use “Download” to fetch it.",
+        "Under “Quarterly delivery”, choose the Instance and Quarter and press “Build the package”. Record the hand-over with “Municipal recipient”, “Channel”, “Delivered on” and “Acknowledged by (optional)”, then press “Record delivery”.",
+        "For an exit at contract end, go to “Exit package”, choose the Instance, “Termination date” and “Reason”, and press “Request”.",
+        "A second administrator presses “Approve and build the package”. Download the “Exit package” and the “Certificate template”, and record its delivery.",
+        "Record each destruction step as people carry it out, with “Done on” (and the “Municipal official” for acceptance), then press “Record”. The product deletes nothing itself.",
+        "Under “Retention”, set periods only if your policy requires them and press “Save retention”; empty keeps everything.",
+        "Read “Where the data is” for every store the product keeps data in and how it leaves."
+      ],
+      "result": "Each export, delivery and exit step is listed with its status and is on the audit trail.",
+      "troubleshooting": [
+        {
+          "problem": "“GAECM_DATA_KEY not set”.",
+          "fix": "Stored exports cannot be encrypted at rest; your operator must provide the data key."
+        },
+        {
+          "problem": "“A second administrator approves this request; you asked for it.”",
+          "fix": "Ask another administrator to approve."
+        },
+        {
+          "problem": "“Read only”.",
+          "fix": "Your role reads these registers; an administrator acts on them."
+        }
+      ],
+      "sources": [
+        "src/modules/controls/DataPage.tsx",
+        "server/data-controls.ts",
+        "docs/operations/BACKUP-RECOVERY.md",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "backups-and-restores",
+      "title": "Back up, drill and restore",
+      "goal": "Verified backups exist, restore drills prove they work, and any real restore is approved by two administrators.",
+      "role": "Administrator (Viewer / auditor reads the register)",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Open “Controls” and the “Backups” tab.",
+        "Press “Back up now”. Each backup is read back and checked against its manifest when made.",
+        "On a backup, press “Verify” to check it again, or “Restore drill” to restore it into a scratch directory, check every file and re-render every report with its pinned template; nothing in service is touched.",
+        "Read the result under “Restore drills”.",
+        "To restore for real, press “Ask to restore”, fill in “Why restore?” and press “Request”. Runs, uploads and configuration in service are moved aside, not deleted; accounts and the audit trail are never replaced.",
+        "A second administrator opens “Restore requests” and presses “Approve and restore” or “Reject”.",
+        "A backup past its retention period can be deleted by typing its id and pressing “Delete”."
+      ],
+      "result": "The backup register shows each backup's status, encryption and SHA-256, and each drill and restore request.",
+      "troubleshooting": [
+        {
+          "problem": "A backup shows “failed” or “not verified”.",
+          "fix": "Read its error, then run “Verify” or take a new backup."
+        },
+        {
+          "problem": "Restore requests awaiting a second administrator.",
+          "fix": "The one who asks cannot approve; another administrator must."
+        }
+      ],
+      "sources": [
+        "src/modules/controls/BackupsPage.tsx",
+        "docs/operations/BACKUP-RECOVERY.md",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "record-an-incident",
+      "title": "Record a security incident and notify the municipality",
+      "goal": "An incident is on the register, the municipality has been notified, and the Regulator hand-off is recorded.",
+      "role": "Administrator (Viewer / auditor reads the register)",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open “Controls” and the “Incidents” tab.",
+        "Under “Record an incident”, fill in Title, “When the grounds arose” and “What happened”. Tick “Personal information may have been accessed or acquired” if it may have been; this starts the notice clock.",
+        "Optionally add categories of personal information, the approximate number of data subjects and the containment so far, then press “Record the incident”.",
+        "When the notice is given, fill in “Record the notice to the municipality”: Notified at, Municipal recipient, Channel and what the notice gave the municipality, then press “Record the notice”.",
+        "Use “Add an update” as details follow.",
+        "Record the municipality's Regulator hand-off with “Municipal contact”, “Regulator reference (optional)” and press “Record hand-off”.",
+        "When done, write a “Closing note” and press “Close the incident”."
+      ],
+      "result": "The “Incident register” lists the incident with its clock, notice, hand-off and closure.",
+      "troubleshooting": [
+        {
+          "problem": "“Notice due now”.",
+          "fix": "Treat it as immediate: notify the municipality and record the notice."
+        }
+      ],
+      "sources": [
+        "src/modules/controls/IncidentsPage.tsx",
+        "docs/compliance/POPIA.md",
+        "README.md"
+      ]
+    },
+    {
+      "id": "command-line",
+      "title": "Run the engine from the command line",
+      "goal": "An operator has run, validated or inspected a valuation without the portal, producing the same artefacts the portal reads.",
+      "role": "Operator with access to the installation",
+      "level": "Advanced",
+      "before": [
+        "Python 3.11+ with the engine's requirements installed in the installation's virtual environment."
+      ],
+      "steps": [
+        "From the engine directory run “python -m gaecm run” for the full pipeline, validation and report. It writes runs/<id>/ with book.json, validation.json, the intermediate CSVs and the report as HTML and PDF.",
+        "Add --mode reference|compute and --basis migration|tvm. For compute, name the valuation with --client, --entity-short and --reporting-date, and give the inputs with --debtors, --macro, --segments, --cash and --assumptions.",
+        "Use --no-pdf to skip the PDF, --with-validation-appendix for Appendix C and --with-policy-appendix for Appendix D.",
+        "Run “python -m gaecm validate” for the validation checks (add --json for a machine-readable result).",
+        "Run “python -m gaecm screen”, “compare”, “policy”, “report” or “info” for the macro screen, both bases side by side, the policy divergence register, a report-only render, or engine metadata and schedule formats.",
+        "Run “python -m gaecm frameworks”, “templates list”, “disclosures” or “mscoa validate” for the GRAP 2026 checks.",
+        "Note that the portal's /api routes are the web portal's own and require a signed-in session; there is no separate public API."
+      ],
+      "result": "The run directory holds the book, validation and report; pass --instance to list the run under a portal instance.",
+      "troubleshooting": [
+        {
+          "problem": "The signature block prints “[signing actuary not set]” and validate says the report is not ready to issue.",
+          "fix": "The signing actuary is set per deployment by the operator, not shipped with the software."
+        },
+        {
+          "problem": "A compute run refuses a category.",
+          "fix": "Supply a segments schedule that defines it."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "server.ts",
+        "server/routes.ts"
+      ]
+    }
+  ]
+}

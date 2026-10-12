@@ -1,0 +1,752 @@
+{
+  "id": "ancops",
+  "name": "ANC CC Ops",
+  "fullName": "Campaign Communications Command Centre",
+  "category": "Campaign communications",
+  "summary": "One web application for running a campaign's communications: the daily command and message bank, the two-hour rapid rebuttal, the WeVote chatbot and volunteer distribution, morning intelligence, and optional desks for paid ads, investigations, wards, manifestos and DCIP. It is used by the campaign manager, the war room, the rapid-response and fact-check team, spokespersons, desk operators, provincial and regional DCIPs and the administrator.",
+  "audience": [
+    "Campaign Manager",
+    "War Room Coordinator",
+    "National Communications Director",
+    "Rapid-Response Lead",
+    "Fact-Check Officer",
+    "Spokesperson",
+    "WhatsApp Desk Operator",
+    "Provincial DCIP",
+    "Regional DCIP",
+    "Investigator",
+    "Administrator"
+  ],
+  "surfaces": [
+    "Web console (desktop and phone)",
+    "Public web chatbot",
+    "Standalone DCIP dashboard"
+  ],
+  "gettingAccess": "Accounts are issued by the command centre administrator under Administration → Accounts; there is no self-registration. Each account carries one or more roles and, for a Provincial or Regional DCIP, an area. Sign in with the email address on your account and your password, or with a passkey you have enrolled. On UAT an access gate comes before the sign-in, and its key is handed over by the operator. The WeVote chatbot and its advert page are public and need no account.",
+  "sources": [
+    "README.md",
+    "content/guide/index.html",
+    "content/index.html",
+    "content/app-core.js",
+    "content/ops-desk.js",
+    "content/rapid-desk.js",
+    "content/whatsapp-desk.js",
+    "content/telemetry-desk.js",
+    "content/fbads-desk.js",
+    "content/osint-desk.js",
+    "content/wards-desk.js",
+    "content/manifestos-desk.js",
+    "content/dcip-desk.js",
+    "content/dcip/index.html",
+    "content/admin-desk.js",
+    "content/chat/index.html",
+    "content/assets/index.html",
+    "public/login.html",
+    "server.ts",
+    "src/features.ts",
+    "src/auth/accounts.ts",
+    "src/rebuttal/stages.ts"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-and-manage-your-account",
+      "title": "Sign in, add a passkey and sign out",
+      "goal": "You are signed in to the command centre, can sign in with a passkey next time, and know how to change your password and end your session.",
+      "role": "Any user with an issued account",
+      "level": "Basic",
+      "before": [
+        "The administrator has issued you an account (there is no self-registration).",
+        "You have the email address on the account and the initial password, handed to you by the administrator.",
+        "On UAT, the operator has given you the key for the access gate that sits in front of the sign-in page."
+      ],
+      "steps": [
+        "Open the command centre address in a browser on your desktop, tablet or phone. If an access gate challenge appears first (UAT), enter the key you were given.",
+        "On the \"Sign in\" page, type your \"Email address\" and \"Password\" and click \"Sign in\". Use the email address: usernames are refused.",
+        "Check the chip beside the brand in the header: it shows your name, the roles you hold and, for a Provincial or Regional DCIP, your area. On a phone, open the ☰ menu to see it.",
+        "If a message asks you to change your password, open the ☰ menu, choose \"Change password\" under Account, and answer the \"Current password:\" and \"New password:\" prompts.",
+        "To enrol a passkey, open the ☰ menu and choose \"Passkeys / Biometrics\". Name the passkey (for example the device) and follow your browser's Touch ID, Windows Hello or security-key prompt until \"Passkey enrolled!\" appears.",
+        "Next time, click \"🔐 Sign in with a Passkey\" on the sign-in page instead of typing a password.",
+        "Move between desks with the tab buttons under the header or the Desks section of the ☰ menu. The desk you were on is remembered across a page refresh.",
+        "When you finish, open the ☰ menu and choose \"Sign out\"."
+      ],
+      "result": "The desk tabs load with your name and roles in the header. Sessions end at sign-out, and in any case after twelve hours.",
+      "troubleshooting": [
+        {
+          "problem": "\"Please sign in with your verified email address… Usernames are not accepted.\"",
+          "fix": "Type the full email address on your account, not your username."
+        },
+        {
+          "problem": "\"That email and password were not accepted.\"",
+          "fix": "Check the address and password. If you have lost the password, ask the administrator (there is no reset on the sign-in page)."
+        },
+        {
+          "problem": "\"Too many failed attempts. Try again in 15 minutes.\"",
+          "fix": "Ten failures from one address lock that address for fifteen minutes. Wait, then try again with the right details."
+        },
+        {
+          "problem": "\"Access details are issued and cannot be changed in this environment.\"",
+          "fix": "The access lock is on (UAT). The issued password is final; keep using it."
+        },
+        {
+          "problem": "The \"Sign in with a Passkey\" button is missing.",
+          "fix": "This browser does not support passkeys. Sign in with email and password."
+        }
+      ],
+      "sources": [
+        "public/login.html",
+        "content/app-core.js",
+        "content/index.html",
+        "src/auth/routes.ts",
+        "src/auth/limiter.ts",
+        "src/auth/session.ts"
+      ]
+    },
+    {
+      "id": "sign-off-through-the-gate",
+      "title": "Sign off an action through the gate",
+      "goal": "An action that needs authority (logging a situation, approving a draft or line, issuing an order, signing or dispatching a deliverable, sending a broadcast) is recorded against you, in a role you hold, and carried out.",
+      "role": "Any user who holds a sign-off role (the admin role holds none)",
+      "level": "Basic",
+      "before": [
+        "Your account holds at least one sign-off role, such as Campaign Manager, Rapid-Response Lead or National Communications Director.",
+        "You have read what you are signing."
+      ],
+      "steps": [
+        "Click the action button on the desk (for example \"✅ Approve\", \"✍️ Sign off\" or \"⚡ Log it and start the clock\"). The \"Executive Confirmation & Human Sign-Off\" window opens.",
+        "Read the \"ACTION TO BE SIGNED OFF\" summary. It names the action, quotes the content and says who you are signing as.",
+        "Tick all three certifications: \"Truth Matrix & Factual Grounding\", \"IEC Electoral Code Adherence\" and \"POPIA Data Privacy\". None is pre-ticked.",
+        "In \"Signing as\", choose the role you are acting in. The list offers only roles your account holds.",
+        "Click \"✅ Authorise & Execute Action\". To go back without signing, click \"Cancel / Review Draft\"."
+      ],
+      "result": "A toast reads \"Signed off as <role>\" and the desk carries out the action. The sign-off is used once, for that action only, and is written to the record.",
+      "troubleshooting": [
+        {
+          "problem": "\"Confirm all three certifications before signing off.\"",
+          "fix": "Tick all three boxes. If you cannot honestly certify one, do not sign; return to the draft."
+        },
+        {
+          "problem": "\"Your account holds no sign-off role. Ask the administrator.\"",
+          "fix": "Your account has only the admin role or no sign-off role. Ask the administrator to add the role you need."
+        },
+        {
+          "problem": "The action is refused after signing.",
+          "fix": "The approval ladder limits who may sign each class of content, and DCIP signers are limited to their own area. Ask someone who holds the required role to sign."
+        }
+      ],
+      "sources": [
+        "content/index.html",
+        "content/app-core.js",
+        "content/guide/index.html",
+        "src/signoff.ts"
+      ]
+    },
+    {
+      "id": "draft-and-issue-the-weekly-campaign-order",
+      "title": "Draft and issue the Weekly Campaign Order",
+      "goal": "This week's order, with its thirteen elements, is issued, and every desk's drafting works within it.",
+      "role": "Drafted by the National Communications Director, War Room Coordinator, Campaign Manager or Elections Committee Operations Lead; issued by the National Communications Director or the SG / TG Authorised Representative",
+      "level": "Intermediate",
+      "before": [
+        "You hold one of the drafting roles, or one of the issuing roles to issue."
+      ],
+      "steps": [
+        "Open the \"📋 Daily Ops & Review Desk\". In the \"🎯 Campaign command\" panel, click the \"Weekly order\" tab.",
+        "Use ‹ and › beside \"Week of …\" to choose the week; \"This week\" returns to the current one.",
+        "Click \"+ Draft this week's order\" (or \"+ Draft a replacement order\" if one is already issued). If a draft exists, click \"✏️ Edit\".",
+        "Fill in the elements, each with its prompt: Political objective, Priority audience (tick the audiences), Manifesto proposition, Key argument, Agitation issue, Evidence / proof, Opposition contrast, Media plan, Digital plan, Ground plan, Creative, Localisation and Measurement.",
+        "Click \"💾 Save draft\". Repeat until the draft is ready; \"Close\" leaves the form without saving.",
+        "An issuer clicks \"✍️ Issue this order\" and signs it off through the gate."
+      ],
+      "result": "The toast reads \"Order issued. Every desk now reads it.\" The \"Issued order\" card shows who issued it and when; an earlier issued order for the week is superseded.",
+      "troubleshooting": [
+        {
+          "problem": "There is no \"✍️ Issue this order\" button, only a note.",
+          "fix": "Only the National Communications Director or the SG / TG Authorised Representative can issue. Ask one of them."
+        },
+        {
+          "problem": "You need to change an issued order.",
+          "fix": "An issued order is not edited. Draft a replacement order and issue it."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "run-the-day-decide-assess-deploy",
+      "title": "Run the day: schedule, 08:00 decision, night assessment and daily pack",
+      "goal": "The day is planned, decided at 08:00 and assessed at night; the morning products are queued for review and the approved ones are printed as the daily pack.",
+      "role": "Schedule: Campaign Manager. Decision, assessment and products: War Room Coordinator or National Communications Director",
+      "level": "Intermediate",
+      "before": [
+        "Ideally a Weekly Campaign Order is issued for the week. Without one, the panel says the day runs within the general playbook."
+      ],
+      "steps": [
+        "Open the \"📋 Daily Ops & Review Desk\". In \"Schedule\", pick the day with ‹, › or the date box, click \"+ Add to schedule\", fill in \"Starts\", \"Ends\", \"What\", \"Owner (role)\" and \"Notes\", and click \"+ Add to the day\".",
+        "In \"🎯 Campaign command\", stay on the \"Today\" tab. Under \"08:00 · Decide\", click \"✏️ Record 08:00 decision\" (or \"✏️ Record\" / \"✏️ Edit\").",
+        "Write \"Today's Counter Active proposition\". Under \"What must be rebutted\", click \"+ Add\" for each claim; \"⚡ Log\" beside a claim logs it as a rebuttal situation through the gate, which starts its two-hour clock.",
+        "Under \"What should be ignored, and why\", click \"+ Add\" and give the claim and the reason. Fill in \"What must be localised\" and \"Who carries the message\", then click \"💾 Save decision\".",
+        "Under \"Morning · Deploy\", click \"+ Draft products\", tick the products the morning needs, and click \"🤖 Draft selected products\". Each becomes an item in the review queue; \"Open\" takes you there.",
+        "Once products are approved, click \"🖨️ Daily pack\" for the printable page, or \"⬇ JSON\" for a file to distribute.",
+        "In the evening, under \"Night · Assess\", click \"✏️ Record night assessment\", answer \"What moved?\", \"What underperformed?\", \"What narrative is rising?\" and \"What must change tomorrow?\", and click \"💾 Save assessment\"."
+      ],
+      "result": "The day shows \"decided\" and \"assessed\" with who recorded each, the products are listed with their status, and the daily pack link appears once a product is approved.",
+      "troubleshooting": [
+        {
+          "problem": "There is no \"✏️ Record\" button.",
+          "fix": "Only the War Room Coordinator or the National Communications Director records the decision and assessment."
+        },
+        {
+          "problem": "\"Write what must be rebutted first.\"",
+          "fix": "Type the claim in the row before clicking \"⚡ Log\"."
+        },
+        {
+          "problem": "\"Decide the day first…\" appears under Morning · Deploy.",
+          "fix": "Save the 08:00 decision with a proposition; products are drafted from it."
+        },
+        {
+          "problem": "\"Tick at least one product.\"",
+          "fix": "Select one or more products before clicking \"🤖 Draft selected products\"."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "localise-the-order-and-write-issue-briefs",
+      "title": "Localise the week's order and write an issue brief",
+      "goal": "Your province or region has a signed five-part localisation of the week's order, and an approved issue brief that drafting starts from.",
+      "role": "Localisation: Provincial DCIP or Regional DCIP (within their area), or the national order roles. Briefs: national editors, Fact-Check Officer, Spokesperson or the area's DCIP",
+      "level": "Intermediate",
+      "before": [
+        "An order exists for the week (issued or draft).",
+        "For a DCIP, the administrator has set your account's area."
+      ],
+      "steps": [
+        "On the Daily Ops desk, in \"🎯 Campaign command\", open the \"Localisation\" tab.",
+        "Click \"+ Add <your area>'s entry\" (or \"+ Add an area's entry\"), choose the \"Area\", and fill in \"Local problem\", \"Local commitment\", \"Local messenger\", \"Local evidence\" and \"How the national line is adapted here\". Click \"💾 Save\".",
+        "Click \"✍️ Sign\" on the entry and sign it off through the gate.",
+        "To change a signed entry later, click \"✏️ Edit\" and save; the save returns it to draft, so sign it again.",
+        "Open the \"Issue briefs\" tab. Choose the issue and the area (\"National brief\" for the national one).",
+        "Click \"+ Write this brief\" (or \"✏️ Edit\"), answer the nine questions, add \"Evidence links (one per line)\" and click \"💾 Save brief\".",
+        "Click \"✍️ Approve\" and sign it off through the gate."
+      ],
+      "result": "The localisation shows \"signed\" with the signer's name. The brief shows \"approved\" (\"Brief approved; drafting starts from it.\"). A place without its own brief inherits the nearest approved one above it, then the national brief.",
+      "troubleshooting": [
+        {
+          "problem": "\"There is no order for this week to localise yet.\"",
+          "fix": "Ask a national editor to draft the Weekly Campaign Order first."
+        },
+        {
+          "problem": "Your sign-off for another area is refused.",
+          "fix": "A DCIP signs only within their own area. Ask the DCIP for that area or a national role."
+        },
+        {
+          "problem": "Editing an approved brief.",
+          "fix": "Saving returns it to draft (\"returned to draft\"); approve it again through the gate."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "submit-and-decide-a-draft-in-the-review-queue",
+      "title": "Submit a draft and decide it in the review queue",
+      "goal": "A statement, set of social posts, WhatsApp broadcast or speaking notes is approved or rejected through the gate, with the decision on record.",
+      "role": "Any signed-in user submits; a role on the item's approval class decides",
+      "level": "Basic",
+      "before": [
+        "For a model draft, drafting must be configured on this environment; otherwise you write the text yourself."
+      ],
+      "steps": [
+        "On the Daily Ops desk, open \"✍️ Review queue\" and click \"+ Submit a draft\".",
+        "Give it a \"Title\", a \"Kind\" (Statement, Social posts, WhatsApp broadcast, Speaking notes or Other) and a \"Language\". Set the issue, approval class, area, audiences and argument step where they apply.",
+        "Either type in \"The text (write it yourself)\", or write \"Or a brief for the model to draft from\". Click \"Submit for review\".",
+        "Use the filter chips (pending, approved, rejected, all) to find the item. Read and edit the text, then click \"💾 Save text\". \"🤖 Draft from the brief\" asks for a fresh draft.",
+        "To decide, click \"✅ Approve\" or \"✕ Reject\" (a reject asks for a reason, recorded on the item), then sign off through the gate. \"Withdraw\" takes an item out without a decision."
+      ],
+      "result": "The item shows \"approved\" or \"rejected\" with who decided it and when, and the toast reads \"Approved and recorded.\" or \"Rejected and recorded.\"",
+      "troubleshooting": [
+        {
+          "problem": "The brief box is disabled and says drafting is not configured.",
+          "fix": "This environment has no drafting model connected. Write the text yourself."
+        },
+        {
+          "problem": "\"There is no text to approve.\"",
+          "fix": "Write or draft the text and save it before approving."
+        },
+        {
+          "problem": "Your sign-off is refused.",
+          "fix": "The approval ladder limits who signs each class (routine, localised, rapid response, major campaign creative, PA/PEB and paid national). Ask a holder of the right role."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "keep-the-message-bank-and-press-list",
+      "title": "Add and approve message-bank lines and keep the press list",
+      "goal": "The approved lines every desk speaks from are in the bank, and the press wire has an up-to-date list of contacts.",
+      "role": "Any signed-in user writes a line; a role on its approval class approves it",
+      "level": "Basic",
+      "steps": [
+        "On the Daily Ops desk, open \"📚 Message bank\". Search with \"Search lines, tags, keywords\" or filter by issue and audience.",
+        "Click \"+ New line\". Fill in \"Title\", \"The line\" (the exact approved wording), \"Language\", \"Tags (comma-separated)\" and \"Keywords the WhatsApp desk matches on (comma-separated)\", plus issue, class, area, audiences and argument step. Click \"Save as draft\".",
+        "Click \"✅ Approve\" on the line and sign it off through the gate.",
+        "To take a line out of use, click \"Retire\"; \"Back to draft\" restores a retired line. Retired lines are kept, not deleted.",
+        "Open \"📰 Press list\" and click \"+ Add contact\". Enter \"Name\", \"Outlet\" and \"Email\" and click \"Add\". Use the button on a contact's row to mark it active or inactive."
+      ],
+      "result": "An approved line shows \"approved\" with the approver's name and is used by drafting. Active press contacts receive the holding statement and spokesperson pack when those are dispatched on the press wire.",
+      "troubleshooting": [
+        {
+          "problem": "A line you edited is back in draft.",
+          "fix": "Editing an approved line returns it to draft, because the approved wording changed. Approve it again."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "log-interventions-in-the-content-factory",
+      "title": "Log an intervention and track its products in the content factory",
+      "goal": "A rally, door-to-door, meeting or other intervention is logged with a capture plan, and its twelve products are tracked with assets uploaded against them.",
+      "role": "Any signed-in user on the Daily Ops desk",
+      "level": "Intermediate",
+      "steps": [
+        "On the Daily Ops desk, in \"🎯 Campaign command\", open the \"Content factory\" tab.",
+        "Click \"+ Log an intervention\". Fill in \"Title\", \"Kind\" (Rally, Door-to-door, Community meeting, Service intervention, Official deployment, Interview or Other), \"Day\", \"Area\", \"Messenger\" and \"Capture plan\". Click \"Log it\".",
+        "Click \"Open\" on the intervention to see its products table (Product, State, Note, Assets).",
+        "For each product, set the state and a note, then click \"💾 Save states and notes\".",
+        "Upload photos, video, audio or documents against a product in its Assets column. Text products are drafted and approved in the review queue.",
+        "When the material has been collected, click \"Mark harvested\"."
+      ],
+      "result": "The intervention line shows how many of the 12 products are under way and how many assets are attached; harvested interventions show when they were harvested.",
+      "troubleshooting": [
+        {
+          "problem": "An older intervention is missing.",
+          "fix": "The list shows the last 60 days from the day selected on the desk."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "generate-a-counter-active-playbook",
+      "title": "Generate a Counter Active Playbook and dispatch its directives",
+      "goal": "A breaking story becomes a playbook of four attack lines, cross-desk directives, a spokesperson pack and a posting instruction, downloadable as PDF or Word.",
+      "role": "Any signed-in user on the Daily Ops desk",
+      "level": "Advanced",
+      "steps": [
+        "On the Daily Ops desk, in \"🎯 Campaign command\", open the \"⚡ Counter Active Playbook\" tab.",
+        "Fill in at least one of \"Breaking Story URL\", \"Focus Topic / Political Target\" or \"Or Paste Raw Leak / Dossier Notes\". Add a \"Custom Title (Optional)\" if you want one.",
+        "Click \"⚡ Generate Counter Active Playbook & Action Directives\" and wait while it reads \"Synthesizing Playbook & Compiling PDF/DOCX…\".",
+        "Choose a playbook under \"Available Playbooks\" and read \"THE FOUR CORE ATTACK LINES\", \"CROSS-DESK ACTION DIRECTIVES\", \"BROADCAST SPOKESPERSON PACK\" and the \"SOCIAL ARMY POSTING INSTRUCTION\".",
+        "Download it with \"📥 Download PDF Report\" or \"📄 Download Word (.docx)\".",
+        "Send a directive to its desk with \"Dispatch\" in its row, or all of them with \"🚀 Dispatch All Directives\". Then check each receiving desk: a review-queue item and a draft posting instruction still need a person to edit and approve them through the gate."
+      ],
+      "result": "The toast confirms the playbook was compiled, and dispatching confirms with \"Dispatched to …\".",
+      "troubleshooting": [
+        {
+          "problem": "\"Please provide a URL, topic, or raw text.\"",
+          "fix": "Fill in at least one of the three inputs."
+        },
+        {
+          "problem": "\"Generation failed: …\"",
+          "fix": "The story could not be read or synthesised. Paste the text into the notes box and try again."
+        },
+        {
+          "problem": "\"Dispatch error: …\"",
+          "fix": "Dispatch that directive's work by hand on its desk, for example log the situation on the Rapid Rebuttal desk."
+        }
+      ],
+      "sources": [
+        "content/ops-desk.js",
+        "src/ops/playbook-engine.ts"
+      ]
+    },
+    {
+      "id": "log-a-situation-and-work-the-five-stages",
+      "title": "Log a rebuttal situation and work its five stages",
+      "goal": "A breaking claim is logged, the two-hour clock is running, and each stage deliverable is drafted, edited and signed off.",
+      "role": "Logging: a sign-off role (the Rapid-Response Lead usually). Stages: Fact-Check Officer (1), National Communications Director (2), Spokesperson (3), Rapid-Response Lead (4 and 5)",
+      "level": "Intermediate",
+      "steps": [
+        "Open \"⚡ Rapid Rebuttal (2-Hour SLA)\" and click \"+ Log a situation\".",
+        "Fill in \"Title\", \"The claim, as made\" (quote it), \"Where it was seen\", \"Link\", \"What is true (the facts the desk holds now)\", \"Severity\", and optionally \"Investigation\", \"Issue (Battle of Ideas)\" and \"Area\".",
+        "Click \"⚡ Log it and start the clock\" and sign off through the gate. The clock starts and the four rebuttal roles are notified.",
+        "On the situation, open \"Update the facts / attach material\" to correct \"What is true\" (\"💾 Save facts\") and drop screenshots, clips or documents; text is read out of PDFs and Word files.",
+        "Click a stage card: 1 Fact check (+15 min), 2 Holding statement (+30), 3 Spokesperson media pack (+60), 4 Digital & grassroots cascade (+90), 5 Visual rebuttal card (+118).",
+        "Click \"🤖 Draft from the facts\" for a first version (where drafting is configured), or write it. Read it, change it, and click \"💾 Save edit\".",
+        "Click \"✍️ Sign off\" and sign through the gate. Use \"Skip stage\" only for a stage that does not apply; \"↩ Un-skip\" restores it."
+      ],
+      "result": "The stage shows \"signed by <name>\" and the list shows how many of 5 stages are done. The clock counts down, turns to a warning in the last fifteen minutes and shows a minus sign when past due.",
+      "troubleshooting": [
+        {
+          "problem": "\"There is nothing to sign: write or draft the … first.\"",
+          "fix": "Put text in the stage and save it before signing."
+        },
+        {
+          "problem": "A model draft has bracketed gaps such as [DATE].",
+          "fix": "The facts did not contain that detail. Add it to \"What is true\" and redraft, or fill it in by hand."
+        },
+        {
+          "problem": "You need to change a signed stage.",
+          "fix": "Click \"↩ Unsign (to edit)\", edit, save, and sign again."
+        },
+        {
+          "problem": "\"Draft from the facts\" is disabled.",
+          "fix": "Drafting is unavailable on this environment. Write the stage yourself."
+        }
+      ],
+      "sources": [
+        "content/rapid-desk.js",
+        "src/rebuttal/stages.ts",
+        "src/rebuttal/routes.ts",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "dispatch-brief-and-close-a-situation",
+      "title": "Dispatch rebuttal stages, open the briefing pack and close the situation",
+      "goal": "Signed deliverables have gone out on their channels, the spokesperson has the briefing pack and contrast card, and the situation is closed with its record.",
+      "role": "A sign-off role allowed for the stage; usually the Rapid-Response Lead",
+      "level": "Intermediate",
+      "before": [
+        "The stage is signed off."
+      ],
+      "steps": [
+        "Select the signed stage. Under \"Dispatch:\", click a channel button. Only the stage's own channels appear: the holding statement goes to \"Press wire (email)\" and \"X (Twitter)\", the spokesperson pack to the press wire, and the cascade and card to X, \"Facebook Page\" and \"WhatsApp Business\". The fact check stays on the desk.",
+        "Sign the dispatch through the gate. The sign-off names the channel.",
+        "Read the dispatch line under the stage: sent (with the provider's id), refused (the channel has no settings), or failed (the provider's error).",
+        "Click \"📄 View Briefing Pack\" for the printable spokesperson dossier, \"🖼️ Contrast Card (SVG)\" for the 1080×1080 card, or \"⬇ Pack (.md)\" for the full record.",
+        "When the matter is over, click \"✅ Close situation\", enter the closing note, and sign through the gate. \"↩ Reopen\" reopens a closed situation.",
+        "Open \"Audit trail\" at the bottom to see every action on the situation."
+      ],
+      "result": "The toast reads \"Sent on <channel>\" for each send, and the situation shows \"closed\" with who closed it. The Markdown pack carries every stage, who signed it as what, and every dispatch.",
+      "troubleshooting": [
+        {
+          "problem": "A channel button reads \"(unavailable)\" and is disabled.",
+          "fix": "That channel is not configured on this environment. The administrator connects it; no screen change is needed afterwards."
+        },
+        {
+          "problem": "A dispatch is recorded as refused or failed.",
+          "fix": "Nothing was published on that channel. Read the reason on the dispatch line and ask the administrator, or use another channel the stage allows."
+        }
+      ],
+      "sources": [
+        "content/rapid-desk.js",
+        "src/rebuttal/stages.ts",
+        "src/rebuttal/routes.ts",
+        "src/channels/email.ts",
+        "src/channels/x.ts",
+        "src/channels/meta.ts"
+      ]
+    },
+    {
+      "id": "use-the-wevote-chatbot-desk",
+      "title": "Use the WeVote Chatbot desk: test answers, reply to citizens and broadcast",
+      "goal": "You can show citizens the public chatbot, test how it answers for a municipality, answer messages the bank could not, and send a broadcast only to opted-in contacts.",
+      "role": "WhatsApp Desk Operator; sending a broadcast needs a sign-off role",
+      "level": "Intermediate",
+      "before": [
+        "The test bot, waiting queue, conversations and broadcasts use the WhatsApp bot module. It is on by default, but a deployment can switch it off, and then these tabs answer \"not found\". Replying and broadcasting also need the official number connected."
+      ],
+      "steps": [
+        "Open \"💬 WeVote Chatbot\" (the \"WeVote Sovereign Chatbot Desk\").",
+        "Click \"🚀 Open Live Chatbot\" to open the public chatbot, or \"📢 View Campaign Advert\" for the advert page. Citizens need no sign-in; in the chatbot they choose a \"Local Area\", tap a topic such as \"🗺️ Find My Ward Candidate\" or \"🙋 Register to Volunteer\", or type a question.",
+        "To test answers, open \"🤖 Test Bot (RAG Simulator)\", choose a \"Simulated Citizen Municipality\", type a message and click \"Send Test 💬\". Open \"📚 Grounding Citations\" to see the manifesto excerpts behind the answer.",
+        "Open \"⏳ Waiting for a person\". Edit the suggested reply (use an approved line where one fits) and click \"Send reply\", or \"Open conversation\", or \"Dismiss (no reply)\".",
+        "In \"💬 Conversation\" (pick a contact on the left or use \"Search a number or name\"), type a reply and click \"Send\". Set the contact's role and area, or change consent; a consent change asks how consent was established and records the answer.",
+        "For a broadcast, open \"📣 Broadcasts\", fill in \"Title (internal)\", \"Message\" (at most 140 words) and \"Language\", click \"Save draft\", then \"📣 Send to opted-in contacts\" and sign it off through the gate."
+      ],
+      "result": "Test answers appear with citations and reach no citizen. Replies show as sent in the thread, and a sent broadcast shows how many of its audience accepted it.",
+      "troubleshooting": [
+        {
+          "problem": "The Test Bot, Waiting, Conversation or Broadcasts tabs show an error.",
+          "fix": "The WhatsApp Cloud API module is off on this environment, which is the default. Ask the administrator."
+        },
+        {
+          "problem": "\"Send\" is disabled for a contact.",
+          "fix": "The contact opted out (for example by replying STOP). They are not messaged."
+        },
+        {
+          "problem": "\"Write the reply first.\"",
+          "fix": "Type a reply before clicking \"Send reply\"."
+        }
+      ],
+      "sources": [
+        "content/whatsapp-desk.js",
+        "content/chat/index.html",
+        "server.ts",
+        "src/features.ts",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "run-the-social-media-army",
+      "title": "Build a distribution list and send a posting instruction",
+      "goal": "Volunteers on a list receive a posting instruction, and the links they post back are recorded and scored.",
+      "role": "Social Media Coordinator or WhatsApp Desk Operator; sending needs a sign-off role",
+      "level": "Intermediate",
+      "before": [
+        "Contacts must have written to the official number and opted in (they write START) before they receive instructions."
+      ],
+      "steps": [
+        "On the WeVote Chatbot desk, open \"👥 Lists\" and click \"+ New list\". Fill in \"Name\", \"Area (optional)\", \"Purpose\" and the roles it gathers, and click \"Create\".",
+        "Click \"Members\" on the list, then \"+ Add everyone matching the list's area and roles (opted in)\".",
+        "Open \"📲 Posting instructions\" and click \"+ New instruction\". Fill in \"Title\", \"List\", \"What to post\", the platforms (X, Facebook, Instagram, TikTok, WhatsApp status) and \"Due\". Click \"Save draft\".",
+        "Click \"📲 Send to the list\" and sign it off through the gate.",
+        "Click \"Open\" on the instruction to see the outcome (sent, delivered, read, failed, posted, engagement, impressions), the \"Posts reported\" and the \"Recipients\".",
+        "If a volunteer sends a link another way, click \"+ Record a link by hand\" and give their number and the link."
+      ],
+      "result": "The toast reads \"Sent to N of M\", and posted links appear under \"Posts reported\". X links get engagement figures where the X lookup is connected.",
+      "troubleshooting": [
+        {
+          "problem": "\"No contact with that number has written to the official number.\"",
+          "fix": "Only contacts who have messaged the official number can be recorded. Check the number, digits only."
+        },
+        {
+          "problem": "Few or none of the list receive the instruction.",
+          "fix": "Only opted-in members are sent to. Outside 24 hours since a contact last wrote, only an approved template can carry the message."
+        }
+      ],
+      "sources": [
+        "content/whatsapp-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "read-the-morning-intel",
+      "title": "Read the 07:00 Morning Intel",
+      "goal": "You know the state of the campaign's desks this morning from the figures the desks recorded.",
+      "role": "National Communications Director, Campaign Manager or War Room leadership",
+      "level": "Basic",
+      "steps": [
+        "Open \"📊 Morning Intel & Telemetry\" (the \"07:00 Morning Intel\" desk).",
+        "Read the figures: Situations open, Holding statement average, Stages on time, Dispatched in 24 h, WhatsApp in 24 h, Opted-in contacts, Evidence tone over 7 days, and the Review queue.",
+        "Read the \"Fourteen days\" chart of situations logged, dispatches sent, WhatsApp messages in and evidence items.",
+        "Check \"Dispatch by channel, 7 days\", \"What channels reported\" and \"Investigations\".",
+        "An administrator can click \"↻ Fetch channel metrics\" to ask each connected channel what it reports for what was sent."
+      ],
+      "result": "Every panel shows a figure computed from records, or \"no data\" where nothing was recorded. The desk refreshes itself every 30 seconds while it is open.",
+      "troubleshooting": [
+        {
+          "problem": "A figure reads \"no data\".",
+          "fix": "Nothing behind it was recorded. The desk never estimates."
+        },
+        {
+          "problem": "\"No connected channel had anything to report.\"",
+          "fix": "No channel is connected, or nothing has been sent on one yet."
+        }
+      ],
+      "sources": [
+        "content/telemetry-desk.js",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "draft-a-facebook-campaign",
+      "title": "Draft a Facebook campaign and create it paused",
+      "goal": "A paid campaign is drafted, Meta's reach estimate is stored, and the campaign is created paused in Ads Manager after sign-off.",
+      "role": "Campaign Manager or Elections Committee Operations Lead",
+      "level": "Advanced",
+      "before": [
+        "This desk is an additional module that is switched off by default. It appears in the desk tabs and the ☰ menu only when the administrator has switched it on for this environment; while it is off, its tab is absent and its pages answer \"not found\".",
+        "The Marketing API (ad account) is connected on this environment for the estimate and creation steps."
+      ],
+      "steps": [
+        "Open \"📣 Campaign Ads Manager\" (the \"Facebook Campaign Manager\" desk).",
+        "Under \"New campaign\", fill in \"Name\", \"Objective\", \"Days\", \"Provinces (none = all of South Africa)\", \"Age from\", \"Age to\", \"Gender\", \"Daily budget (R)\", \"Ad text\", \"Headline\" and \"Link\". Click \"Save draft\".",
+        "On the campaign under \"Campaigns\", click \"📈 Ask Meta for the estimate\".",
+        "Click \"Create in Ads Manager (paused)\" and sign it off through the gate.",
+        "Use \"🖨️ Pack\" for a printable record of the campaign or \"⬇ JSON\" for a file. A person switches the campaign on in Ads Manager."
+      ],
+      "result": "The toast reads \"Created paused: <id>\" and the campaign shows its Ads Manager id. Meta's estimate is shown verbatim with its date.",
+      "troubleshooting": [
+        {
+          "problem": "\"📈 Ask Meta for the estimate\" is disabled.",
+          "fix": "The Marketing API is not configured. The desk does not project a number in its place."
+        }
+      ],
+      "sources": [
+        "content/fbads-desk.js",
+        "src/features.ts",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "open-and-run-an-investigation",
+      "title": "Open an investigation, search open sources and trace a photo",
+      "goal": "A case is opened under a recorded purpose and lawful basis, the desk searches the configured sources, and chosen results become evidence.",
+      "role": "Investigations Coordinator or Investigator",
+      "level": "Advanced",
+      "before": [
+        "This desk is an additional module. It is on by default, but a deployment can switch it off; while it is off, its tab is absent from the desk tabs and the ☰ menu and its pages answer \"not found\"."
+      ],
+      "steps": [
+        "Open \"🔍 Investigations Desk\" and click \"➕ Open Investigation\".",
+        "Fill in \"Title\", \"Subject type\", \"Priority\", \"Subject\", \"Question the desk must answer\", the sources and languages, \"Geography\", \"Extra keywords\", \"From\", \"To\", \"Assign to\" and \"Keep checking every\".",
+        "State the \"Purpose (why this investigation exists)\" and choose the \"Lawful basis (POPIA s11)\". Click \"🔍 Open investigation & start the background check\" and sign it off through the gate.",
+        "In \"🗂️ Case Files\", open the case to read its \"📄 Report\", \"🧾 Evidence\", \"📎 Uploads\", \"⚙️ Checks\" and \"🗒 Audit\". Use \"🔄 Check again now\", \"📡 Keep monitoring\" or \"⏸ Stop monitoring\" as needed.",
+        "In \"🔎 Media Search\", enter \"What to search for\", choose sources, languages and dates, pick the case under \"Attach results to case\", and click \"🔎 Search Open Sources\". Tick results and click \"📎 Attach selected to case\" (through the gate).",
+        "In \"🖼️ Reverse Photo Forensics\", choose the open case, then drop a photo. Tick matches and attach them with the photo to the case.",
+        "When finished, click \"✅ Close case\" and sign it off. \"⬇ Report .md\" downloads the report."
+      ],
+      "result": "The case shows its reference, its checks and a versioned report; attached items appear as evidence cited by the next report.",
+      "troubleshooting": [
+        {
+          "problem": "\"Select at least one source to check.\"",
+          "fix": "Choose one or more sources before opening the case."
+        },
+        {
+          "problem": "\"Choose the open case this photo belongs to first.\"",
+          "fix": "A photo is searched only against an open case. Pick the case, then drop the photo."
+        },
+        {
+          "problem": "A source is listed as not searched.",
+          "fix": "Its provider is not configured on this environment; the report's gaps say so."
+        }
+      ],
+      "sources": [
+        "content/osint-desk.js",
+        "src/features.ts",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "explore-wards-candidates-and-manifestos",
+      "title": "Look up a ward, its candidates and its localised manifesto",
+      "goal": "You can find a ward on the map or list, read its dossier and certified candidates, and open the manifesto that covers it.",
+      "role": "Any signed-in user; editing a candidate needs the Admin or Super Admin role",
+      "level": "Basic",
+      "before": [
+        "The Wards and Manifestos desks are additional modules. Both are on by default, but a deployment can switch either off, and then its tab is absent."
+      ],
+      "steps": [
+        "Open \"🗺️ Wards & Map (2,838)\". Filter with the ward chips (\"All Wards\", \"🟢 Safe\", \"🟡 Strong\", \"🔴 Weak Battlegrounds\"), the province list, or the search box (IEC code, candidate name, ward or town).",
+        "Switch views with \"🗺️ Map\", \"📋 Wards\" or \"👥 Candidates (8,836)\". On the map, use \"↺ Whole Country\" or a metro button to zoom.",
+        "Click \"Inspect\" on a ward to open its \"WARD DOSSIER\": vote shares, registered voters, candidates and the covering manifesto (\"⬇️ Download\" or \"🤖 Test in Bot\").",
+        "The dossier's \"🎯 Focus in Weekly Campaign Order\", \"📢 Mobilize WhatsApp Army List\" and \"📣 Micro-Target in Facebook Ads\" buttons take you to that desk with a note of the ward; fill in the form there yourself.",
+        "An admin can click \"✏️ Edit\" on a candidate, change the details, and click \"💾 Save Changes\". The change is written to the audit log.",
+        "Open \"📘 Manifestos (52 Municipal)\", filter by province, locality type or search, and click \"Inspect Dossier\" or \"⬇️ Doc\". \"🤖 Test in WhatsApp Bot Simulator\" tests questions against it."
+      ],
+      "result": "The dossier shows the ward's figures and certified candidates, and the manifesto dossier shows the local commitments.",
+      "troubleshooting": [
+        {
+          "problem": "\"Unauthorized: Only Super Admin and Admin can edit certified candidates.\"",
+          "fix": "Candidate records are locked. Ask an administrator to make the change."
+        }
+      ],
+      "sources": [
+        "content/wards-desk.js",
+        "content/manifestos-desk.js",
+        "src/features.ts",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "use-the-dcip-communications-desk",
+      "title": "Work the DCIP desk: packs, provincial hubs and government deliveries",
+      "goal": "The week's messaging pack reaches the provincial hubs, government delivery submissions are verified, and communicators have posts to share.",
+      "role": "National DCIP or Provincial DCIP",
+      "level": "Intermediate",
+      "before": [
+        "This desk is an additional module. It is on by default, but a deployment can switch it off; while it is off, its tab is absent from the desk tabs and the ☰ menu and its pages answer \"not found\"."
+      ],
+      "steps": [
+        "Open \"📢 DCIP Comms (Digital System)\". Use the sections \"📦 Active Key-Messaging Pack\", \"🇿🇦 9 Provincial Hubs\", \"🏛️ Govt Deliveries Queue\", \"👥 Top Communicators Roster\" and \"🤝 Agency & Listening\". \"🔄 Refresh\" reloads.",
+        "In the pack section, use \"📋 Copy\" on a suggested social post to copy it.",
+        "In \"🇿🇦 9 Provincial Hubs\", click \"🚀 Dispatch Pack to <province>\" for each hub.",
+        "In \"🏛️ Govt Deliveries Queue\", click \"✓ Verify\" on a submission once you have checked it.",
+        "For the full system, click \"🚀 Open Standalone DCIP Dashboard ↗\". There, \"+ New Weekly Brief\" opens \"Draft New DCIP Messaging Pack\" (Pack Code / Ref, Week Code, Pack Title, Core Political Direction, Rapid Response Guidance → \"Create Draft Pack\"), and \"+ Submit Govt Delivery\" opens the \"Standard Government Submission Template\" (\"✓ Submit Delivery to DCIP\").",
+        "On the standalone dashboard, sort information with \"1. Audience\", \"2. Subject / Manifesto\", \"3. Urgency\" and \"4. Purpose\", and use \"📱 WhatsApp Digest\", \"🚀 Dispatch Pack\" or \"🖨️ Print Brief\" on a pack."
+      ],
+      "result": "Each hub dispatch confirms with \"Dispatched to <province>\", and a verified submission shows as verified in the queue.",
+      "troubleshooting": [
+        {
+          "problem": "\"No active messaging pack found.\"",
+          "fix": "Click \"Draft Pack →\" to create one on the standalone dashboard."
+        },
+        {
+          "problem": "\"DCIP Desk offline: …\"",
+          "fix": "The desk could not load its data. Click \"🔄 Refresh\"; if it persists, tell the administrator."
+        }
+      ],
+      "sources": [
+        "content/dcip-desk.js",
+        "content/dcip/index.html",
+        "src/features.ts"
+      ]
+    },
+    {
+      "id": "administer-accounts-settings-and-regions",
+      "title": "Issue accounts and keep campaign settings and regions",
+      "goal": "People have accounts with the right roles and areas, the campaign calendar is correct, the regions match the organisation, and the access log is checked.",
+      "role": "Administrator (admin or super_admin role)",
+      "level": "Advanced",
+      "steps": [
+        "Open the ☰ menu and choose \"Administration\" under Account. The \"👥 Administration\" desk has tabs \"Accounts\", \"Campaign settings\", \"Regions\", \"Access log\" and \"🤖 AI & Background Engine\".",
+        "In \"Accounts\", under \"Issue an account\", fill in \"Username (display handle)\", \"Full name\" and \"Email (sign-in & alerts)\", tick the \"Roles\", and choose the \"Area (scope)\" (National, or a province or region for a Provincial or Regional DCIP).",
+        "Enter an \"Initial password\" (at least 12 characters) or click \"Generate\". Leave \"Must change it on first sign-in\" ticked where it appears. Click \"Issue the account\" and hand the email and password to the person privately; the password is shown once.",
+        "To change an account, click \"Roles / area\" and \"Save\". Where the access lock is off, \"Reset password\", \"Deactivate\" and \"Reactivate\" are also available; deactivating ends the person's sessions.",
+        "In \"Campaign settings\", set \"Campaign name\", \"Organisation\", \"Campaign line\", \"Polls date (header countdown)\", \"Election day\" and \"Special vote days\", and click \"Save settings\". Edit phases with \"+ Add a phase\" and \"Save phases\".",
+        "In \"Regions\", add a region with \"+ Add region\", rename or retire one, move a municipality with its \"move…\" list, or paste a CSV and click \"Import and replace defaults in those provinces\".",
+        "In \"Access log\", read sign-ins, refusals and administrative changes with the address they came from."
+      ],
+      "result": "The toast reads \"Account issued.\", \"Settings saved.\", \"Phases saved.\" or \"Region added.\", and the header countdown and phase line on the desks follow the settings.",
+      "troubleshooting": [
+        {
+          "problem": "\"Tick at least one role.\"",
+          "fix": "Every account needs at least one role."
+        },
+        {
+          "problem": "Reset and Deactivate buttons are missing.",
+          "fix": "The access lock is on (UAT): issued credentials are final, so they are not reset or deactivated."
+        },
+        {
+          "problem": "The Administration desk says your account holds no admin role.",
+          "fix": "Only administrators see it. Ask an administrator."
+        },
+        {
+          "problem": "A region has no \"Retire\" button.",
+          "fix": "A region with municipalities cannot be retired; move them first."
+        }
+      ],
+      "sources": [
+        "content/admin-desk.js",
+        "content/index.html",
+        "src/auth/accounts.ts",
+        "content/guide/index.html"
+      ]
+    },
+    {
+      "id": "use-the-media-asset-bank-vault",
+      "title": "Find and add assets in the Media Asset Bank Vault",
+      "goal": "You can download campaign graphics, audio, portraits and manifesto cards, and add a new asset to the vault.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "steps": [
+        "Open the ☰ menu and choose \"Media Asset Bank Vault\" under More.",
+        "Filter by \"🎨 Campaign Graphics\", \"🎙️ Audio Clips\", \"👤 Candidate Portraits\" or \"📜 Manifesto Excerpt Cards\", and download what you need.",
+        "To add one, click \"➕ Upload / Add Asset\". Fill in \"Asset Title\", \"Asset Category\", the file (SVG, MP3, PNG, JPG or WAV) or an external relative URL, \"Format / Dimensions\", \"Description\" and \"Target Usage\". Click \"Save to Vault\".",
+        "Click \"‹ Command Desk\" to return to the desks."
+      ],
+      "result": "The new asset appears in its category.",
+      "sources": [
+        "content/assets/index.html",
+        "content/index.html"
+      ]
+    }
+  ]
+}

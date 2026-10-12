@@ -1,0 +1,560 @@
+{
+  "id": "peacekeeper",
+  "name": "Peacekeeper",
+  "fullName": "The Electoral Peace & Stability Dashboard",
+  "category": "Elections and public safety",
+  "summary": "A single operator console for monitoring electoral peace and stability: it collects TV, radio, press and social sources, raises source-topic alerts for independent review, and lets liaison officers build cases, query an information base and share signals with other agencies. Its operational focus defaults to elections and democracy.",
+  "audience": [
+    "Liaison officer",
+    "Information analyst",
+    "Senior case officer",
+    "Director / command staff",
+    "System administrator"
+  ],
+  "surfaces": [
+    "Web console",
+    "Desktop app (macOS and Linux, Electron)",
+    "Telegram alert dispatch"
+  ],
+  "gettingAccess": "A system administrator provisions each liaison officer (LO) in OFFICERS with an LO number, agency, role and clearance level. Operators sign in on the console's sign-in screen with the access passcode the administrator issues; the console then opens the LO account named in the sign-in link or remembered from the last session, or the server's configured default account when none is named. Passcodes are issued privately and never appear in documentation. An account that is inactive or missing is refused rather than replaced.",
+  "sources": [
+    "README.md",
+    "AGENTS.md",
+    "product.json",
+    "jcds.config",
+    "electron-builder.yml",
+    "docs/data-import.md",
+    "docs/source-readiness.md",
+    "docs/evidence-integrity-fix.md",
+    "web/src/App.tsx",
+    "web/src/config/product.ts",
+    "web/src/components/",
+    "backend/main.py"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-and-switch-officer",
+      "title": "Sign in, switch officer profile and lock the console",
+      "goal": "Open the console under your own liaison officer profile, change to another profile you are allowed to use, and lock the console when you step away.",
+      "role": "Any provisioned liaison officer",
+      "level": "Basic",
+      "before": [
+        "An administrator has provisioned your LO account and issued you an access passcode.",
+        "You know the console address your administrator gave you, or have the desktop app installed."
+      ],
+      "steps": [
+        "Open the console. The sign-in screen shows the product title, the backend address it will use, and the line \"Sign in to access your operator profile and collected information.\"",
+        "Enter your passcode in the \"Access passcode\" field and press \"Sign in\". While the session is checked the screen reads \"Verifying your operator session…\".",
+        "Check the header: the clearance badge (CONFIDENTIAL, SECRET, TOP SECRET or TS//SCI) shows the clearance of the active profile.",
+        "To change profile, click the clearance badge (tooltip \"Click to Switch Liaison Officer & Clearance Profile\") and choose an officer under \"Switch Active Officer Profile\". The console clears intercepts, search results, alarms and cases from the previous profile before loading the new one.",
+        "When you leave the workstation, press \"LOCK\" (tooltip \"Lock Console / Logout\") in the header. The session is ended and the sign-in screen returns."
+      ],
+      "result": "The header shows your LO profile and clearance, and every panel loads only the records that profile is cleared to see.",
+      "troubleshooting": [
+        {
+          "problem": "\"Sign-in was refused. Check your passcode and active operator account.\"",
+          "fix": "The passcode is wrong or the LO account is inactive. Ask your system administrator to confirm your account is active in OFFICERS."
+        },
+        {
+          "problem": "\"Sign-in service is unavailable (HTTP 5xx). Please retry.\" or \"AUTHENTICATION ERROR. VERIFY HOST CONNECTIVITY.\"",
+          "fix": "The backend could not be reached. Retry, and if it persists ask the administrator to check the backend address under SYSTEM ADMIN → PORT 3162 & NETWORK."
+        },
+        {
+          "problem": "\"Operator switch failed\" banner",
+          "fix": "The backend refused the switch or returned a different account. Stay on your current profile and ask the administrator whether you may use the other profile."
+        }
+      ],
+      "sources": [
+        "web/src/components/OperatorSignIn.tsx",
+        "web/src/App.tsx",
+        "backend/main.py",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "navigate-subsystems",
+      "title": "Find your way around the subsystems and maps",
+      "goal": "Move between the console's subsystems on a desktop screen or a phone, and recognise when a panel is empty because its data is unavailable. Explore the figures, link graph and map views.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [
+        "You are signed in."
+      ],
+      "steps": [
+        "On a wide screen, use the tab strip under the header: PEACE & STABILITY, INFORMATION BASE & RAG, SOCIAL & VIDEO RADAR, LIVE STREAM, VOTING STATIONS, INFORMATION OVERVIEW, THREAT MAP (SA), 3X3 NEWS, HIGH-RISK WATCH, TARGETS, OPEN PROFILER, SEARCH & SITREP, FIGURES & BIAS, LINK GRAPH, GEOINT MAP, CASES, MESH, OFFICERS and SYSTEM ADMIN. Hover a tab to read its description.",
+        "On any screen size, press \"MENU\" (tooltip \"Open Subsystem Navigation Drawer\") to open the \"SELECT OPERATIONAL SUBSYSTEM\" drawer, choose a subsystem, and close it with the X or the Esc key.",
+        "On a phone, use the bottom bar: STREAM, NEWS, TARGETS, SEARCH, and MORE for the rest.",
+        "The header shows the current subsystem in square brackets, a COLLECTORS LIVE indicator when collectors are reporting, the FOCUS button for the active operational focus, and buttons for OFFICERS, ADMIN, PHOTO RECON and \"Sync All Telemetry\".",
+        "If an amber notice reads \"Some data is unavailable. Empty panels for these sources do not establish that there are no records.\", open \"View unavailable sources\" to see which requests failed, then press \"Retry data requests\".",
+        "Open FIGURES & BIAS and select a figure (or use \"Search figure...\") to see mentions, recorded airtime, last seen, sentiment and cross-network analysis. Open LINK GRAPH for the network of public figures, cases, broadcast stations and locations, and press \"RE-LAYOUT\" to redraw it.",
+        "Open THREAT MAP (SA) or GEOINT MAP for the geographic views of recorded sources. On a case's tracking map choose DARK OSM, STANDARD OSM, SATELLITE or TRAFFIC HEAT, and press \"ADD WAYPOINT\" to log a sighting (title, location name, latitude, longitude, severity), then \"PLOT WAYPOINT\"."
+      ],
+      "result": "You can reach every subsystem and can tell an empty result apart from a failed data request.",
+      "troubleshooting": [
+        {
+          "problem": "A panel is empty",
+          "fix": "Check for the amber unavailable-data notice first. An empty panel without that notice means no records are stored yet; with it, the source could not be read."
+        },
+        {
+          "problem": "VOTING STATIONS tab is missing",
+          "fix": "The tab is shown only when the product is configured for elections. Peacekeeper's product configuration enables it; ask the administrator if it is absent."
+        },
+        {
+          "problem": "A figure shows \"No historical coverage bias registered for this subject.\"",
+          "fix": "No stored coverage mentions that figure yet. Missing locations and coverage stay unknown; they are not filled in."
+        }
+      ],
+      "sources": [
+        "web/src/App.tsx",
+        "web/src/components/CaseTrackingMap.tsx",
+        "web/src/components/CybermapSourceMap.tsx",
+        "web/src/components/FiguresBiasMatrix.tsx",
+        "web/src/components/NetworkGraph.tsx",
+        "web/src/config/product.ts"
+      ]
+    },
+    {
+      "id": "review-source-topic-alerts",
+      "title": "Review, investigate and resolve a source-topic alert",
+      "goal": "Inspect an alert raised from a collected source, act on it, and acknowledge it.",
+      "role": "Liaison officer or information analyst",
+      "level": "Intermediate",
+      "before": [
+        "You are signed in. Alerts appear in the red banner on PEACE & STABILITY when reviewed alerts are in view."
+      ],
+      "steps": [
+        "Open PEACE & STABILITY. A reviewed alert shows in a red banner with its severity, \"SOURCE TOPIC\", time, source and title.",
+        "If the banner instead reads \"NO REVIEWED AUTOMATIC ALERTS\" with alerts \"LOADED AWAITING REVIEW\", press \"Review held alert\" to open the oldest held alert.",
+        "Press \"INVESTIGATE\" or click \"CLICK TO INSPECT FULL UNCLIPPED DOSSIER & TRANSMISSION\" to open the alert dossier.",
+        "Read \"ALARM NARRATIVE & THREAT TRIGGER DETAILS\", the \"TARGET / ENTITY INVOLVED\", and \"INTERCEPTED EVIDENCE TRANSMISSION\" (channel or source, ingested time, threat, sentiment and the complete transcript). If the source has captured video it plays under \"VIDEO FROM THIS SOURCE RECORD\".",
+        "Choose an action: \"PIN TO ACTIVE CASE DOSSIER\" to attach the source to a case, \"360° SEARCH & SITREP\" to search with this alert's query, or \"BROADCAST FLASH SIGNAL\" to send a flash alert to inter-agency peers.",
+        "Press \"CLOSE\" (or Esc), then press \"ACK / RESOLVE\" on the banner once the alert has been dealt with. Use the speaker button (\"Toggle Alarm Buzzer\") to mute or unmute the audible alarm."
+      ],
+      "result": "The alert is marked RESOLVED and, if you pinned it, its source appears in the chosen case.",
+      "troubleshooting": [
+        {
+          "problem": "No alerts appear at all",
+          "fix": "Automatic alerts are only published after an independent review of the exact source snapshot. No reviewed alerts does not mean the area is secure; check LIVE STREAM and SEARCH & SITREP directly."
+        },
+        {
+          "problem": "An older alert shows as held",
+          "fix": "Alerts without a durable independent review stay stored and are shown as held for review; they are not published automatically."
+        }
+      ],
+      "sources": [
+        "web/src/components/AlarmsBanner.tsx",
+        "web/src/components/AlarmInvestigationModal.tsx",
+        "web/src/App.tsx",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "search-and-sitrep",
+      "title": "Search collected information and generate an AI SITREP",
+      "goal": "Find intercepts across TV, radio, press and social sources and produce an executive situation report.",
+      "role": "Information analyst or liaison officer",
+      "level": "Basic",
+      "before": [
+        "You are signed in."
+      ],
+      "steps": [
+        "Open SEARCH & SITREP (\"360° UNIVERSAL INFORMATION SEARCH (FTS5)\").",
+        "Type into \"Search by keywords, politician, frequency, unit, or location...\" and press \"SEARCH\".",
+        "Narrow results with the source filter (All Sources, TV Broadcasts, Radio & SDR Signals, Online & Printed Press, Social Media & Telegram) and the threat filter (All Threat Levels, Critical, High, Medium, Low).",
+        "Open a result with \"OPEN FULL UNCLIPPED TRANSCRIPT & MEDIA DOSSIER\". Use \"WATCH\" for a 30-second captured broadcast clip or the listen control for a radio capture, and \"PIN TO ACTIVE CASE\" to attach it to a case.",
+        "For an item marked \"RESTRICTED\", press \"REQUEST ACCESS TO ND OFFICE\", enter the \"OPERATIONAL JUSTIFICATION / CASE RATIONALE\" and press \"TRANSMIT TO DIRECTOR\". The request is logged in the audit trail.",
+        "Press \"GENERATE AI SITREP\" to open the \"C4ISR EXECUTIVE SITUATION REPORT (SITREP)\" with an executive summary, totals (intercepts, active alarms, sentiment index, active cases) and key threat developments. Press \"DISMISS\" to close it."
+      ],
+      "result": "You have a filtered result list, any needed items pinned to a case, and a SITREP for the reporting window.",
+      "troubleshooting": [
+        {
+          "problem": "\"No information intercepts matched the specified criteria.\"",
+          "fix": "Clear the source and threat filters or broaden the keywords. Check the amber unavailable-data notice in case collection failed."
+        }
+      ],
+      "sources": [
+        "web/src/components/SearchPanel.tsx",
+        "web/src/App.tsx"
+      ]
+    },
+    {
+      "id": "run-evidence-harvest-job",
+      "title": "Start an evidence harvest job and inspect its provenance",
+      "goal": "Launch an independent harvesting worker for a query and check what it collected, with its source hashes and model review.",
+      "role": "Information analyst or liaison officer",
+      "level": "Advanced",
+      "before": [
+        "You are signed in. Harvest jobs belong to the signed-in operator that starts them."
+      ],
+      "steps": [
+        "Open SEARCH & SITREP and type a specific query in the search box.",
+        "Press \"START HARVEST JOB\". The status line reads \"Worker started: <job ID>. You can launch another job.\" You may start further jobs in parallel; each has its own job ID.",
+        "Under \"Independent harvesting jobs\", expand a job. The summary shows the query, status, number of collected candidates and job ID.",
+        "For each candidate, read its title, content and verification status, and the line \"Collected: <time> · Source item SHA-256: <hash>\".",
+        "Use \"Download captured source response\" to save the exact bytes that were captured, and expand \"Original source and model review\" to see the original provenance and the model review side by side.",
+        "To harvest for a specific case instead, open CASES, select the case and press \"RUN FOCUSED CASE HARVEST\"."
+      ],
+      "result": "Each candidate is stored with its source URL, capture time, captured bytes and SHA-256, and remains a candidate for manual review.",
+      "troubleshooting": [
+        {
+          "problem": "\"Enter a specific harvesting query.\"",
+          "fix": "The search box was empty. Type a query before pressing START HARVEST JOB."
+        },
+        {
+          "problem": "\"Worker failed: …\" or \"… source requests failed. Results are incomplete.\"",
+          "fix": "The job did not complete. Treat its results as incomplete and start a new job; a failed job is never reported as successful."
+        },
+        {
+          "problem": "Candidates show as unverified",
+          "fix": "Source-text consistency is reviewed separately from factual authenticity. Two models agreeing is not corroboration; verify manually before relying on a candidate."
+        }
+      ],
+      "sources": [
+        "web/src/components/SearchPanel.tsx",
+        "web/src/components/InvestigationsCases.tsx",
+        "AGENTS.md",
+        "docs/evidence-integrity-fix.md"
+      ]
+    },
+    {
+      "id": "open-case-and-attach-evidence",
+      "title": "Open a case and attach evidence to it",
+      "goal": "Create an investigative case file and build its evidence chain of custody.",
+      "role": "Senior case officer or liaison officer",
+      "level": "Intermediate",
+      "before": [
+        "You are signed in with a clearance at least as high as the case you will create."
+      ],
+      "steps": [
+        "Open CASES. The tab label shows how many cases you can see.",
+        "Press \"+ NEW\" (or \"OPEN NEW CASE\"). In \"OPEN NEW INVESTIGATIVE INFORMATION CASE\" fill in CASE TITLE, OPERATIONAL DESCRIPTION, PRIORITY (CRITICAL, HIGH, MEDIUM or LOW), CLEARANCE (LEVEL 1 // CONFIDENTIAL to LEVEL 4 // TOP SECRET SCI), ASSIGNED LO and LEAD AGENCY.",
+        "Tick \"Share case summary with Inter-Agency Mesh\" if the summary should go to peer agencies, then press \"INITIALIZE CASE\".",
+        "Select the case under \"OPEN PRIORITY INVESTIGATIVE CASES\" to open its dossier with \"OPERATIONAL SYNOPSIS & DIRECTIVES\" and the \"EVIDENCE CHAIN OF CUSTODY TIMELINE\", which lists each item's SHA-256 checksum.",
+        "To add evidence by hand, press \"ATTACH EVIDENCE\", enter an intercept ID or a media/photo URL in \"INTERCEPT ID OR MEDIA / PHOTO URL\" and press \"ATTACH\". From other screens use \"PIN TO CASE\" and pick the case in \"PIN EVIDENCE TO CASE\".",
+        "Filter the evidence with \"EVIDENCE VIEW\", open photos with \"ZOOM PHOTO\", play dispatch audio, and remove a wrong item with the unpin button (\"Unpin evidence from case\").",
+        "Press \"OSINT RECON\" to profile suspects for this case in OPEN PROFILER, and \"EXPORT MD\" in the official dossier view to download the case as Markdown."
+      ],
+      "result": "The case lists its evidence in a timestamped chain of custody with a checksum per item, and can be exported as a dossier.",
+      "troubleshooting": [
+        {
+          "problem": "No cases are listed in PIN EVIDENCE TO CASE",
+          "fix": "Create a case first in CASES; only open cases you are cleared for are offered."
+        },
+        {
+          "problem": "Evidence list is empty after attaching",
+          "fix": "Press the refresh button (\"Refresh Case Evidence\"). If the item still does not appear, check the intercept ID is exact."
+        }
+      ],
+      "sources": [
+        "web/src/components/InvestigationsCases.tsx",
+        "web/src/App.tsx"
+      ]
+    },
+    {
+      "id": "query-information-base",
+      "title": "Ask the Information Base & RAG desk and search the 24-hour TV buffer",
+      "goal": "Get a cited synthesis across indexed sources, and find segments in recorded domestic TV broadcasts.",
+      "role": "Information analyst",
+      "level": "Intermediate",
+      "before": [
+        "You are signed in. A language model must be configured by the administrator for synthesis."
+      ],
+      "steps": [
+        "Open INFORMATION BASE & RAG. The header shows how many documents are INDEXED and which MODEL is configured.",
+        "Under \"TACTICAL RAG SYNTHESIS\", type a question or pick one of the \"QUICK PRESETS\", then press \"QUERY RAG\" (it shows \"SYNTHESIZING...\" while it works).",
+        "Read the synthesis, \"ACTIONABLE TACTICAL RECOMMENDATIONS\" and \"SUGGESTED INFORMATION INQUIRIES\". Check the cited ground-truth documents listed under the answer and open media with \"VIEW MEDIA\".",
+        "To keep the answer, choose a case in \"Select Case to Pin...\" and press \"PIN\", or use \"Copy dossier to clipboard\".",
+        "If the index is out of date, press the rescan button (\"Rescan and index all intercepts, evidence, situations, and crime reports\").",
+        "Switch to \"24H ROTATING TV BUFFER & SEARCH\", type chyron text, speech or keywords, press \"SEARCH BROADCASTS\" and use \"PLAY SEGMENT\" on a match. The panel also shows the buffer's disk allocation and the resolution options.",
+        "Browse raw indexed records at the bottom of the desk, filtering by TYPE or with \"Filter indexed records by title, content, or location...\"."
+      ],
+      "result": "You have an answer tied to the specific indexed documents it drew on, optionally pinned to a case, and any matching broadcast segments.",
+      "troubleshooting": [
+        {
+          "problem": "Query returns an error or no synthesis",
+          "fix": "The configured model may be unreachable. Ask the administrator to check SYSTEM ADMIN → AI & INTEL ENGINES. Raw document browsing still works."
+        }
+      ],
+      "sources": [
+        "web/src/components/IntelligenceBaseQueryDesk.tsx"
+      ]
+    },
+    {
+      "id": "monitor-voting-stations",
+      "title": "Monitor voting stations and flag or clear a station incident",
+      "goal": "Review imported voting-station records and record a security incident against a station.",
+      "role": "Liaison officer",
+      "level": "Intermediate",
+      "before": [
+        "Verified voting-station records have been imported. The project's data-import note records that generated station records are quarantined and not shown."
+      ],
+      "steps": [
+        "Open VOTING STATIONS. The header shows MONITORED STATIONS and TOTAL VOTERS from the imported records.",
+        "Narrow the map with the province list (All 9 Provinces or one province), the status filter (ALL, GREEN (NORMAL), RED (ALERT)) and \"Search Station, VD, Ward...\".",
+        "Select a station to see its VD number, ward, registered voters, nearest police precinct and administrative reference. Green means normal operation; red means a security or criminal issue has been reported.",
+        "To report a problem, press \"FLAG SECURITY INCIDENT (TURN RED)\", choose the level (Medium Threat, High Risk or Critical Violence / Riot), describe it in the details box and press \"SUBMIT ALERT\".",
+        "When it is over, select the station and press \"MARK RESOLVED (RESTORE GREEN STATUS)\".",
+        "Use the refresh button (\"Refresh Voting Stations Telemetry\") to reload, and INFORMATION OVERVIEW to see recorded source coverage."
+      ],
+      "result": "The station shows red with an ACTIVE CRIMINAL / PUBLIC ORDER ALERT until it is marked resolved.",
+      "troubleshooting": [
+        {
+          "problem": "The map is empty or INFORMATION OVERVIEW says \"Awaiting verified voting-station data.\"",
+          "fix": "No verified station records have been imported yet. The authoritative IEC station data has not been retrieved; generated stations are deliberately excluded. Ask the administrator about the import."
+        }
+      ],
+      "sources": [
+        "web/src/components/VotingStationsMap.tsx",
+        "web/src/components/EnvironmentalScanView.tsx",
+        "docs/data-import.md",
+        "docs/source-readiness.md"
+      ]
+    },
+    {
+      "id": "watch-live-sources",
+      "title": "Watch the live stream, the news wall and the social and video radar",
+      "goal": "Follow incoming dispatches and broadcasts, and pull a specific social post or video into the system.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [
+        "You are signed in."
+      ],
+      "steps": [
+        "Open LIVE STREAM (\"24/7 NATIONAL TACTICAL REPORT STREAM\"). Filter by threat (ALL THREATS to LOW), search with \"Search live stream (e.g. Durban, robbery, Mayfair, Soweto, rifle)...\", and toggle auto-scroll.",
+        "On a dispatch use \"VIEW EVIDENCE\", \"LIVE ARTICLE\", \"COPY INTEL\", \"PIN TO CASE\" or \"INSPECT\" (close with \"CLOSE [ESC]\").",
+        "Open 3X3 NEWS (\"NEWS MONITOR // LIVE CHANNEL GRID\"). Choose GRID, QUAD or FOCUS, filter by DOMESTIC NEWS / RSA, PARLIAMENT / RSA, GLOBAL WIRES or AFRICA, and press UNMUTE on the one channel you want to hear (only one channel plays audio at a time; \"MUTE ALL\" silences them).",
+        "Reorder channels by dragging or with the move buttons; \"RESET\" restores the default order. To point a tile at a different mirror, use \"Edit Channel URL / Mirror\", enter the embed URL and press \"APPLY & SAVE\" (\"RESTORE DEFAULT\" undoes it).",
+        "Open SOCIAL & VIDEO RADAR. Paste a post or video link in \"INGEST ON-DEMAND POST OR VIDEO\", optionally choose a case in \"Link to Case:\", and press \"INGEST VIDEO\"; or type a query in the \"PARALLEL SEARCH ENGINE HARVESTER\" and press \"RUN HARVEST\".",
+        "Select an item and press \"WATCH & INSPECT\" to view it in the \"TACTICAL VIDEO & EVIDENCE INSPECTOR\", then \"PIN TO CASE DOSSIER\" or \"OPEN ORIGINAL SOURCE\"."
+      ],
+      "result": "You see current dispatches and broadcasts, and selected posts or videos are stored and can be pinned to a case.",
+      "troubleshooting": [
+        {
+          "problem": "A news tile does not play",
+          "fix": "Press \"Reload Video Stream\", or open the channel page. Configured channel links can change; edit the tile's URL if you have a working mirror."
+        },
+        {
+          "problem": "\"Evidence not yet verified against an active case docket.\"",
+          "fix": "Link the item to a case first; the case-match check is a model assessment, not factual verification."
+        }
+      ],
+      "sources": [
+        "web/src/components/LiveReportStream.tsx",
+        "web/src/components/NewsStreamGrid.tsx",
+        "web/src/components/SocialUnrestVideoDesk.tsx"
+      ]
+    },
+    {
+      "id": "high-risk-watch",
+      "title": "Run the high-risk situations watch and monitored reporters",
+      "goal": "Sweep sources for a high-risk situation, add a reporter handle to monitor, and ingest a post or CCTV still.",
+      "role": "Liaison officer or information analyst",
+      "level": "Intermediate",
+      "before": [
+        "You are signed in."
+      ],
+      "steps": [
+        "Open HIGH-RISK WATCH and choose a situation from the watch list. Filter by threat, and switch between the C4ISR view and \"List view\".",
+        "Press \"RUN 24/7 LIVE SWEEP\" to search sources for the selected situation. Matches appear under \"UNVERIFIED SOURCE MATCHES\"; open one with \"Inspect source dossier\" or see it in \"GEOGRAPHIC SOURCE VIEW\".",
+        "Press \"VIEW CASES\" to go to related cases.",
+        "To monitor a reporter, press \"ADD HANDLE\" and fill in HANDLE / IDENTIFIER, REPORTER / DESK NAME, PLATFORM (X / Twitter, News Desk / Live Wire, Mastodon ActivityPub or Tactical Dispatch), OUTLET / AGENCY and BEAT / PRIMARY FOCUS.",
+        "To bring in a specific report, press \"INGEST POST / CCTV\" (or \"+ Ingest Post\" on a reporter card) and enter REPORTER HANDLE, POST URL, REPORT DETAILS & EYEWITNESS CONTEXT and, optionally, MEDIA / CCTV ATTACHMENT URL.",
+        "Use \"View reporter records\" to see what each monitored source has contributed."
+      ],
+      "result": "The situation shows its current source matches, and new reporters and ingested posts are recorded as sources.",
+      "troubleshooting": [
+        {
+          "problem": "\"No real-time intercepts matched in the current operational window.\"",
+          "fix": "Run a sweep, or widen the threat filter. A situation's configured geofence is an operational area and never supplies an incident location."
+        }
+      ],
+      "sources": [
+        "web/src/components/HighRiskSituationsWatchlist.tsx",
+        "web/src/components/GeographicSourceView.tsx",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "targets-and-profiler",
+      "title": "Track a target, run deep research and profile a suspect",
+      "goal": "Add a surveillance target, compile a research report from stored intercepts, and run rapid open-source reconnaissance.",
+      "role": "Information analyst",
+      "level": "Advanced",
+      "before": [
+        "You are signed in with the clearance your agency requires for target work."
+      ],
+      "steps": [
+        "Open TARGETS (\"STRATEGIC TARGET SURVEILLANCE & DEEP RESEARCH\"). Filter with the search box, category (OSINT, SIGINT, GEOINT, FININT) and priority.",
+        "Press \"LOAD NEW TARGET\" and complete \"LOAD NEW SURVEILLANCE TARGET\": names, organisation, Target Type (PERSON, ORGANIZATION, FACILITY, VESSEL), Category, Priority, social handles, known aliases and \"Surveillance Notes & Operational Objectives\". Press \"LOAD & INITIALIZE SURVEILLANCE\".",
+        "Select a target and press \"RUN DEEP RESEARCH\". It compiles every stored intercept that mentions the target into a report, through the configured model when one is reachable. Reports are encrypted at rest and cite the items they were built from.",
+        "Open OPEN PROFILER. Optionally choose a case in \"BIND TO ACTIVE CASE\", enter a name, alias, phone number, social handle or vehicle plate in the recon bar and press \"RECON\".",
+        "Review the \"NEURAL EXECUTIVE ASSESSMENT\" and the sections for phone vectors, social handles, IDs and plates, associates and sightings. Press \"PIN FINDINGS TO CASE\" or \"EXPORT DOSSIER\" (Markdown)."
+      ],
+      "result": "The target is on the watch list and has a cited research report; profiler findings are pinned or exported.",
+      "troubleshooting": [
+        {
+          "problem": "Profiler sections say nothing was identified",
+          "fix": "Only stored intercepts and collector results are used. Try other identifiers, or start a harvest job in SEARCH & SITREP first."
+        }
+      ],
+      "sources": [
+        "web/src/components/TargetWatchlist.tsx",
+        "web/src/components/OsintProfiler.tsx"
+      ]
+    },
+    {
+      "id": "photo-recon",
+      "title": "Compare a photo against monitored figures and targets",
+      "goal": "Run a perceptual-hash comparison of an uploaded photo and, if useful, open a case from the result.",
+      "role": "Information analyst",
+      "level": "Advanced",
+      "before": [
+        "You are signed in and have a JPEG, PNG or WebP image."
+      ],
+      "steps": [
+        "Press \"PHOTO RECON\" in the header to open \"BIOMETRIC RECONNAISSANCE // IMAGE IDENTIFICATION\".",
+        "Click or drop the photo on \"CLICK OR DROP PHOTO TO SCAN\". The console compares perceptual difference hashes against monitored leaders, registered surveillance targets and broadcast keyframes.",
+        "Read the comparison: the uploaded photo beside the catalogue reference portrait, the identified entity, role, affiliation and the dHash and cosine similarity scores.",
+        "To act on it, press \"OPEN OFFICIAL INVESTIGATIVE CASE FILE\", enter a Case Title, \"Case Description & Forensic Findings\" and Priority, then create the case and use \"VIEW IN CASES & DOSSIERS\".",
+        "Press \"DISMISS\" to close."
+      ],
+      "result": "You see similarity scores against catalogued images, and optionally a new case holding the finding.",
+      "troubleshooting": [
+        {
+          "problem": "A match looks wrong",
+          "fix": "The scores are image-similarity measures, not identity verification. Confirm any identification through other evidence before acting."
+        }
+      ],
+      "sources": [
+        "web/src/components/BiometricSearchModal.tsx",
+        "web/src/App.tsx"
+      ]
+    },
+    {
+      "id": "inter-agency-mesh",
+      "title": "Send a flash alert or request information from another agency",
+      "goal": "Use the inter-agency signal mesh to broadcast a flash alert, raise a request for information (RFI), or answer one.",
+      "role": "Liaison officer",
+      "level": "Intermediate",
+      "before": [
+        "Peer agency endpoints have been configured. The MESH tab label shows how many signals are loaded."
+      ],
+      "steps": [
+        "Open MESH (\"INTER-AGENCY SIGNAL MESH\"). Check PEERS ONLINE, PENDING RFIs and the peer list with each endpoint and last heartbeat.",
+        "To alert peers, press \"DISPATCH FLASH ALERT\". Choose THREAT TYPE, enter OPERATIONAL SECTOR / CORRIDOR, choose SEVERITY LEVEL, write the TACTICAL BRIEF & INCIDENT SUMMARY and press \"BROADCAST ALERT\".",
+        "To ask a peer for information, press \"CREATE RFI\", fill in TARGET AGENCY, CASE REFERENCE (OPTIONAL), INQUIRY SUBJECT and OPERATIONAL SPECIFICATION & SCOPE, and press \"SUBMIT RFI\".",
+        "To answer an RFI addressed to you, press \"PROVIDE INFORMATION\" on it, enter your findings in \"INFORMATION REPORT & AUDIT FINDINGS\" and press \"TRANSMIT INFORMATION\". The RFI is marked FULFILLED.",
+        "Use the refresh button (\"Refresh Mesh Status\") to reload."
+      ],
+      "result": "Flash alerts show as BROADCAST DELIVERED to the target nodes, and RFIs move from pending to fulfilled.",
+      "troubleshooting": [
+        {
+          "problem": "\"No inter-agency flash alerts currently broadcast.\" or no peers online",
+          "fix": "Peers are configured by the administrator; an offline peer cannot receive alerts. Refresh and check the peer heartbeat times."
+        }
+      ],
+      "sources": [
+        "web/src/components/InterAgencyMesh.tsx",
+        "web/src/App.tsx"
+      ]
+    },
+    {
+      "id": "provision-officers",
+      "title": "Provision a liaison officer and review the audit trail",
+      "goal": "Register a new officer with the right clearance, and check who accessed what.",
+      "role": "Director / command staff or system administrator",
+      "level": "Intermediate",
+      "before": [
+        "You are signed in with a profile allowed to manage officers."
+      ],
+      "steps": [
+        "Open OFFICERS (tab or header button) to see \"LIAISON OFFICERS & CLEARANCE GOVERNANCE\".",
+        "Press \"PROVISION LIAISON OFFICER\" and complete LO NUMBER, agency, OFFICER FULL NAME & RANK, OPERATIONAL ROLE (Investigator, Senior Case Officer, Information Analyst or Director / Command Staff), CLEARANCE LEVEL, STATION / HEADQUARTERS LOCATION and, optionally, SECURE COMMS EMAIL.",
+        "Press \"REGISTER OFFICER\". The officer appears in the LIAISON OFFICERS list.",
+        "To view the console as another officer, press \"SWITCH PERSPECTIVE\" on their card. The active one is marked ACTIVE OFFICER.",
+        "Scroll to \"IMMUTABLE AUDIT TRAIL\" to read each logged event with its timestamp, officer, agency, action, target, clearance and details. Use \"Refresh Directory\" to reload."
+      ],
+      "result": "The new officer can sign in under their LO number, and every cross-agency access is visible in the audit trail.",
+      "troubleshooting": [
+        {
+          "problem": "The officer cannot sign in",
+          "fix": "Check that the account is active and the LO number is exact. Issue the access passcode to them privately; never record it in a case, note or guide."
+        }
+      ],
+      "sources": [
+        "web/src/components/UserManagement.tsx",
+        "backend/main.py"
+      ]
+    },
+    {
+      "id": "system-administration",
+      "title": "Configure focus, models, collectors, evidence capture and alert dispatch",
+      "goal": "Set the operational focus, check the AI analyst and collectors, harvest media into the evidence vault, and configure Telegram dispatch.",
+      "role": "System administrator",
+      "level": "Advanced",
+      "before": [
+        "You are signed in with the administrator profile; the console marks SYSTEM ADMIN as restricted to it."
+      ],
+      "steps": [
+        "Open SYSTEM ADMIN (\"CENTRAL SYSTEM ADMINISTRATION & AI METRICS\"). Pick a section from the tab row or, on small screens, the \"ADMIN SECTION:\" list.",
+        "FOCUS & RECON: under \"1. OPERATIONAL INFORMATION FOCUS & THREAT SCOPE\" add terms in \"CUSTOM PRIORITY KEYWORDS / TARGETS (OPTIONAL)\" and press \"SAVE KEYWORDS\", or press \"RESET TO DEFAULT (ELECTIONS)\". Section 3 sets the LLM provider, endpoint base URL and model name; section 4 sets automatic media download, preferred quality and maximum size.",
+        "Telegram dispatch (section 5): enter the bot token and target chat ID from your own bot, tick \"Enable Dispatch\" and, if wanted, \"Attach Media\" and \"Signal Intercepts\", and choose \"Min Threat Level\". Keep the bot token private.",
+        "AI & INTEL ENGINES: read the background analyst's inference count and latency, and press \"TRIGGER IMMEDIATE BACKGROUND AI INFORMATION SWEEP\" to process un-enriched intercepts now.",
+        "30s COLLECTORS TELEMETRY: press \"CAPTURE 30s TV BROADCAST\", \"RECORD 30s RADIO SIMULCAST\" or \"POLL ALL FEEDS & SOCIAL\", and check each collector's interval, total runs, items captured, last run and status.",
+        "EVIDENCE VAULT: paste a video or audio link in the \"MANUAL EVIDENCE URL HARVESTER\" to store it with a SHA-256 hash; play, save or delete assets from the media table.",
+        "PORT 3162 & NETWORK: check the connected backend; to point the console at another backend, enter it under \"CUSTOM PRIVATE BACKEND URL / TACTICAL LAN IP\", press \"TEST PING\" and then \"SWITCH & ACTIVATE\"."
+      ],
+      "result": "The focus, model, collectors and dispatch settings are saved, and harvested media sits in the evidence vault with its hash.",
+      "troubleshooting": [
+        {
+          "problem": "Telegram alerts do not arrive",
+          "fix": "Confirm Enable Dispatch is ticked, the chat ID is right (send /start to your bot first) and the minimum threat level is not set higher than the alerts you expect."
+        },
+        {
+          "problem": "Deleting a vault file asks for confirmation",
+          "fix": "Deletion removes the downloaded evidence file. Only delete when you are certain it is not needed as evidence."
+        }
+      ],
+      "sources": [
+        "web/src/components/SystemAdminPage.tsx",
+        "web/src/components/SettingsConfig.tsx"
+      ]
+    },
+    {
+      "id": "desktop-app-and-hardware",
+      "title": "Use the desktop app's capture controls and hardware manager",
+      "goal": "Work from the Peacekeeper desktop app, check attached receivers and modems, and capture TV, radio and SDR evidence from the operations HUD.",
+      "role": "Liaison officer at a desktop workstation",
+      "level": "Advanced",
+      "before": [
+        "The Peacekeeper desktop app is installed (it is packaged for macOS and Linux) and connected to a backend.",
+        "Any USB SDR receiver, LTE modem or DVB-T2 tuner is plugged in."
+      ],
+      "steps": [
+        "Open Peacekeeper and sign in as on the web console.",
+        "Click the BUS indicator in the header (tooltip \"Inspect Connected Desktop Devices (USB, GSM LTE, RTL-SDR, DVB-T2)\") to open \"HARDWARE & DEVICE MANAGER\". It lists USB peripherals and the status of the RTL-SDR receiver, GSM LTE modem and DVB-T2 tuner. Press \"RE-PROBE BUS\" after plugging in a device.",
+        "On PEACE & STABILITY, use \"TV CASCADING TRIAGE & LIVE BROADCAST\": switch between STREAM, CLIP (30s) and BIOMETRIC, and press REFRESH to poll the stream.",
+        "Under \"CAPTURE CONTROLS — RADIO, SDR & TV\", choose a broadcast radio station or enter an SDR frequency and mode (WBFM broadcast, NFM, AM airband, USB), then record; for TV choose a channel and press \"RECORD CLIP + OCR\".",
+        "Play a stored radio capture with \"PLAY RECORDING\" and read its transcript; use \"SWEEP\" to sweep radio frequencies.",
+        "On any panel record, use \"Open exact source and evidence\" or \"Pin source to case\"."
+      ],
+      "result": "Attached hardware is listed with its status, and captured clips and recordings are stored as source records you can pin to cases.",
+      "troubleshooting": [
+        {
+          "problem": "SDR HARDWARE shows \"no receiver attached or registered\"",
+          "fix": "Plug in the receiver, press RE-PROBE BUS, and check the device appears under DETECTED USB HARDWARE BUS PERIPHERALS."
+        },
+        {
+          "problem": "\"NO CAPTURED VIDEO CLIP AVAILABLE\"",
+          "fix": "Press REFRESH or wait for the TV signal scanner to harvest a clip."
+        }
+      ],
+      "sources": [
+        "electron-builder.yml",
+        "src/main/hardware/",
+        "web/src/components/HardwareDeviceStatusModal.tsx",
+        "web/src/components/LiveOpsHud.tsx"
+      ]
+    }
+  ]
+}

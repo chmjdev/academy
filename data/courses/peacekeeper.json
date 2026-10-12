@@ -1,0 +1,596 @@
+{
+  "course": {
+    "id": "peacekeeper",
+    "system": "peacekeeper",
+    "name": "Peacekeeper Electoral Peace & Stability Course",
+    "tagline": "Understand how Peacekeeper collects, reviews, records and shares election-related information — and what its records do and do not establish.",
+    "summary": "Peacekeeper (The Electoral Peace & Stability Dashboard) is an election-focused monitoring console for liaison officers and analysts. This course explains its roles and clearance, sources and source readiness, the independent review gate for alerts, evidence custody, AI features and their limits, cases and sharing, and desktop operation. It is for anyone who will work in or govern the console.",
+    "audience": [
+      "Liaison officer",
+      "Information analyst",
+      "Senior case officer",
+      "Director / command staff",
+      "System administrator"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "peacekeeper-01-orientation",
+      "moduleNumber": 1,
+      "title": "What Peacekeeper Is and How the Console Is Organised",
+      "subtitle": "An election-focused monitoring console, its subsystems and its honest empty states",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The Electoral Peace & Stability Dashboard (service name peacekeeper) is a single operator console for monitoring electoral peace and stability. It collects TV, radio, press and social sources, raises source-topic alerts for independent review, and lets liaison officers build cases, query an information base and share signals with other agencies. Its product profile sets the operational focus to elections and democracy and switches on the voting-station subsystem; police-data routes are switched off in this product. It was derived from another estate system but has its own configuration, credentials, storage and data paths. Most importantly for a new user, the console is built to show only recorded information: when a data request fails it says so, rather than presenting an empty panel as if nothing had happened.",
+      "keyPoints": [
+        "The operational focus defaults to elections and democracy; the elections flag enables VOTING STATIONS, and the police flag is off in this product.",
+        "The console is organised into subsystems: PEACE & STABILITY, INFORMATION BASE & RAG, SOCIAL & VIDEO RADAR, LIVE STREAM, VOTING STATIONS, INFORMATION OVERVIEW, THREAT MAP (SA), 3X3 NEWS, HIGH-RISK WATCH, TARGETS, OPEN PROFILER, SEARCH & SITREP, FIGURES & BIAS, LINK GRAPH, GEOINT MAP, CASES, MESH, OFFICERS and SYSTEM ADMIN.",
+        "It is used through a web console that adapts to phone width, and through a desktop app for macOS and Linux; alerts can also be dispatched to a Telegram chat the administrator configures.",
+        "An amber notice ('Some data is unavailable. Empty panels for these sources do not establish that there are no records.') marks panels whose requests failed. An empty panel without that notice means nothing is stored yet.",
+        "Responses from a previous session or officer are discarded, so a panel never shows another operator's results after a switch.",
+        "Feeds for neighbouring countries are deferred work; the product claims no coverage of them."
+      ],
+      "operationalProcedures": [
+        "1. Sign in and read the header: subsystem name in square brackets, clearance badge, COLLECTORS LIVE indicator and FOCUS button.",
+        "2. Move between subsystems with the tab strip, the MENU drawer ('SELECT OPERATIONAL SUBSYSTEM') or, on a phone, the bottom bar.",
+        "3. Before reading any empty panel as 'nothing happened', check for the amber unavailable-data notice and open 'View unavailable sources'.",
+        "4. Use 'Retry data requests' when a source failed, and report persistent failures to the system administrator."
+      ],
+      "takeaways": [
+        "An empty panel is a statement about what is stored, never proof that the situation is calm.",
+        "A failed request is shown as unavailable; never treat it as a zero.",
+        "Peacekeeper is an election-focused product; it does not carry police statistics."
+      ],
+      "guides": [
+        "navigate-subsystems",
+        "sign-in-and-switch-officer"
+      ],
+      "quiz": [
+        {
+          "question": "A panel in VOTING STATIONS is empty and the amber notice lists that source as unavailable. What can you conclude?",
+          "options": [
+            "There are no voting stations in the area",
+            "The stations are all operating normally",
+            "The request for that source failed, so the console cannot tell you whether records exist",
+            "The administrator has deleted the station records"
+          ],
+          "correctIndex": 2,
+          "explanation": "The notice exists precisely so that a failed request is not mistaken for an empty result. Empty panels for unavailable sources do not establish that there are no records."
+        },
+        {
+          "question": "Which product setting makes the VOTING STATIONS subsystem appear in Peacekeeper?",
+          "options": [
+            "The elections flag in the product profile",
+            "The officer's clearance level",
+            "The number of collectors running",
+            "A Telegram dispatch setting"
+          ],
+          "correctIndex": 0,
+          "explanation": "The product profile enables election routes for Peacekeeper; the voting-station API and tab are tied to that flag."
+        },
+        {
+          "question": "What happens to responses that arrive from a previous officer's session after a profile switch?",
+          "options": [
+            "They are merged into the new officer's view",
+            "They are discarded so they cannot populate the current operator's console",
+            "They are shown with a warning banner",
+            "They are emailed to the previous officer"
+          ],
+          "correctIndex": 1,
+          "explanation": "The console discards stale responses from an earlier operator or session so records never cross between officers."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-02-officers-clearance",
+      "moduleNumber": 2,
+      "title": "Officers, Roles, Clearance and the Audit Trail",
+      "subtitle": "Who you are in the console, what you may see, and how access is recorded",
+      "badge": "Access & Governance",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every action in Peacekeeper is attributed to a liaison officer (LO) account. An administrator provisions each officer with an LO number, agency, operational role, clearance level and station. Signing in requires the access passcode the administrator issues; the session then opens an exact, active LO account — named in the sign-in link, remembered from the last session, or the server's configured default. In the code checked, the passcode is a service-level passcode rather than a personal password, so your accountable identity is the LO account the session opens, which the header always shows. The server builds identity only from a signed session that resolves to an exact active stored account: it never guesses an account from a name, never accepts an identity header in place of the session, and never constructs a substitute profile when sign-in fails. Records carry a classification, and the backend filters searches, cases and source records by the caller's clearance.",
+      "keyPoints": [
+        "Roles offered when provisioning: Investigator, Senior Case Officer, Information Analyst and Director / Command Staff.",
+        "Clearance levels rank from LEVEL 1 // CONFIDENTIAL through SECRET and TOP SECRET to LEVEL 4 // TOP SECRET SCI; you see a record only if your clearance meets its classification.",
+        "Switching to another officer's profile is refused by the server unless the caller holds the Director role; every switch is written to the audit trail as SWITCH_OPERATOR.",
+        "An inactive or missing account is refused, not replaced.",
+        "Items marked RESTRICTED can be requested with an operational justification; the request is stored as PENDING and logged in the audit trail with the requesting officer.",
+        "The audit trail records timestamp, officer, agency, action, target, clearance and details. The screen calls it 'IMMUTABLE AUDIT TRAIL'; in the code checked it is an ordinary database table, so treat it as an accountability record, not a tamper-proof ledger."
+      ],
+      "operationalProcedures": [
+        "1. Sign in with the issued passcode and confirm the clearance badge and LO profile in the header are yours.",
+        "2. If you must act under another profile, use the clearance badge switcher only if you are entitled to; expect a refusal otherwise.",
+        "3. For a RESTRICTED item, use 'REQUEST ACCESS TO ND OFFICE', write a real operational justification and transmit it.",
+        "4. Administrators provision officers in OFFICERS with 'PROVISION LIAISON OFFICER' and review 'IMMUTABLE AUDIT TRAIL' regularly.",
+        "5. Press LOCK whenever you leave the workstation."
+      ],
+      "takeaways": [
+        "Never share or record the access passcode in a case, note or guide.",
+        "Your identity is the LO account shown in the header; check it before acting.",
+        "Clearance filtering decides what you can see; it is not a judgement on what you should do with it."
+      ],
+      "guides": [
+        "sign-in-and-switch-officer",
+        "provision-officers",
+        "search-and-sitrep"
+      ],
+      "quiz": [
+        {
+          "question": "An officer without the Director role tries to switch to a colleague's LO profile. What does the server do?",
+          "options": [
+            "Switches silently",
+            "Switches but hides the clearance badge",
+            "Creates a temporary guest profile",
+            "Refuses the switch, because Director access is required to switch operator accounts"
+          ],
+          "correctIndex": 3,
+          "explanation": "The switch endpoint refuses callers who are not Directors unless they are selecting their own account."
+        },
+        {
+          "question": "Sign-in fails because the named LO account is inactive. What does the console do?",
+          "options": [
+            "Refuses sign-in; it does not construct a replacement profile",
+            "Opens a default director profile",
+            "Opens the account with the lowest clearance",
+            "Signs in read-only"
+          ],
+          "correctIndex": 0,
+          "explanation": "The synthetic fallback profile was removed; an inactive or missing account is refused rather than replaced."
+        },
+        {
+          "question": "Why should you check the LO profile in the header after signing in?",
+          "options": [
+            "Because the passcode changes every session",
+            "Because in the code checked the passcode is service-level, and accountability attaches to the exact LO account the session opens",
+            "Because the header controls the collectors",
+            "Because clearance is chosen at random"
+          ],
+          "correctIndex": 1,
+          "explanation": "The passcode gates the console; the audit trail attributes actions to the LO account the session resolves to."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-03-collection-readiness",
+      "moduleNumber": 3,
+      "title": "Collection Sources and Source Readiness",
+      "subtitle": "Where Peacekeeper's information comes from, and what has not been obtained",
+      "badge": "Sources & Data",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Peacekeeper collects from configured TV, radio, press and social sources, from on-demand ingestion of posts and videos, and from hardware receivers on the desktop app. Each collector reports its interval, runs, items captured, last run and status. The product is equally careful about what it does not have. The authoritative electoral-commission voting-station records have not been retrieved or imported: in the 2026-10-10 source-readiness check, the commission's help and GIS landing pages answered over verified HTTPS, but the detailed station-schema and terms requests were refused, so no station records were imported. A local registry generator that synthesises station names, coordinates and capacities exists, and its records were deliberately quarantined, never promoted to the operational dataset. An empty imported dataset establishes neither coverage nor current incident counts.",
+      "keyPoints": [
+        "Collectors: 30-second TV broadcast capture, 30-second radio capture, and polling of feeds and social sources; their telemetry is under SYSTEM ADMIN → 30s COLLECTORS TELEMETRY.",
+        "On-demand ingestion: paste a post or video link in SOCIAL & VIDEO RADAR, or a report and optional CCTV still in HIGH-RISK WATCH.",
+        "VOTING STATIONS shows only imported verified records; 'Awaiting verified voting-station data.' means none have been imported.",
+        "Generated station and incident records are quarantined; they are never promoted to operational data.",
+        "Configured news-channel links can change; a tile that will not play is not evidence that a broadcaster is off air.",
+        "Static channel definitions do not supply a live status; transport information comes only from successful backend responses."
+      ],
+      "operationalProcedures": [
+        "1. Check collector status in SYSTEM ADMIN → 30s COLLECTORS TELEMETRY before relying on a feed.",
+        "2. Use LIVE STREAM and 3X3 NEWS to follow incoming dispatches and broadcasts.",
+        "3. Bring in a specific post or video with 'INGEST VIDEO', linking it to a case only when it belongs there.",
+        "4. In VOTING STATIONS, read the MONITORED STATIONS count as 'imported records', not as national coverage.",
+        "5. Raise missing data with the administrator; do not substitute your own figures."
+      ],
+      "takeaways": [
+        "No verified voting-station dataset has been imported in the source checked; never treat the map as complete.",
+        "Generated data is excluded by design, so gaps are real gaps.",
+        "A configured source is not the same as a working source."
+      ],
+      "guides": [
+        "watch-live-sources",
+        "monitor-voting-stations",
+        "system-administration",
+        "high-risk-watch"
+      ],
+      "quiz": [
+        {
+          "question": "INFORMATION OVERVIEW says 'Awaiting verified voting-station data.' What is the correct reading?",
+          "options": [
+            "All stations are safe",
+            "No verified station records have been imported; generated stations are deliberately excluded",
+            "The map has a rendering fault",
+            "Stations are hidden by your clearance"
+          ],
+          "correctIndex": 1,
+          "explanation": "The authoritative station records were not retrieved, and generated records stay quarantined, so the dataset is empty by honest design."
+        },
+        {
+          "question": "What did the 2026-10-10 source-readiness check establish about the electoral-commission station data?",
+          "options": [
+            "The full dataset was imported",
+            "The data was rebuilt from a local generator",
+            "The landing pages answered, but detailed schema and terms requests were refused and no records were imported",
+            "The data was copied from another system"
+          ],
+          "correctIndex": 2,
+          "explanation": "Only landing pages answered over verified HTTPS; detailed requests returned HTTP 403 and nothing was imported."
+        },
+        {
+          "question": "A 3X3 NEWS tile does not play. What does that tell you?",
+          "options": [
+            "The configured link may have changed; it is not evidence the broadcaster is off air",
+            "The broadcaster has stopped transmitting",
+            "A security incident is under way",
+            "Your clearance is too low"
+          ],
+          "correctIndex": 0,
+          "explanation": "Channel links are configuration and can change; transport status comes only from successful backend responses."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-04-alert-review-gate",
+      "moduleNumber": 4,
+      "title": "Source-Topic Alerts and the Independent Review Gate",
+      "subtitle": "Why an alert appears, why it may be held, and what 'no alerts' does not mean",
+      "badge": "Alerts",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Peacekeeper raises source-topic alerts when a collected source fragment matches a bounded incident topic with explicit domestic context in the same fragment. Keyword matching alone is treated as unverified. An automatic alert is published only after a durable independent review of the exact source snapshot: the review must find the processed text SOURCE_CONSISTENT with the original, approve the topic's relevance, and match the exact source hash and review request. Alerts that lack such a review — including older alerts created before the gate existed — stay stored but are shown as held for review. If the source changes, or a reviewed topic does not match the alert, publication eligibility is lost. Channel branding, stream titles, station coordinates and configured situation geofences can never supply an incident's facts, category or location, and independent transcript and on-screen text topics stay separate alerts, each linked to its own source and triggering text.",
+      "keyPoints": [
+        "Review outcomes you will meet include SOURCE_CONSISTENT, REVIEW_REQUIRED, VERIFICATION_UNAVAILABLE and NOT_REVIEWED; only a consistent, relevance-approved, hash-matched review publishes an automatic alert.",
+        "'NO REVIEWED AUTOMATIC ALERTS' with alerts 'LOADED AWAITING REVIEW' means alerts exist but are held; use 'Review held alert'.",
+        "A reviewed topic cannot authorise a different topic on the same source.",
+        "The alert dossier shows the narrative, entity involved and the complete transcript of the exact triggering source.",
+        "No reviewed alerts does not establish that an area is secure.",
+        "In HIGH-RISK WATCH, sweep results are labelled 'UNVERIFIED SOURCE MATCHES', and a situation's configured geofence never supplies an incident location."
+      ],
+      "operationalProcedures": [
+        "1. On PEACE & STABILITY, read the banner: a reviewed alert shows severity, 'SOURCE TOPIC', time, source and title.",
+        "2. Open the dossier with 'INVESTIGATE' and read the exact triggering text, not just the title.",
+        "3. Decide an action: 'PIN TO ACTIVE CASE DOSSIER', '360° SEARCH & SITREP' or 'BROADCAST FLASH SIGNAL'.",
+        "4. Press 'ACK / RESOLVE' only once the alert has actually been dealt with.",
+        "5. When no reviewed alerts appear, check LIVE STREAM and SEARCH & SITREP directly rather than assuming calm."
+      ],
+      "takeaways": [
+        "Silence from the alert banner is not an all-clear.",
+        "A keyword match is a filter, not a finding.",
+        "A held alert is preserved for review, not discarded and not published."
+      ],
+      "guides": [
+        "review-source-topic-alerts",
+        "high-risk-watch",
+        "search-and-sitrep"
+      ],
+      "quiz": [
+        {
+          "question": "An older alert has no review request tied to its exact source snapshot. How is it presented?",
+          "options": [
+            "Published as a critical alert",
+            "Deleted at startup",
+            "Converted into a case automatically",
+            "Kept in storage and shown as held for review"
+          ],
+          "correctIndex": 3,
+          "explanation": "Legacy alerts without the exact review request and matching snapshot remain stored but appear as held."
+        },
+        {
+          "question": "Which of these can supply an incident's location in Peacekeeper?",
+          "options": [
+            "A situation's configured geofence",
+            "The broadcaster's station coordinates",
+            "None of these; missing locations stay unknown",
+            "The channel's name"
+          ],
+          "correctIndex": 2,
+          "explanation": "Branding, station coordinates and configured geofences cannot supply incident facts or locations; unknown locations stay unknown."
+        },
+        {
+          "question": "The source text behind a reviewed alert is later changed. What happens to the alert's publication eligibility?",
+          "options": [
+            "It is invalidated, because the review was bound to the exact source snapshot",
+            "It is unaffected",
+            "It is upgraded to critical",
+            "It transfers to the new text automatically"
+          ],
+          "correctIndex": 0,
+          "explanation": "Review state is bound to the source hash; a changed source invalidates eligibility."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-05-evidence-custody",
+      "moduleNumber": 5,
+      "title": "Evidence Custody: Hashes, Harvest Jobs and Cases",
+      "subtitle": "What a checksum proves, and the larger thing it does not",
+      "badge": "Evidence",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Peacekeeper keeps evidence tied to exact source identifiers. Harvest jobs run as independent workers, each with its own job identifier and authenticated owner, and every candidate keeps its source URL, capture time, captured source bytes and a reproducible SHA-256 digest; captured RSS responses are stored as content-addressed files. Cases keep an evidence chain of custody with a checksum per item, and the evidence vault stores harvested media with its hash. The rule that governs all of this is simple and strict: byte custody is not verification. A hash establishes that the bytes are the bytes that were captured. It does not establish that the source is true, that footage is authentic, that independent reporting corroborates it, or that it is legally admissible. Broad search candidates never attach themselves to cases, and a failed or partial job is never reported as successful.",
+      "keyPoints": [
+        "Each harvest job shows its query, status, number of collected candidates and job ID; you may run several in parallel.",
+        "Each candidate shows 'Collected: <time> · Source item SHA-256: <hash>' and offers 'Download captured source response'.",
+        "Captured RSS items do not include the article body and do not claim independently corroborated reporting.",
+        "A failed source produces partial completion ('… source requests failed. Results are incomplete.'), never invented results.",
+        "A saved job with no observable worker reports that recovery is required; it is not claimed to be running.",
+        "Media serving requires the exact evidence file; a missing file returns not found rather than a substitute broadcast or synthesised audio."
+      ],
+      "operationalProcedures": [
+        "1. In SEARCH & SITREP, type a specific query and press 'START HARVEST JOB'.",
+        "2. Expand the job and review each candidate's title, content, verification status and hash.",
+        "3. Download the captured source response when you need the exact bytes.",
+        "4. Attach only relevant items to a case, by 'PIN TO CASE' or 'ATTACH EVIDENCE' with the exact intercept ID.",
+        "5. Use 'RUN FOCUSED CASE HARVEST' from CASES to harvest for a specific case, and 'EXPORT MD' to export the dossier."
+      ],
+      "takeaways": [
+        "Byte custody is not verification: a matching hash proves identity of bytes, not truth of content.",
+        "A harvest candidate stays a candidate until a person has reviewed it.",
+        "Never report a partial or failed job as complete."
+      ],
+      "guides": [
+        "run-evidence-harvest-job",
+        "open-case-and-attach-evidence",
+        "search-and-sitrep"
+      ],
+      "quiz": [
+        {
+          "question": "A candidate's recorded SHA-256 matches the bytes you download. What does that establish?",
+          "options": [
+            "The reported event happened",
+            "The footage is authentic",
+            "The bytes are identical to those captured, and nothing more",
+            "The item is admissible in court"
+          ],
+          "correctIndex": 2,
+          "explanation": "A hash establishes byte identity, not source truth, authenticity, corroboration or admissibility."
+        },
+        {
+          "question": "A harvest job reports that some source requests failed. How should you treat its results?",
+          "options": [
+            "As incomplete; start a new job if you need full coverage",
+            "As complete, since some results arrived",
+            "As verified, since they were collected automatically",
+            "As fabricated"
+          ],
+          "correctIndex": 0,
+          "explanation": "Failed sources produce partial completion, and a failed job is never reported as successful."
+        },
+        {
+          "question": "Do broad search candidates attach themselves to a case?",
+          "options": [
+            "Yes, whenever they mention the case title",
+            "Yes, if two models agree",
+            "Only for Directors",
+            "No; an officer attaches evidence to a case deliberately"
+          ],
+          "correctIndex": 3,
+          "explanation": "Broad search hits never attach themselves to cases; attaching is a deliberate officer action."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-06-ai-features-limits",
+      "moduleNumber": 6,
+      "title": "AI, Translation and Model Features — and Their Limits",
+      "subtitle": "Two models, View original, RAG, SITREPs, profiling and photo comparison",
+      "badge": "AI & Analysis",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Peacekeeper uses language models in several places, always with stated limits. Newly collected intercepts pass through a two-model pipeline: one pinned model processes or translates the source and a different, independent model checks the output against the complete original. Provider fallback routing is disabled, so a substituted model, incomplete output, unsupported quotation or outage fails explicitly instead of silently using another model. English text is a derivative keyed to the source identifier and source-text hash; the original is always kept and reachable through View original, and translation can never change evidence, links or geotags. Two models agreeing establishes source-text consistency only — it is not factual authentication or independent corroboration. The same caution applies to the information-base synthesis, the SITREP, target deep research (which compiles stored intercepts that mention a target and cites them), the profiler, and PHOTO RECON, whose perceptual-hash and cosine similarity scores are image-similarity measures, not identity verification. Live model completions have not been verified for this product.",
+      "keyPoints": [
+        "Processing/translation and independent review must use distinct models; fallback routing is off.",
+        "English is shown only after independent review; otherwise the original appears with an explicit unavailable status and a retry.",
+        "'Download source & model review' exports the original text, both assessments, model identifiers, review times and source hash.",
+        "INFORMATION BASE & RAG answers cite the indexed documents they drew on; if the model is unreachable, raw document browsing still works.",
+        "PHOTO RECON compares difference hashes against catalogued images; scores are similarity, not identification.",
+        "The case-match check on ingested items is a model assessment, not factual verification."
+      ],
+      "operationalProcedures": [
+        "1. When reading translated text, open View original for anything you will act on.",
+        "2. In INFORMATION BASE & RAG, check the cited documents under every synthesis before relying on it.",
+        "3. Treat 'GENERATE AI SITREP' and 'RUN DEEP RESEARCH' output as a summary of stored intercepts, not of the world.",
+        "4. Confirm any PHOTO RECON or profiler finding through other evidence before acting on it.",
+        "5. If a model feature errors, ask the administrator to check SYSTEM ADMIN → AI & INTEL ENGINES; do not substitute another tool's output as if it were reviewed."
+      ],
+      "takeaways": [
+        "Model agreement is consistency, not truth.",
+        "A similarity score is never an identification.",
+        "The original source is the record; English is a reviewed derivative of it."
+      ],
+      "guides": [
+        "query-information-base",
+        "search-and-sitrep",
+        "targets-and-profiler",
+        "photo-recon"
+      ],
+      "quiz": [
+        {
+          "question": "The processor model and the independent reviewer both agree a translated passage is faithful. What has been established?",
+          "options": [
+            "That the event is true",
+            "That the passage is consistent with the source text, and nothing about factual truth",
+            "That the source is independently corroborated",
+            "That the item can be published as verified"
+          ],
+          "correctIndex": 1,
+          "explanation": "Two models agreeing establishes source-text consistency only, not authentication or corroboration."
+        },
+        {
+          "question": "The configured reviewer model is unavailable. What does Peacekeeper do?",
+          "options": [
+            "Routes the request to another provider",
+            "Uses the processor model to review itself",
+            "Fails explicitly; fallback routing is disabled and nothing is substituted",
+            "Marks the item as verified"
+          ],
+          "correctIndex": 2,
+          "explanation": "Fallback routing is disabled; outages and substitutions fail explicitly."
+        },
+        {
+          "question": "PHOTO RECON reports a high dHash and cosine similarity to a catalogued portrait. How should you treat it?",
+          "options": [
+            "As an image-similarity lead that must be confirmed by other evidence",
+            "As a confirmed identification",
+            "As grounds to open a case automatically",
+            "As proof the photo is authentic"
+          ],
+          "correctIndex": 0,
+          "explanation": "The scores measure image similarity; they are not identity verification."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-07-cases-geography-sharing",
+      "moduleNumber": 7,
+      "title": "Cases, Geography and Inter-Agency Sharing",
+      "subtitle": "Building a case, reading maps honestly, and what leaves the system",
+      "badge": "Cases & Sharing",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Cases bring sources together under a title, priority, clearance and lead agency, with a timestamped chain of custody. The console's maps are deliberately conservative about place. Saved geography is kept as recorded; bounded place mentions in source text are shown separately and labelled 'place mentioned', not 'incident location'. A source with several distinct place mentions produces no single map pin, and no mention means unknown coordinates. Waypoints you plot on a case map are your own logged sightings. Sharing reaches outside the console in two ways. The inter-agency MESH sends flash alerts and requests for information (RFIs) to peer agencies whose endpoints the administrator has configured; the recorded outcome for each peer is its HTTP response, or 'no endpoint configured', or 'unreachable'. Telegram dispatch sends alerts — optionally with media — to a chat the administrator configures, which is an external service.",
+      "keyPoints": [
+        "Case clearance runs from LEVEL 1 // CONFIDENTIAL to LEVEL 4 // TOP SECRET SCI; only open cases you are cleared for appear when pinning evidence.",
+        "'Share case summary with Inter-Agency Mesh' is a deliberate choice at case creation.",
+        "A place mention is labelled as such; it is not a verified incident location.",
+        "Peers without an endpoint report NOT_CONFIGURED; an offline peer cannot receive alerts.",
+        "Telegram dispatch has a minimum threat level and options to attach media and signal intercepts; the bot token must stay private.",
+        "Voting-station incidents are flagged red with a threat level and details, and returned to green only when marked resolved."
+      ],
+      "operationalProcedures": [
+        "1. Open a case in CASES with a real title, description, priority, clearance, assigned LO and lead agency.",
+        "2. Attach evidence by exact intercept ID or URL, and check each item's checksum in the chain of custody.",
+        "3. On maps, distinguish recorded geography, 'place mentioned' and your own waypoints.",
+        "4. In MESH, use 'DISPATCH FLASH ALERT' or 'CREATE RFI' only with information the recipient agency may receive, and check each peer's heartbeat first.",
+        "5. Administrators configure Telegram dispatch deliberately, remembering that dispatched content leaves the console."
+      ],
+      "takeaways": [
+        "A pin on a map is only as good as its source; mentions are not locations.",
+        "Anything sent through MESH or Telegram leaves your control; share deliberately.",
+        "A peer's HTTP response records transport, not that the peer acted."
+      ],
+      "guides": [
+        "open-case-and-attach-evidence",
+        "inter-agency-mesh",
+        "monitor-voting-stations",
+        "navigate-subsystems",
+        "system-administration"
+      ],
+      "quiz": [
+        {
+          "question": "A source mentions two different towns. Where does Peacekeeper place it on the map?",
+          "options": [
+            "At the first town mentioned",
+            "Halfway between them",
+            "At the broadcaster's location",
+            "Nowhere as a single pin; multiple distinct mentions require review"
+          ],
+          "correctIndex": 3,
+          "explanation": "Multiple distinct mentions produce no arbitrary point; they require review."
+        },
+        {
+          "question": "You send a flash alert and one peer shows 'no endpoint configured'. What happened?",
+          "options": [
+            "The alert was not delivered to that peer, because the administrator has not configured its endpoint",
+            "The peer received and ignored it",
+            "The alert was queued for later",
+            "The peer is under attack"
+          ],
+          "correctIndex": 0,
+          "explanation": "Delivery outcomes are recorded per peer; a peer with no endpoint cannot receive the alert."
+        },
+        {
+          "question": "Why should an administrator be careful when enabling 'Attach Media' for Telegram dispatch?",
+          "options": [
+            "It slows down collectors",
+            "It lowers officers' clearance",
+            "Media is then sent to an external service outside the console",
+            "It deletes the media from the vault"
+          ],
+          "correctIndex": 2,
+          "explanation": "Telegram dispatch sends content to a configured chat on an external service; it leaves the console."
+        }
+      ]
+    },
+    {
+      "id": "peacekeeper-08-desktop-lawful-use",
+      "moduleNumber": 8,
+      "title": "Desktop Operation, Hardware and Responsible Use",
+      "subtitle": "Receivers and capture on the desktop app, administration, and the limits of the record",
+      "badge": "Operations",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The desktop app (macOS and Linux) adds hardware access. Its HARDWARE & DEVICE MANAGER lists USB peripherals and the status of an RTL-SDR receiver, a GSM LTE modem and a DVB-T2 tuner; the operations HUD captures radio, SDR and TV clips as source records you can pin to cases. Hardware errors are shown rather than hidden, and the HUD no longer contains any fixed transcript, hash, timestamp or signal animation — its cards use exact loaded records. Administration covers the operational focus, model configuration, collectors, the evidence vault and Telegram dispatch; deleting a vault file removes downloaded evidence and asks for confirmation. Peacekeeper's own record of its readiness is candid: it has not been released, its release gate is open, and live model completions and deployment are unverified. The console does not check legal authority. Clearance, audit records and hashes support accountability, but they do not establish that a given collection, search or disclosure is lawful; that judgement rests with your organisation's mandate and procedures.",
+      "keyPoints": [
+        "The BUS indicator opens the hardware manager; 'RE-PROBE BUS' rescans after plugging in a device.",
+        "SDR modes include WBFM broadcast, NFM, AM airband and USB; TV capture uses 'RECORD CLIP + OCR'.",
+        "'no receiver attached or registered' means exactly that; captured OCR is never overlaid on another channel.",
+        "SYSTEM ADMIN sections: FOCUS & RECON, AI & INTEL ENGINES, 30s COLLECTORS TELEMETRY, EVIDENCE VAULT and PORT 3162 & NETWORK.",
+        "Pointing the console at another backend is an explicit 'TEST PING' then 'SWITCH & ACTIVATE'.",
+        "The project's release gate (isolated dataset workflows, authentication and isolation tests, evidence hashes after import, user acceptance) is not complete."
+      ],
+      "operationalProcedures": [
+        "1. On the desktop app, open the hardware manager and confirm each device's status before capturing.",
+        "2. Capture radio, SDR or TV clips from 'CAPTURE CONTROLS — RADIO, SDR & TV' and pin them only to the case they belong to.",
+        "3. Administrators reset the focus with 'RESET TO DEFAULT (ELECTIONS)' when custom keywords are no longer needed.",
+        "4. Delete vault files only when certain they are not needed as evidence.",
+        "5. Before collecting, profiling or sharing, confirm you are acting within your organisation's lawful mandate; record the justification where the console asks for one."
+      ],
+      "takeaways": [
+        "Hardware presence is not signal, and a listed device is not a working receiver.",
+        "The console records what you did; it does not decide whether you were permitted to do it.",
+        "Nothing in the console is certified as deployed or operationally verified."
+      ],
+      "guides": [
+        "desktop-app-and-hardware",
+        "system-administration",
+        "provision-officers"
+      ],
+      "quiz": [
+        {
+          "question": "The hardware manager shows 'no receiver attached or registered' for SDR. What should you do?",
+          "options": [
+            "Use the last captured clip as a substitute",
+            "Plug in the receiver, press 'RE-PROBE BUS' and check it appears under detected peripherals",
+            "Switch to a TV channel's OCR instead",
+            "Report a jamming incident"
+          ],
+          "correctIndex": 1,
+          "explanation": "Plug in and re-probe; the console never substitutes captures for a missing device."
+        },
+        {
+          "question": "Does an audit-trail entry show that an action was lawful?",
+          "options": [
+            "Yes, every logged action is lawful",
+            "Yes, if the clearance level was high enough",
+            "Only for Directors",
+            "No; it records who did what, and lawfulness depends on the organisation's mandate and procedures"
+          ],
+          "correctIndex": 3,
+          "explanation": "Accountability records support review, but the console does not check legal authority."
+        },
+        {
+          "question": "According to the project's own records, what is Peacekeeper's release status?",
+          "options": [
+            "Not released; its release gate is open and live model completions and deployment are unverified",
+            "Released and verified in production",
+            "Released to a pilot agency",
+            "Deprecated"
+          ],
+          "correctIndex": 0,
+          "explanation": "The project's status and release gate record it as not released or deployed, with live providers unverified."
+        }
+      ]
+    }
+  ]
+}

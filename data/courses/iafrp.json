@@ -1,0 +1,680 @@
+{
+  "course": {
+    "id": "iafrp",
+    "system": "iafrp",
+    "name": "Integrated Accounting & Financial Reporting Course",
+    "tagline": "Understand how one controlled ledger takes a practice from source evidence to signed-off annual financial statements, and why each control is there.",
+    "summary": "The Integrated Accounting & Financial Reporting Platform gives South African accounting practices one controlled ledger: evidence, governed imports, bookkeeping, bank reconciliation, month close, management packs and annual financial statements, with maker/reviewer separation throughout, a client portal and offline drafts. This course explains the concepts, roles and controls behind those features for practice administrators, directors, accountants, bookkeepers, viewers and client portal users.",
+    "audience": [
+      "Practice administrator",
+      "Director (reviewer / approver)",
+      "Accountant (preparer)",
+      "Bookkeeper",
+      "Viewer",
+      "Client portal user"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "iafrp-01-orientation-access",
+      "moduleNumber": 1,
+      "title": "Orientation: Practices, Roles and Scope",
+      "subtitle": "Who can do what, where, and why the server is the control",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The platform is organised as a practice (the accounting firm), its clients, and each client's legal entities. Access is a role granted within a scope: the whole practice, one client or one entity. Six roles divide the work so that preparing and approving are held by different people: accountants and bookkeepers prepare, directors review and approve, practice administrators manage access, viewers read, and client portal users answer the practice's requests. Every rule is evaluated by the server on every request; a client showing a button is a courtesy, and the server refusing the request is the control. Accounts are joined by invitation, and the roles that approve must use an authenticator app by default.",
+      "keyPoints": [
+        "Roles: Practice administrator, Director (reviewer / approver), Accountant (preparer), Bookkeeper, Viewer and Client portal user.",
+        "Scope narrows a role to the whole practice, one client or one entity; a person can hold several memberships.",
+        "Accountants prepare and never approve. Bookkeepers prepare journals, imports, bank reconciliations, contacts and documents. Viewers read. Directors hold everything except practice administration and unlocking a locked period. Practice administrators hold everything a practice role can hold.",
+        "Answering a client-portal request is the client's own act: no practice role holds that permission, and clients see only their own organisation's requests.",
+        "Someone already in the practice receives a granted role at once; anyone else receives a one-time invitation code, shown once to the administrator and not stored.",
+        "Two-step verification with an authenticator app is required by default for practice administrators and directors; the practice administrator can set which roles must use it.",
+        "Shared demo accounts are immutable while the demo runs, and the UAT environment keeps issued credentials fixed."
+      ],
+      "operationalProcedures": [
+        "1. On the Sign in page enter your Email and Password, or choose I have an invitation code to join with a code.",
+        "2. If your role requires it, set up two-step verification from the QR code and confirm with the code from your app.",
+        "3. If you belong to more than one practice, choose it in the Practice selector.",
+        "4. Practice administrator: open Team & access, enter Email, Name, Role and Scope, and choose Grant access.",
+        "5. Pass on the one-time invitation code; withdraw an unaccepted invitation with Withdraw."
+      ],
+      "takeaways": [
+        "A hidden button is not the control; the server's refusal is.",
+        "A lost invitation code cannot be recovered, only withdrawn and reissued.",
+        "Grant the narrowest scope that lets a person do their work."
+      ],
+      "guides": [
+        "sign-in-and-verification",
+        "practice-administration"
+      ],
+      "quiz": [
+        {
+          "question": "Which scopes can a practice administrator choose when granting access?",
+          "options": [
+            "Read, write or approve",
+            "Any single page of the application",
+            "The whole practice, one client or one entity",
+            "One financial year or one period"
+          ],
+          "correctIndex": 2,
+          "explanation": "Access is a role within a scope: the whole practice, a client or one entity."
+        },
+        {
+          "question": "A new staff member lost their invitation code before using it. What should the administrator do?",
+          "options": [
+            "Withdraw the invitation and issue a new one",
+            "Look the code up on Team & access",
+            "Reset the staff member's password",
+            "Grant them the Viewer role instead"
+          ],
+          "correctIndex": 0,
+          "explanation": "Codes are shown once and not stored, so the only remedy is to withdraw the invitation and issue another."
+        },
+        {
+          "question": "Which role prepares work but never approves it?",
+          "options": [
+            "Director",
+            "Practice administrator",
+            "Client portal user",
+            "Accountant"
+          ],
+          "correctIndex": 3,
+          "explanation": "The accountant is the preparer role; approving is reserved for directors and practice administrators who did not prepare the item."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-02-entities-chart-periods",
+      "moduleNumber": 2,
+      "title": "Entities, the Chart of Accounts and Periods",
+      "subtitle": "Setting up an entity, why accounts are never edited, and how periods control posting",
+      "badge": "Foundations",
+      "duration": "13 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every ledger belongs to a legal entity with a financial year, a functional currency and an effective-dated reporting framework. The chart of accounts uses text codes so leading zeros survive, and once an account is created it cannot be edited: an account that has been used is deactivated with a reason, never deleted, so history always reads the same. Each financial year is divided into twelve monthly periods, and a period is open, closed or locked; only an open period accepts postings. Amounts are held as exact integers of the currency's minor unit, with no floating point anywhere, so rounding never creeps into the books.",
+      "keyPoints": [
+        "An entity records its client, legal type, financial year start, first financial year, functional currency and reporting framework (the IFRS for SMEs Accounting Standard, 2015 edition or third edition), and whether it is publicly accountable.",
+        "Account codes are text, so leading zeros are kept. An account cannot be edited once created; to change a code or name, deactivate it with a reason and add a new one.",
+        "Dimensions such as departments and projects add analysis to lines without multiplying accounts.",
+        "Period transitions: Close (open → closed), Reopen (closed → open, with a reason), Lock (closed → locked, with a reason) and Unlock (locked → closed, with a reason). Only the practice administrator unlocks.",
+        "Posting into a closed or locked period is refused.",
+        "Amounts are integer counts of minor units with the currency's exponent (two decimals for the rand); input with more precision than the currency allows is an error, not rounded."
+      ],
+      "operationalProcedures": [
+        "1. Open Entities and choose Add entity; complete the profile and choose Create entity.",
+        "2. Choose the entity in the Entity selector and open Chart of accounts.",
+        "3. Add each account with Code, Name, Type, Normal balance and optional Tax default, then choose Add account.",
+        "4. Under Add a dimension enter a Code, Name and Kind, choose Add dimension, then Add value.",
+        "5. To stop using an account, choose Deactivate and give a Reason.",
+        "6. Open Periods to see each period's status; Add next financial year opens the next year."
+      ],
+      "takeaways": [
+        "Never try to repurpose an account; deactivate and add a new one.",
+        "A period that is not open accepts no postings, whoever you are.",
+        "Excess precision in an amount is refused, never rounded silently."
+      ],
+      "guides": [
+        "add-entity-and-chart",
+        "month-close-and-packs"
+      ],
+      "quiz": [
+        {
+          "question": "An account was created with the wrong name. How is it corrected?",
+          "options": [
+            "Edit the name on Chart of accounts",
+            "Deactivate it with a reason and add a new account",
+            "Delete it and add it again with the same code",
+            "Ask the director to rename it"
+          ],
+          "correctIndex": 1,
+          "explanation": "Accounts cannot be edited once created; used accounts are deactivated, never deleted, and a new account is added."
+        },
+        {
+          "question": "A journal is dated in a period that has been closed. What happens when it is posted?",
+          "options": [
+            "Posting is refused because only an open period accepts postings",
+            "It posts with a warning",
+            "It posts into the next open period",
+            "It posts if a director approved it"
+          ],
+          "correctIndex": 0,
+          "explanation": "Only an open period accepts postings; closed and locked periods refuse them."
+        },
+        {
+          "question": "Why are account codes stored as text?",
+          "options": [
+            "So they can be translated",
+            "So they sort by name",
+            "So leading zeros are kept",
+            "So they can be changed later"
+          ],
+          "correctIndex": 2,
+          "explanation": "Text codes keep leading zeros that a numeric field would drop."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-03-ledger-maker-reviewer",
+      "moduleNumber": 3,
+      "title": "The Ledger: Prepare, Approve, Post",
+      "subtitle": "Maker/reviewer separation, official numbering and immutable posted lines",
+      "badge": "Ledger",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every entry reaches the ledger the same way: a preparer drafts and submits it, and a different user approves and posts it. The separation is enforced twice, by the service and by constraints in the database itself, so no route around the screen can let someone approve their own journal. A journal gets its official number only when it is posted, so drafts never consume or skip numbers. Posted lines are never changed: a mistake is undone by a linked reversal in an open period. Every journal carries its provenance (who prepared, submitted, approved and posted it) and a hash-chained audit trail, and the trial balance is built from posted journals only.",
+      "keyPoints": [
+        "Journal flow: draft → submitted → approved → posted. A journal must balance before it can be submitted.",
+        "The approver can never be the journal's preparer or submitter, and neither can the user who posts it; the database enforces the same rule.",
+        "A reviewer can return a journal to its preparer with a reason the preparer sees.",
+        "The official number is given at posting.",
+        "Posted lines are immutable; Reverse creates a linked reversal dated in an open period.",
+        "Commands are idempotent, so a retried request does not post twice.",
+        "The audit trail is append-only and hash-chained.",
+        "The trial balance shows opening, debits, credits and closing from posted journals only; drafts waiting on a device are listed beside it, never in it.",
+        "Source documents are attached to the journal as evidence."
+      ],
+      "operationalProcedures": [
+        "1. Open Journals and choose New journal; enter the Date, Reference and Description.",
+        "2. Add lines with an account and a Debit or Credit; choose Save draft or Save and submit for review once it balances.",
+        "3. Attach the source document with Attach file under Evidence.",
+        "4. Reviewer: choose Approve, or Return to preparer with a Reason.",
+        "5. A user who did not prepare or submit it chooses Post to ledger.",
+        "6. To undo, choose Reverse, enter a Reversal date in an open period and choose Create reversal."
+      ],
+      "takeaways": [
+        "You can never approve or post a journal you prepared or submitted.",
+        "Never expect to edit a posted journal; reverse it.",
+        "Only posted journals count in the trial balance."
+      ],
+      "guides": [
+        "journal-prepare-approve-post",
+        "trial-balance-and-exports"
+      ],
+      "quiz": [
+        {
+          "question": "A posted journal used the wrong account. How is it corrected?",
+          "options": [
+            "Edit the posted line",
+            "Delete the journal and post a new one",
+            "Ask the practice administrator to unlock the journal",
+            "Reverse it with a linked reversal in an open period, then post a correct journal"
+          ],
+          "correctIndex": 3,
+          "explanation": "Posted lines are never changed; a linked reversal undoes the entry and keeps the history."
+        },
+        {
+          "question": "An accountant prepared and submitted a journal. Who may post it?",
+          "options": [
+            "The same accountant, once it is approved",
+            "An authorised user who neither prepared nor submitted it",
+            "Any bookkeeper",
+            "A client portal user"
+          ],
+          "correctIndex": 1,
+          "explanation": "The poster, like the approver, must be different from the preparer and the submitter."
+        },
+        {
+          "question": "What does the trial balance include?",
+          "options": [
+            "Posted journals only",
+            "Posted journals and submitted drafts",
+            "Every journal, including drafts on devices",
+            "Approved journals that are not yet posted"
+          ],
+          "correctIndex": 0,
+          "explanation": "The trial balance reads posted journals only; drafts are provisional and never in the balances."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-04-evidence-retention",
+      "moduleNumber": 4,
+      "title": "Evidence, Retention and Legal Holds",
+      "subtitle": "Hashed, encrypted source documents and why nothing is disposed of by default",
+      "badge": "Evidence",
+      "duration": "11 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Source documents are the basis of every entry, so evidence is stored encrypted, identified by its hash and checked on access. A file's contents must match its type, so a file cannot pretend to be something it is not. Retention is deliberately conservative: each record class has a retention period drawn from source statements that need legal review, and nothing in a class is disposed of until the practice records a reviewed period. Legal holds, placed on one document, an entity, a client or the whole practice, override disposal.",
+      "keyPoints": [
+        "Evidence uploads accept PDF, PNG, JPEG or TIFF up to 20 MB; the contents must match the type.",
+        "Each stored file shows its hash; downloads are access-checked.",
+        "Malware scanning of uploads is not built; treat uploaded files accordingly.",
+        "Each upload is given a retention class.",
+        "Nothing in a record class is disposed of until a reviewed retention period, with its legal basis, is recorded. There is no universal purge.",
+        "Legal holds can be placed on a document, an entity, a client or the whole practice, each with a reason, and override disposal; releasing a hold also needs a reason.",
+        "Practice data is encrypted under a data key; changing that key makes existing evidence unreadable, which is why it is treated as a destructive change."
+      ],
+      "operationalProcedures": [
+        "1. Open Evidence for the entity, choose the Retention class and choose Choose file.",
+        "2. Find the file under Stored evidence with its hash, and choose Download to retrieve it.",
+        "3. To protect one document choose Legal hold, give a Reason and choose Place hold.",
+        "4. For a wider hold open Retention, choose the target under Hold, give a Reason and choose Place legal hold.",
+        "5. On Retention, under Record classes, enter Period (years) and Legal basis confirmed by review, then choose Record reviewed period."
+      ],
+      "takeaways": [
+        "A legal hold beats any retention period.",
+        "Retention periods are not decided by the platform; the practice records a reviewed period.",
+        "There is no malware scanning: handle uploaded files with care."
+      ],
+      "guides": [
+        "evidence-and-legal-holds"
+      ],
+      "quiz": [
+        {
+          "question": "A file named invoice.pdf is actually an image of another type. What happens on upload?",
+          "options": [
+            "It is stored as a PDF",
+            "It is refused because its contents must match its type",
+            "It is converted to PDF",
+            "It is stored without a hash"
+          ],
+          "correctIndex": 1,
+          "explanation": "The platform checks the contents against the declared type and refuses a mismatch."
+        },
+        {
+          "question": "When can records in a retention class be disposed of?",
+          "options": [
+            "Immediately after the financial year closes",
+            "After the default period built into the platform",
+            "Only after the practice records a reviewed period, and never while a legal hold applies",
+            "Whenever a director requests it"
+          ],
+          "correctIndex": 2,
+          "explanation": "Nothing is disposed of until a reviewed period is recorded, and legal holds override disposal."
+        },
+        {
+          "question": "Which protection is not built into evidence uploads?",
+          "options": [
+            "Encryption",
+            "Hashing",
+            "Access checks",
+            "Malware scanning"
+          ],
+          "correctIndex": 3,
+          "explanation": "Evidence is encrypted, hashed and access-checked, but malware scanning is not built."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-05-imports-bank-reconciliation",
+      "moduleNumber": 5,
+      "title": "Governed Imports and Bank Reconciliation",
+      "subtitle": "Quarantine, mapping, duplicate control, second-person approval and a provable bank balance",
+      "badge": "Imports & Bank",
+      "duration": "18 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Bulk data enters the ledger only through a governed pipeline, because an import can post thousands of lines at once. A file is first quarantined (hashed, identified by its content rather than its name, and its original kept encrypted), then given a target, a layout and a mapping, previewed and validated with before-and-after totals. The preparer submits it, a different reviewer approves exactly the totals they saw, and the commit is one atomic step through the same posting engine as a hand-entered journal. Bank statements use the same pipeline and must prove that opening balance plus movements equals the closing balance before they can be reconciled.",
+      "keyPoints": [
+        "Accepted formats: CSV, TSV, fixed-width text, XLSX and the canonical JSON/XML documents. Legacy XLS workbooks are refused with a request to save them as XLSX.",
+        "Preview asks about anything ambiguous, such as date order, number formats and signs, rather than guessing.",
+        "Unknown account codes go to a review queue to be created, mapped or rejected; an invoice naming a customer or supplier that does not exist is refused, never created implicitly.",
+        "Duplicate control: a file with the same SHA-256 as an earlier live import is caught whatever its name; repeated business records are detected by key; a record already in the books cannot be overridden; any other override needs a reason and a different reviewer.",
+        "The approval binds the totals fingerprint the reviewer saw; any change afterwards needs a new approval. Approver and committer are different from the preparer.",
+        "Every posted line carries its provenance, and a committed import can be reversed through a linked reversal that is itself approved.",
+        "A statement must pass the proof opening + movements = closing. Reconciliation uses suggested and manual matches; the difference between bank and ledger must be zero before sign-off, and an unmatch stays in history.",
+        "Named bank formats and bank feeds are designed only, not built."
+      ],
+      "operationalProcedures": [
+        "1. Open Imports and choose Choose a file…; the file is checked and kept in quarantine.",
+        "2. Set the Target, then the Layout (Preview with this layout, Confirm layout).",
+        "3. Map fields or apply a saved mapping, answer the preview's questions and check the control totals.",
+        "4. Resolve the Review queues, then choose Submit for approval.",
+        "5. Reviewer: choose Approve these totals and the commit button, or Return to the preparer.",
+        "6. On Bank choose Import a statement, then Reconcile; accept suggested matches, match the rest, confirm a zero difference and choose Sign off."
+      ],
+      "takeaways": [
+        "An import is approved on its totals; change anything and approve again.",
+        "Imports never invent customers, suppliers or accounts.",
+        "A bank reconciliation with a non-zero difference cannot be signed off."
+      ],
+      "guides": [
+        "governed-import",
+        "bank-reconciliation"
+      ],
+      "quiz": [
+        {
+          "question": "A bookkeeper renames a file that was already imported and uploads it again. What happens?",
+          "options": [
+            "Duplicate control catches it by its SHA-256, whatever its name",
+            "It imports normally because the name is new",
+            "It replaces the earlier import",
+            "It is accepted but flagged for the client"
+          ],
+          "correctIndex": 0,
+          "explanation": "Files are identified by content hash; the same hash as a live import is a duplicate regardless of the file name."
+        },
+        {
+          "question": "A reviewer approved an import's totals, then the preparer corrected the mapping. What now?",
+          "options": [
+            "The approval still stands",
+            "The import commits automatically",
+            "A new approval is needed because the approval binds the totals fingerprint it saw",
+            "The practice administrator must unlock the import"
+          ],
+          "correctIndex": 2,
+          "explanation": "An approval applies to exactly the totals fingerprint it saw; any change requires approval again."
+        },
+        {
+          "question": "Which check must a bank statement pass before reconciliation?",
+          "options": [
+            "Every line must match an invoice",
+            "Opening balance plus movements must equal the closing balance",
+            "The statement must be in a named bank format",
+            "The statement must be signed by the client"
+          ],
+          "correctIndex": 1,
+          "explanation": "The statement proof opening + movements = closing must balance."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-06-bookkeeping",
+      "moduleNumber": 6,
+      "title": "Bookkeeping: Contacts, Documents, VAT, Budgets and Assets",
+      "subtitle": "Fraud-resistant bank details, gapless numbering, allocations and the VAT workpaper",
+      "badge": "Bookkeeping",
+      "duration": "18 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The bookkeeping modules sit on the same ledger and the same rules. Every sales and supplier document posts through the posting engine, so subledgers and the general ledger cannot drift apart: ageing at any date equals the control account. Controls target known risks. A supplier's bank details become usable only after a different user approves the change, so a payment cannot be redirected by one person. Official document numbers are issued only at issuance, from a gapless per-entity series, so drafts never leave gaps. VAT is handled through effective-dated tax codes and a VAT workpaper per period, which supports a return but is not one.",
+      "keyPoints": [
+        "Customers and suppliers are checked for possible duplicates; saving anyway needs a reason and flags the matches for review.",
+        "Bank-detail changes stay inactive until a different authorised user approves them; only approved details can be chosen to pay to.",
+        "Quotes, invoices, credit notes, supplier invoices and supplier returns: a different user issues or approves what someone else prepared, and the official number comes from the entity's gapless series at issuance.",
+        "Supplier invoices are checked for duplicates, with the supplier's reference compared ignoring case, spaces and punctuation; a possible duplicate is held for review.",
+        "Receipts and payments are allocated to one or more invoices; reversing an allocation keeps it in the history. Ageing at any date reconciles to the control account.",
+        "Tax codes are effective-dated with explicit treatments; a rate change is a new version. The VAT workpaper is prepared per period, reviewed, and must be re-prepared if the ledger moves; it is not a VAT return.",
+        "Budgets are versioned and frozen on approval; recurring entries need approval and each occurrence posts exactly once; depreciation runs once per period and is posted by a different user."
+      ],
+      "operationalProcedures": [
+        "1. Open Bookkeeping setup and set the control, VAT and cashbook accounts.",
+        "2. Open Customers & suppliers, choose New contact, and use Request a change for bank details; a different user chooses Approve.",
+        "3. Open Sales and choose New invoice; Submit for approval; a different authorised user chooses Issue.",
+        "4. Open Cashbook, record a receipt or payment, have it approved and posted, then Allocate it.",
+        "5. Open Ageing and check the Reconciliation to the control account.",
+        "6. Open VAT, set up tax codes, choose Open workpaper and Prepare workpaper; the reviewer chooses Mark reviewed."
+      ],
+      "takeaways": [
+        "One person can never both request and approve a change to bank details.",
+        "Document numbers are issued, never reserved by drafts.",
+        "A VAT workpaper supports a return; it is not the return."
+      ],
+      "guides": [
+        "customers-and-suppliers",
+        "invoices-receipts-allocation",
+        "vat-workpaper",
+        "budgets-recurring-assets"
+      ],
+      "quiz": [
+        {
+          "question": "When does a sales invoice get its official number?",
+          "options": [
+            "When it is issued, from the entity's gapless series",
+            "When the draft is saved",
+            "When it is submitted for approval",
+            "When the customer pays it"
+          ],
+          "correctIndex": 0,
+          "explanation": "Official numbers are allocated only at issuance from a gapless per-entity series, so drafts never leave gaps."
+        },
+        {
+          "question": "Why must a different user approve a change to a supplier's bank details?",
+          "options": [
+            "To update the ageing report",
+            "To calculate VAT on payments",
+            "Because suppliers cannot be edited",
+            "So that one person alone cannot redirect payments to new bank details"
+          ],
+          "correctIndex": 3,
+          "explanation": "Bank-detail changes stay inactive until a different authorised user approves them, and only approved details can be paid to."
+        },
+        {
+          "question": "What is the VAT workpaper?",
+          "options": [
+            "The VAT return submitted to the revenue authority",
+            "A list of tax codes",
+            "A prepared and reviewed workpaper for a period that supports VAT work, not a VAT return",
+            "A report of customer invoices only"
+          ],
+          "correctIndex": 2,
+          "explanation": "The platform prepares a VAT workpaper per period, with a content hash; it is explicitly not a VAT return."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-07-month-close-packs",
+      "moduleNumber": 7,
+      "title": "Month Close and Management Packs",
+      "subtitle": "Blocking controls, attestation, locking periods and frozen packs",
+      "badge": "Close & Reporting",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Closing a month is a set of checks the platform runs rather than a date on a calendar. A month-close checklist evaluates blocking controls and refuses to close or lock the period while any is unresolved. One control, the bank reconciliation, can be resolved by a person's attestation, recording what was checked and where the evidence is, when the system cannot evaluate it. Once closed, a period can be locked to stop all further change; correcting it means reopening with a reason, and a locked period must first be unlocked by the practice administrator. Management packs are built from a frozen trial-balance snapshot, so the figures in an approved pack never move.",
+      "keyPoints": [
+        "Blocking controls: no journals awaiting review; no documents awaiting approval; receivables and payables reconcile to their control accounts; the fixed asset register reconciles to the ledger; depreciation is posted; recurring entries due are executed; the VAT workpaper is prepared and still agrees with the ledger; every bank account with imported statements is reconciled and signed off as at the period end.",
+        "Only the bank reconciliation control may be resolved by attestation.",
+        "Period changes carry reasons (reopen, lock and unlock) and are kept in the period history.",
+        "Only the practice administrator can unlock a locked period; directors and administrators close, lock and reopen.",
+        "Period actions need a connection.",
+        "A management pack uses a frozen trial-balance snapshot, an optional approved budget version for comparison, a tie-out against its snapshot and commentary; once approved it is frozen and exports to PDF or Excel."
+      ],
+      "operationalProcedures": [
+        "1. Open Month close and choose the Period.",
+        "2. Work through the checklist; where allowed choose Attest, write What was checked and where the evidence is, and choose Record attestation.",
+        "3. When the blocking controls pass choose Close, and Lock with a reason if no further change is allowed.",
+        "4. To correct a closed period choose Reopen with a reason; a locked period needs Unlock first.",
+        "5. Open Management packs, choose New pack, choose the Period and budget, and choose Create pack.",
+        "6. Check the Tie-out, add commentary and choose Submit for approval; the reviewer chooses Approve pack."
+      ],
+      "takeaways": [
+        "A period that fails a blocking control cannot be closed, by anyone.",
+        "Attestation is a recorded statement of what was checked, not a way around the checklist.",
+        "An approved pack is frozen; a later change needs a new pack."
+      ],
+      "guides": [
+        "month-close-and-packs",
+        "bank-reconciliation"
+      ],
+      "quiz": [
+        {
+          "question": "Which month-close control can be resolved by a person's attestation?",
+          "options": [
+            "Receivables reconcile to their control account",
+            "Bank reconciliation completed",
+            "Depreciation posted for the period",
+            "No journals awaiting review"
+          ],
+          "correctIndex": 1,
+          "explanation": "Only the bank reconciliation control is attestable; the others are evaluated by the system."
+        },
+        {
+          "question": "An error is found in a locked period. What is the path to correct it?",
+          "options": [
+            "Post directly into the locked period",
+            "Delete the period and recreate it",
+            "A director reopens the locked period",
+            "The practice administrator unlocks it, then it is reopened with a reason"
+          ],
+          "correctIndex": 3,
+          "explanation": "A locked period returns to closed only through Unlock (practice administrator, with a reason), then Reopen with a reason."
+        },
+        {
+          "question": "Where do a management pack's figures come from?",
+          "options": [
+            "A frozen trial-balance snapshot, tied out in the pack",
+            "The live ledger, recalculated each time the pack is opened",
+            "Drafts waiting on devices",
+            "The client's own spreadsheet"
+          ],
+          "correctIndex": 0,
+          "explanation": "Packs are built from a frozen snapshot so an approved pack never changes."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-08-annual-financial-statements",
+      "moduleNumber": 8,
+      "title": "Annual Financial Statements and the Client Portal",
+      "subtitle": "Snapshots, the mapping catalogue, the bridge, materiality and issued packages",
+      "badge": "Annual Reporting",
+      "duration": "20 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Annual financial statements are prepared in an engagement for one entity and financial year, built on a hashed snapshot of the ledger. The scope is stated precisely: South African private companies and close corporations that are not publicly accountable, under the IFRS for SMEs Accounting Standard, with wording the product writes itself and that no standards owner has reviewed. Every account with a balance must be mapped to a reporting concept, and the bridge proves the statements come from the ledger with a zero difference. Approvals and sign-offs bind the exact version and content they saw, and a material change to the ledger afterwards invalidates them. Issued packages never change. The client portal lets the practice request documents and answers from the client with an owner, due date and status.",
+      "keyPoints": [
+        "Scope: South African private companies and close corporations that are not publicly accountable, under the IFRS for SMEs Accounting Standard (2015 edition or third edition).",
+        "The mapping catalogue is effective-dated and versioned and is approved by a different user; an account with a balance and no concept blocks the statements.",
+        "The bridge: operational trial balance + posted accounting adjustments + presentation reclassifications = the financial statements trial balance, with a zero difference by account and by line.",
+        "Working papers: lead schedules are generated; reconciliations, memos and checklists are written. A sign-off (prepared, then reviewed by a different user) binds the paper's version and content hash; editing supersedes it.",
+        "Materiality is set per engagement by a reviewer (a proposed default awaits a decision). A posting at or above it after approval invalidates the affected approvals and marks drafts out of date, blocking approval and issue.",
+        "Review issues have an owner, a due date and a status; issue waits for every one to be closed.",
+        "An authorised director issues a PDF, a Word document and a signed manifest. Issued packages never change; reopening prepares a new version beside them.",
+        "Roll-forward posts the year-end transfer to retained earnings as one journal on the new year's first day, approved by a director.",
+        "The client portal sends in-app notifications only, never e-mail; accepted uploads are stored as evidence with their SHA-256 hash."
+      ],
+      "operationalProcedures": [
+        "1. Open Annual statements and choose Open an engagement with the Financial year, Presentation and Materiality.",
+        "2. Open Mapping catalogue, create a draft, map every account with a balance; a different user approves the version.",
+        "3. Take a new snapshot if needed and choose Generate statements; check the Difference is 0 on Trial balance & bridge.",
+        "4. Write working papers and sign them as preparer and reviewer; answer the Questionnaire.",
+        "5. Raise and resolve review issues; the reviewer approves the statements.",
+        "6. On Issue, enter the directors' approval date and choose Approve and issue; use Client requests to request documents from the client."
+      ],
+      "takeaways": [
+        "No statement line exists without a trace to its accounts, journals and evidence.",
+        "A material ledger change after approval undoes the approval; take a new snapshot and approve again.",
+        "Never alter an issued package; reopen to prepare a new version."
+      ],
+      "guides": [
+        "annual-financial-statements",
+        "client-portal"
+      ],
+      "quiz": [
+        {
+          "question": "Approved statements now show Out of date. What is the most likely cause?",
+          "options": [
+            "The client uploaded a document",
+            "A review issue was closed",
+            "A posting at or above the engagement's materiality changed a linked balance after approval",
+            "The mapping catalogue was viewed"
+          ],
+          "correctIndex": 2,
+          "explanation": "A material change after approval invalidates the affected approvals and marks drafts out of date; take a new snapshot, regenerate and approve again."
+        },
+        {
+          "question": "What does the bridge prove?",
+          "options": [
+            "Operational trial balance + posted adjustments + presentation reclassifications equals the financial statements trial balance, with zero difference",
+            "That every invoice has been paid",
+            "That the VAT workpaper agrees with the ledger",
+            "That every client request is completed"
+          ],
+          "correctIndex": 0,
+          "explanation": "The bridge shows, with a zero difference by account and line, that the statements come from the ledger."
+        },
+        {
+          "question": "An issued package contains an error. What happens?",
+          "options": [
+            "The package is edited and re-signed",
+            "The issued package is deleted",
+            "The client portal user corrects it",
+            "The engagement is reopened to prepare a new version beside it; the issued package never changes"
+          ],
+          "correctIndex": 3,
+          "explanation": "Issued packages never change; reopening prepares a new version beside them."
+        }
+      ]
+    },
+    {
+      "id": "iafrp-09-offline-devices-exports",
+      "moduleNumber": 9,
+      "title": "Offline Drafts, Devices, Exports and Recovery",
+      "subtitle": "What can be captured without a connection, and how the practice keeps its data portable",
+      "badge": "Offline & Data",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The platform can keep working without a connection, but only for drafts. After one online sign-in on a device where the user has turned offline drafts on, journals, invoices, cashbook entries, import files, working papers, working-paper notes and questionnaire answers can be captured into an encrypted outbox as typed commands. Nothing that submits, approves, posts, controls a period, issues or changes access is ever queued. When the device reconnects, the server replays each command at most once and checks access, device, period and version again; a conflict keeps both versions. The same web client runs inside a Windows desktop shell, which is built but not released. For portability, the practice can export its core data with a hashed manifest.",
+      "keyPoints": [
+        "Offline drafts have no number, are not posted and appear in no report; cached reports show as provisional with their as-of time.",
+        "Import files read offline use the server's own parsers and are read and checked again by the server after upload.",
+        "Conflict options: apply this proposal to the draft, keep the server version, or save as a separate new draft.",
+        "The offline grant is time-limited: the practice administrator sets the practice's grant hours, capped by a platform maximum that is still a proposal awaiting a decision.",
+        "Revoking a device ends its sessions and grant and refuses its queued drafts; data already downloaded to a device cannot be recalled.",
+        "Attachments captured offline upload in resumable pieces; a partial upload is never evidence, and an evidence record exists only once every byte matches its declared SHA-256.",
+        "The desktop app enforces a minimum version: the server refuses writes from older builds.",
+        "Exports cover the ledger, trial balance, chart, dimensions, evidence index and import receipts as CSV, XLSX or JSON in a ZIP with a manifest of hashes; customers, suppliers, open items and reports are not in the export in this version.",
+        "Backups and a local restore drill exist; the recovery-time and recovery-point targets are not shown as met."
+      ],
+      "operationalProcedures": [
+        "1. While online, open Offline & sync, choose Turn on offline drafts and Download for offline; note the Offline until time.",
+        "2. While offline, save drafts on the device, or Read a file… and Queue for when I am back online on Imports.",
+        "3. When back online choose Sync now, and resolve Offline conflicts.",
+        "4. Practice administrator: set the Offline grant (hours) on Team & access and revoke lost devices on Devices.",
+        "5. Open Exports, tick the Datasets and Formats and choose Download package."
+      ],
+      "takeaways": [
+        "Nothing is ever submitted, approved, posted or issued from an offline queue.",
+        "Revocation stops further access but cannot recall what a device already holds.",
+        "A partial upload is never evidence."
+      ],
+      "guides": [
+        "offline-drafts-and-desktop",
+        "practice-administration",
+        "trial-balance-and-exports"
+      ],
+      "quiz": [
+        {
+          "question": "A laptop with queued offline drafts is reported stolen and the administrator revokes it. What follows?",
+          "options": [
+            "The drafts are posted before revocation takes effect",
+            "Its sessions and grant end and its queued drafts are refused; data already downloaded cannot be recalled",
+            "All data on the laptop is erased remotely",
+            "Nothing until the user signs out"
+          ],
+          "correctIndex": 1,
+          "explanation": "Revocation ends sessions and the grant and refuses queued drafts; it cannot recall data already on the device."
+        },
+        {
+          "question": "A draft edited offline conflicts with a newer server version. Which option is not offered?",
+          "options": [
+            "Apply this proposal to the draft",
+            "Keep the server version",
+            "Save as a separate new draft",
+            "Post the device version over the server version"
+          ],
+          "correctIndex": 3,
+          "explanation": "Both versions are kept and the user chooses among the allowed options; nothing posts from the device."
+        },
+        {
+          "question": "What does manifest.json in an export package let you do?",
+          "options": [
+            "Re-import customers and suppliers",
+            "Approve the exported journals",
+            "Check from its hashes that the files are complete and unchanged",
+            "Unlock closed periods"
+          ],
+          "correctIndex": 2,
+          "explanation": "The manifest carries the hashes that let anyone verify the exported files are complete and unchanged."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "course": {
+    "id": "basimo",
+    "system": "basimo",
+    "name": "BASIMO Console Accountability Course",
+    "tagline": "Use the BASIMO console accountably: navigation, officer profiles, the audit trail and the desktop app.",
+    "summary": "BASIMO is a monitoring console used by liaison officers, analysts and command staff through the web console or the desktop app. This course covers only the accountable use of the console: finding your way, how officer profiles and clearance are provisioned, reading the audit trail, and installing the desktop app. Operational monitoring features are out of its scope.",
+    "audience": [
+      "Liaison officer",
+      "Director / command staff",
+      "Workstation administrator"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "basimo-01-console-orientation",
+      "moduleNumber": 1,
+      "title": "Finding your way and knowing who you are",
+      "subtitle": "The console layout, status indicators and your officer badge",
+      "badge": "Foundations",
+      "duration": "10 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The console sits behind the platform access gate, issued by your administrator. Once inside, the header names the section you are in, shows whether the live connection is up, and carries your LO badge, which shows your agency and clearance.",
+      "keyPoints": [
+        "COLLECTORS LIVE (green) means the live connection is up; CONNECTING... (amber) means it is reconnecting.",
+        "Sections are reached from the tab bar on a desktop screen, from MENU (the COMMAND NAVIGATION MATRIX drawer), or from the bottom bar on a phone.",
+        "OFFICERS and ADMIN are reached from buttons at the top right, not the tab bar.",
+        "LOCK signs you out of the console."
+      ],
+      "operationalProcedures": [
+        "1. Pass the access gate with the access your administrator issued.",
+        "2. Check your LO badge shows your own agency and clearance.",
+        "3. Navigate with the tab bar, MENU or the phone bottom bar.",
+        "4. Click LOCK when you leave the workstation."
+      ],
+      "takeaways": [
+        "Access keys and passwords are never shared; ask your administrator.",
+        "Lock the console whenever you step away."
+      ],
+      "guides": [
+        "find-your-way-around"
+      ],
+      "quiz": [
+        {
+          "question": "What does an amber CONNECTING... indicator mean?",
+          "options": [
+            "The live connection is reconnecting",
+            "The console is locked",
+            "Your clearance is being checked",
+            "A new alarm has arrived"
+          ],
+          "correctIndex": 0,
+          "explanation": "The console retries every few seconds; use Sync All Telemetry and tell the administrator if it persists."
+        },
+        {
+          "question": "Where do you check your agency and clearance?",
+          "options": [
+            "The ADMIN screen",
+            "Your LO badge at the top right",
+            "The tab bar",
+            "The audit trail"
+          ],
+          "correctIndex": 1,
+          "explanation": "Click the LO badge to see them."
+        },
+        {
+          "question": "What should you do when leaving the workstation?",
+          "options": [
+            "Close the browser tab only",
+            "Switch to another officer's profile",
+            "Click LOCK",
+            "Nothing; sessions expire"
+          ],
+          "correctIndex": 2,
+          "explanation": "LOCK signs you out of the console."
+        }
+      ]
+    },
+    {
+      "id": "basimo-02-officers-and-audit",
+      "moduleNumber": 2,
+      "title": "Officer profiles, clearance and the audit trail",
+      "subtitle": "Who is provisioned, at what clearance, and what is recorded",
+      "badge": "Accountability",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "A director provisions each liaison officer in the LIAISON OFFICERS & CLEARANCE GOVERNANCE screen with an LO number, agency, role, clearance level and station. The same screen shows the audit trail of access, recording timestamp, officer, agency, action, target, clearance and details for each event.",
+      "keyPoints": [
+        "Roles are Investigator, Senior Case Officer, Intelligence Analyst and Director / Command Staff.",
+        "Clearance is set per officer at provisioning; give each officer the lowest clearance their work needs.",
+        "SWITCH PERSPECTIVE lets an officer work from another officer's profile, so use it only where your unit's policy permits and note why.",
+        "Read the audit trail as an accountability record that supervisors review regularly."
+      ],
+      "operationalProcedures": [
+        "1. Click OFFICERS, then PROVISION LIAISON OFFICER.",
+        "2. Fill in the officer's details, role and clearance, and click REGISTER OFFICER.",
+        "3. Scroll to the audit trail and review recent access events.",
+        "4. Click Refresh Directory if a new officer does not appear."
+      ],
+      "takeaways": [
+        "Provision with least privilege.",
+        "Supervisors review the audit trail; unexplained access is raised, not ignored."
+      ],
+      "guides": [
+        "manage-liaison-officers"
+      ],
+      "quiz": [
+        {
+          "question": "Who provisions liaison officers?",
+          "options": [
+            "Any signed-in user",
+            "The desktop app automatically",
+            "The access gate",
+            "A director, from the OFFICERS screen"
+          ],
+          "correctIndex": 3,
+          "explanation": "Provisioning is a director's task in the governance screen."
+        },
+        {
+          "question": "What clearance should a new officer receive?",
+          "options": [
+            "The lowest their work needs",
+            "The highest available, to avoid delays",
+            "The same as the director",
+            "None until their first case"
+          ],
+          "correctIndex": 0,
+          "explanation": "Least privilege limits what an account can reach."
+        },
+        {
+          "question": "What does the audit trail record for each event?",
+          "options": [
+            "Only the time",
+            "Timestamp, officer, agency, action, target, clearance and details",
+            "Only failed sign-ins",
+            "Only director actions"
+          ],
+          "correctIndex": 1,
+          "explanation": "These are the trail's columns."
+        }
+      ]
+    },
+    {
+      "id": "basimo-03-desktop-app",
+      "moduleNumber": 3,
+      "title": "The desktop app and its devices",
+      "subtitle": "Installing Basimo.app and checking attached hardware",
+      "badge": "Operations",
+      "duration": "8 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Basimo.app gives the same sections as the web console in its own window on a Mac. A workstation administrator installs it from the project folder; the install removes any previous copy first, so only one version is ever installed.",
+      "keyPoints": [
+        "./start.sh install builds the app and removes any previous Basimo.app from /Applications and ~/Applications before installing.",
+        "The BUS button opens the HARDWARE & DEVICE MANAGER, which lists the device types the machine can see.",
+        "RE-PROBE BUS rescans after a device is plugged in; a device that is not present is not listed."
+      ],
+      "operationalProcedures": [
+        "1. Run ./start.sh install in the project folder.",
+        "2. Open the app from /Applications or with ./start.sh run.",
+        "3. Click BUS to check attached devices; RE-PROBE BUS after changes."
+      ],
+      "takeaways": [
+        "One installed copy per machine; never install over an old build.",
+        "Install only on workstations your unit has approved."
+      ],
+      "guides": [
+        "install-the-desktop-app"
+      ],
+      "quiz": [
+        {
+          "question": "What does the install step do with an older Basimo.app?",
+          "options": [
+            "Keeps it beside the new one",
+            "Renames it",
+            "Removes it before installing",
+            "Moves it to the Desktop"
+          ],
+          "correctIndex": 2,
+          "explanation": "The install removes previous copies so only one version exists."
+        },
+        {
+          "question": "Where do you see which devices the machine can see?",
+          "options": [
+            "The ADMIN screen",
+            "The audit trail",
+            "The LO badge",
+            "The HARDWARE & DEVICE MANAGER from the BUS button"
+          ],
+          "correctIndex": 3,
+          "explanation": "BUS opens the device manager."
+        },
+        {
+          "question": "A device you plugged in is not listed. What first?",
+          "options": [
+            "Click RE-PROBE BUS",
+            "Reinstall the app",
+            "Switch officer profile",
+            "Lock the console"
+          ],
+          "correctIndex": 0,
+          "explanation": "Re-probing rescans the bus."
+        }
+      ]
+    }
+  ]
+}

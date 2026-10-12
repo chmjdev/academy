@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import http from "node:http";
 import test from "node:test";
+import fs from "node:fs";
+import path from "node:path";
 import { createApp } from "../src/server.js";
+import { loadGuides, validateSystem } from "../src/guides.js";
+import { loadCourses } from "../src/courses.js";
+
+const GUIDES_DIR = new URL("../data/guides/", import.meta.url).pathname;
+const COURSES_DIR = new URL("../data/courses/", import.meta.url).pathname;
+const CURRICULUM = JSON.parse(fs.readFileSync(new URL("../data/curriculum.json", import.meta.url), "utf8"));
+const courseFiles = () => fs.readdirSync(COURSES_DIR).filter(f => f.endsWith(".json"));
 
 test("ANC CC Ops Academy server test suite", async (t) => {
   const app = createApp();
@@ -111,4 +120,108 @@ test("ANC CC Ops Academy server test suite", async (t) => {
     assert.ok(html.includes("CEDEC AFRICA"));
     assert.ok(html.includes("10 Sponsored Student Seats"));
   });
+
+  await t.test("GET /api/guides lists every Govtech system's how-to guides", async () => {
+    const res = await fetch(`${base}/api/guides`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    const files = fs.readdirSync(GUIDES_DIR).filter(f => f.endsWith(".json"));
+    assert.equal(body.systems.length, files.length);
+    assert.ok(body.guidesCount > 0);
+    for (const s of body.systems) assert.ok(s.guidesCount > 0, s.id);
+  });
+
+  await t.test("GET /api/guides/:system/:guide returns one guide, 404 otherwise", async () => {
+    const index = await (await fetch(`${base}/api/guides`)).json();
+    const sys = index.systems[0];
+    const res = await fetch(`${base}/api/guides/${sys.id}/${sys.guides[0].id}`);
+    assert.equal(res.status, 200);
+    const guide = await res.json();
+    assert.ok(guide.steps.length > 0);
+    assert.equal((await fetch(`${base}/api/guides/${sys.id}/no-such-guide`)).status, 404);
+    assert.equal((await fetch(`${base}/api/guides/no-such-system`)).status, 404);
+  });
+
+  await t.test("GET /guides/... serves the guides library page", async () => {
+    for (const p of ["/guides", "/guides/newt", "/guides/newt/register-an-asset"]) {
+      const res = await fetch(`${base}${p}`);
+      assert.equal(res.status, 200, p);
+      const html = await res.text();
+      assert.ok(html.includes("How-to Guides"), p);
+    }
+    const home = await (await fetch(`${base}/`)).text();
+    assert.ok(home.includes('href="/guides"'));
+  });
+
+  await t.test("GET /api/courses lists ANC CC Ops first, then one course per system file", async () => {
+    const body = await (await fetch(`${base}/api/courses`)).json();
+    assert.equal(body.courses[0].id, "ancops");
+    assert.equal(body.courses[0].lessonsCount, 15);
+    assert.equal(body.courses.length, 1 + courseFiles().length);
+  });
+
+  await t.test("every course page renders, and its quizzes grade through /api/quiz", async () => {
+    const { courses } = await (await fetch(`${base}/api/courses`)).json();
+    for (const c of courses) {
+      const page = c.id === "ancops" ? "/" : `/course/${c.id}`;
+      const res = await fetch(`${base}${page}`);
+      assert.equal(res.status, 200, page);
+      assert.ok((await res.text()).includes('href="/courses"'), page);
+      const full = await (await fetch(`${base}/api/courses/${c.id}`)).json();
+      const lesson = full.lessons.find(l => (l.quiz || []).length);
+      if (!lesson) continue;
+      const answers = Object.fromEntries(lesson.quiz.map((q, i) => [i, q.correctIndex]));
+      const graded = await (await fetch(`${base}/api/quiz/${lesson.id}`, {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ answers })
+      })).json();
+      assert.equal(graded.scorePercent, 100, lesson.id);
+    }
+    assert.equal((await fetch(`${base}/course/no-such-course`)).status, 404);
+    assert.equal((await fetch(`${base}/courses`)).status, 200);
+  });
+
+  await t.test("healthz reports the loaded guides", async () => {
+    const body = await (await fetch(`${base}/healthz`)).json();
+    assert.ok(body.guideSystems >= 1);
+    assert.ok(body.guidesCount >= body.guideSystems);
+  });
+});
+
+test("every guide file is valid and carries no secrets or server addresses", () => {
+  const { systems, errors } = loadGuides(GUIDES_DIR);
+  assert.deepEqual(errors, []);
+  assert.ok(systems.length > 0);
+  for (const file of fs.readdirSync(GUIDES_DIR).filter(f => f.endsWith(".json"))) {
+    const text = fs.readFileSync(path.join(GUIDES_DIR, file), "utf8");
+    assert.doesNotMatch(text, /\b\d{1,3}(\.\d{1,3}){3}\b/, `${file}: IP address`);
+    assert.doesNotMatch(text, /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/i, `${file}: email address`);
+    assert.doesNotMatch(text, /BEGIN [A-Z ]*PRIVATE KEY|htpasswd/i, `${file}: key material`);
+  }
+});
+
+test("validateSystem rejects a guide without steps", () => {
+  const errors = validateSystem({ id: "x", name: "X", summary: "s", guides: [{ id: "a", title: "A", steps: [] }] }, "x.json");
+  assert.equal(errors.length, 1);
+});
+
+test("every course loads, links only to guides that exist, and carries no secrets", () => {
+  const { courses, errors } = loadCourses(CURRICULUM, COURSES_DIR);
+  assert.deepEqual(errors, []);
+  const { systems } = loadGuides(GUIDES_DIR);
+  for (const c of courses) {
+    const sys = systems.find(s => s.id === c.system);
+    for (const l of c.lessons) {
+      for (const id of l.guides || []) {
+        assert.ok(sys && sys.guides.some(g => g.id === id), `${c.id}/${l.id}: unknown guide "${id}"`);
+      }
+      for (const q of l.quiz || []) {
+        assert.equal(q.options.length, 4, `${l.id}: quiz needs 4 options`);
+      }
+    }
+  }
+  for (const file of courseFiles()) {
+    const text = fs.readFileSync(path.join(COURSES_DIR, file), "utf8");
+    assert.doesNotMatch(text, /\b\d{1,3}(\.\d{1,3}){3}\b/, `${file}: IP address`);
+    assert.doesNotMatch(text, /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/i, `${file}: email address`);
+  }
 });

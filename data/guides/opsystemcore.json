@@ -1,0 +1,291 @@
+{
+  "id": "opsystemcore",
+  "name": "OpSystem Core",
+  "fullName": "OpSystem Core — evidence store, jobs, search and analysis backend",
+  "category": "Public safety & policing",
+  "summary": "The Go backend the OpSystem desktop and Android apps connect to. It stores incidents and hash-verified evidence, runs background jobs, indexes OSINT documents and posts for search, produces AI-assisted reports, streams live events and backs itself up. These guides are for operators and integrators working with its HTTP API.",
+  "audience": [
+    "Platform operator",
+    "Integrator",
+    "Collector developer"
+  ],
+  "surfaces": [
+    "REST API",
+    "CLI"
+  ],
+  "gettingAccess": "Every /api/ route needs a bearer token: either a device token issued when an operator signs in or enrols, or one of the static API keys the core's administrator configures for scripts and collectors. A super user is created at the core's first start and its one-time password is written only to the core's own data directory, for the estate operator to retrieve. Keys and tokens are never published in this academy; ask the core's administrator for yours.",
+  "sources": [
+    "README.md",
+    "jcds.config",
+    "api.go",
+    "auth_api.go",
+    "jobs.go",
+    "store.go",
+    "main.go",
+    "start.sh",
+    "scripts/fetch-backup.sh"
+  ],
+  "guides": [
+    {
+      "id": "authenticate-a-client",
+      "title": "Authenticate a client",
+      "goal": "Obtain a device token (or use a static key) and send it correctly on every request.",
+      "role": "Integrator",
+      "level": "Basic",
+      "before": [
+        "An operator account or a one-time enrolment code, or a static API key from the administrator."
+      ],
+      "steps": [
+        "Check the core is up: GET /healthz needs no token and answers status ok (or 503 degraded with a reason).",
+        "As an operator, POST /api/v1/auth/login with JSON {email, password, device_label}. The response carries a long-lived device token; store it on the device.",
+        "Or exchange an enrolment code: POST /api/v1/auth/enrol with {code, device_label}. Codes are single-use and valid for 24 hours.",
+        "Send the token on every /api/ request as the header Authorization: Bearer <token>. For EventSource, which cannot set headers, pass it as ?token=.",
+        "Confirm who you are with GET /api/v1/auth/me.",
+        "When a device is retired, POST /api/v1/auth/logout to revoke its own token."
+      ],
+      "result": "Requests succeed and anything you create is stamped with the signed-in operator's LO number. Static keys work too, but carry no identity.",
+      "troubleshooting": [
+        {
+          "problem": "401 missing or invalid bearer token",
+          "fix": "The header is missing, malformed or the token was revoked. Sign in or enrol again."
+        },
+        {
+          "problem": "Login or enrol answers with a rate-limit error",
+          "fix": "Both routes are rate-limited. Wait before retrying."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go",
+        "auth_api.go"
+      ]
+    },
+    {
+      "id": "create-an-incident-and-upload-evidence",
+      "title": "Create an incident and upload hash-verified evidence",
+      "goal": "Open an incident and store a file or text exhibit so the core can confirm it holds the exact bytes captured in the field.",
+      "role": "Integrator",
+      "level": "Intermediate",
+      "before": [
+        "An authenticated client."
+      ],
+      "steps": [
+        "POST /api/v1/incidents with JSON including title (required) and optionally callsign, location_name, geofence_lat, geofence_lng, geofence_radius_km, keywords, threat_level and summary. Status defaults to ACTIVE_DISPATCH and threat_level to MEDIUM.",
+        "Compute the SHA-256 of the exhibit on the capturing device before upload.",
+        "POST /api/v1/evidence as multipart/form-data with incident_id and evidence_type (both required; types include IMAGE, VIDEO, AUDIO, POST, SPECTRUM, GSM_LOG, DOCUMENT), and source, title, origin, recorded_by_lo, client_sha256, optional captured_at (RFC 3339) and metadata (a JSON object).",
+        "Attach the bytes as the file field, or send text_content instead for text-only exhibits such as posts or GSM logs.",
+        "Read the response item: hash_verified is true only when the server's hash equals your client_sha256.",
+        "List an incident's evidence with GET /api/v1/evidence?incident=<id>; fetch bytes with GET /api/v1/evidence/<id>/file (the X-Evidence-SHA256 header carries the hash) and an image thumbnail with /thumbnail.",
+        "Close an incident with POST /api/v1/incidents/<id>/close, or mark it inactive with POST /api/v1/incidents/<id>/inactive."
+      ],
+      "result": "The evidence is stored once per unique hash, has a chain-of-custody entry, is categorised and indexed, and an evidence.captured event is published. IMAGE uploads queue a thumbnail job.",
+      "troubleshooting": [
+        {
+          "problem": "hash_verified is false",
+          "fix": "The bytes received differ from what the device sealed, or client_sha256 was not sent. Re-upload from the local sealed copy and compare hashes."
+        },
+        {
+          "problem": "400 either a file or text_content is required",
+          "fix": "Send a file field or a non-empty text_content."
+        },
+        {
+          "problem": "404 incident ...",
+          "fix": "The incident_id does not exist; create the incident first."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go",
+        "store.go"
+      ]
+    },
+    {
+      "id": "search-the-core",
+      "title": "Search everything the core holds",
+      "goal": "Run full-text searches across incidents, evidence text, OSINT documents, posts and reports.",
+      "role": "Integrator",
+      "level": "Basic",
+      "before": [
+        "An authenticated client."
+      ],
+      "steps": [
+        "Call GET /api/v1/search?q=<words>. Add &limit=<n> to change the number of hits (default 50).",
+        "End a term with * to prefix-match it (for example grayston*).",
+        "Read each hit's kind, id, title, snippet and score, and follow the id to the matching resource."
+      ],
+      "result": "A ranked list of hits from the in-memory index, which is rebuilt from the stored data at every start.",
+      "troubleshooting": [
+        {
+          "problem": "A just-fetched page is not found",
+          "fix": "OSINT pages are indexed when their osint.fetch job finishes. Check the job's status first."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go"
+      ]
+    },
+    {
+      "id": "run-background-jobs-and-collect-osint",
+      "title": "Run background jobs and collect OSINT pages",
+      "goal": "Fetch a public page into an incident and follow jobs to completion.",
+      "role": "Integrator",
+      "level": "Intermediate",
+      "before": [
+        "An authenticated client and an incident ID."
+      ],
+      "steps": [
+        "To collect a page, POST /api/v1/osint/fetch with {url, incident_id}. The core fetches the page, strips it to text, categorises and indexes it.",
+        "Other work goes through POST /api/v1/jobs with {type, params}. The accepted types are osint.fetch (url, incident_id), evidence.thumbnail (evidence_id), evidence.categorise (evidence_id) and osint.categorise (document_id).",
+        "Follow progress with GET /api/v1/jobs, optionally ?status=queued, running, done or failed, or GET /api/v1/jobs/<id>.",
+        "List collected pages with GET /api/v1/osint/documents and read one with /api/v1/osint/documents/<id>."
+      ],
+      "result": "The job moves from queued to running to done (or failed with a reason). Jobs are persisted and re-queued after a restart.",
+      "troubleshooting": [
+        {
+          "problem": "The fetch is refused",
+          "fix": "The core refuses targets whose host is written as localhost, a loopback, link-local, 10.x or 192.168.x address, or the all-zeros address. It checks only the host as written and does not cover the 172.16–172.31 private range, so do not rely on it to keep internal addresses out; use a public address."
+        },
+        {
+          "problem": "400 on POST /api/v1/jobs",
+          "fix": "The type is not one of the four accepted job types."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go",
+        "jobs.go",
+        "jobs.go"
+      ]
+    },
+    {
+      "id": "ingest-posts-and-subscribe-to-events",
+      "title": "Push social posts from a collector and subscribe to live events",
+      "goal": "Feed posts into an incident and react to changes as they happen.",
+      "role": "Collector developer",
+      "level": "Intermediate",
+      "before": [
+        "A static API key or device token."
+      ],
+      "steps": [
+        "POST /api/v1/social/ingest with {\"posts\": [ ... ]}. Each post needs incident_id and text; author, platform, views, verified, threat_score, timestamp, matched_keywords, source_url and similar fields are optional.",
+        "Read the response count ingested; posts missing incident_id or text are skipped. The core creates no posts of its own.",
+        "Read posts for an incident with GET /api/v1/social?incident=<id>.",
+        "Open GET /api/v1/events as a Server-Sent Events stream (token as ?token= for EventSource).",
+        "Handle the event types incident.updated, evidence.captured, evidence.updated, job.*, osint.indexed, report.created and social.ingested."
+      ],
+      "result": "Ingested posts appear in the apps' social stream for that incident, and connected clients refresh when events arrive.",
+      "troubleshooting": [
+        {
+          "problem": "ingested is 0",
+          "fix": "Every post lacked incident_id or text. Add both."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go",
+        "store.go"
+      ]
+    },
+    {
+      "id": "export-a-dossier-and-run-analysis",
+      "title": "Export an incident dossier and run AI analysis",
+      "goal": "Get everything held on an incident and produce cited AI reports from it.",
+      "role": "Integrator",
+      "level": "Intermediate",
+      "before": [
+        "An incident with evidence.",
+        "An AI provider key configured on the core by its administrator."
+      ],
+      "steps": [
+        "GET /api/v1/incidents/<id>/dossier for the dossier as JSON (record, evidence with text and hashes, OSINT documents in full, posts, timeline, category counts), or add ?format=text for the plain-text export.",
+        "POST /api/v1/analysis with {incident_id, task, question, lo_number}. task is one of sitrep, action_plan, timeline, entities, osint_leads or ask; question is used with ask.",
+        "List reports with GET /api/v1/reports and read one with GET /api/v1/reports/<id>. A report.created event is published for each."
+      ],
+      "result": "A stored report that cites evidence IDs and separates what is verified from what is reported.",
+      "troubleshooting": [
+        {
+          "problem": "503 not configured",
+          "fix": "No AI provider key is set on the core. The core never produces a placeholder report; ask the administrator to configure one."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go"
+      ]
+    },
+    {
+      "id": "manage-operators-and-devices",
+      "title": "Manage operators and devices",
+      "goal": "Invite operators, reset passwords, disable accounts and revoke lost devices.",
+      "role": "Super user",
+      "level": "Advanced",
+      "before": [
+        "A device token belonging to a SUPER_USER operator."
+      ],
+      "steps": [
+        "POST /api/v1/operators/invite with {email, name, role, lo_number}. Roles are SUPER_USER, ANALYST and OFFICER. The response carries a one-time code; the apps wrap it into an enrolment link.",
+        "List operators with GET /api/v1/operators.",
+        "Set a password for someone with POST /api/v1/operators/<id>/password.",
+        "Disable or re-enable an operator with POST /api/v1/operators/<id>/disabled.",
+        "Revoke a single device with POST /api/v1/devices/<id>/revoke (the device's owner may also do this)."
+      ],
+      "result": "The team list reflects the change; a disabled operator's devices stop working.",
+      "troubleshooting": [
+        {
+          "problem": "403 forbidden",
+          "fix": "These routes need a SUPER_USER device token; static API keys carry no identity and cannot use them."
+        },
+        {
+          "problem": "A self-service password change is refused",
+          "fix": "Where the access lock is switched on (UAT), operators cannot change their own passwords; a super user may still set one."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "api.go",
+        "auth_api.go"
+      ]
+    },
+    {
+      "id": "back-up-and-restore",
+      "title": "Back up, copy off and restore the core's data",
+      "goal": "Make sure a verified backup exists, keep a copy on another machine, and restore from it.",
+      "role": "Platform operator",
+      "level": "Advanced",
+      "before": [
+        "A bearer token or static API key accepted by the core (the backup routes need authentication but no particular role).",
+        "Access to the machine running the core for restores."
+      ],
+      "steps": [
+        "Check freshness: GET /healthz includes backup.stale, and after ten minutes of uptime it answers 503 if no verified archive is younger than 48 hours.",
+        "Nightly backups run by themselves at the configured hour (default 23:45 UTC). To take one now, POST /api/v1/backups, or run ./start.sh backup [stage] on the machine.",
+        "List archives with GET /api/v1/backups.",
+        "From another machine, on a schedule, run scripts/fetch-backup.sh <core-url> <bearer-key> [dest-dir]; add --snapshot to pull a live archive instead of the latest nightly. The script checks the downloaded archive with tar before keeping it.",
+        "To restore, run ./start.sh restore <archive.tar.gz> [stage], which stops the service, restores and starts it again; or run opsystemcore -restore <archive> (add -force only to overwrite a non-empty data directory)."
+      ],
+      "result": "Every kept archive has been read back in full; archives are retained for 14 days, and a restore reproduces the data and evidence files.",
+      "troubleshooting": [
+        {
+          "problem": "fetch-backup.sh says no backup on the core yet",
+          "fix": "Take one with POST /api/v1/backups or ./start.sh backup, then fetch again."
+        },
+        {
+          "problem": "Restore refuses to run",
+          "fix": "The data directory is not empty, or the archive failed verification. Check the archive; use -force only when you mean to overwrite."
+        },
+        {
+          "problem": "The core will not start in a deployed stage",
+          "fix": "It refuses to start without its separate backup volume and without API keys configured."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "start.sh",
+        "scripts/fetch-backup.sh",
+        "main.go",
+        "api.go"
+      ]
+    }
+  ]
+}

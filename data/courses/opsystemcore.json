@@ -1,0 +1,427 @@
+{
+  "course": {
+    "id": "opsystemcore",
+    "system": "opsystemcore",
+    "name": "OpSystem Core Course",
+    "tagline": "Run and integrate with the evidence backend knowing exactly what it records, what it verifies and what it leaves to people.",
+    "summary": "OpSystem Core is the Go backend behind the OpSystem desktop and Android apps. It holds incidents and hash-verified evidence, runs background jobs, keeps a search index, assembles incident dossiers for AI-assisted reports and backs itself up. This course is for the platform operators and integrators who run it or write clients for it, and it teaches the limits of each guarantee as carefully as the guarantee itself.",
+    "audience": ["Platform operator", "Integrator", "Super user"]
+  },
+  "lessons": [
+    {
+      "id": "opsystemcore-01-identity-and-access",
+      "moduleNumber": 1,
+      "title": "Who is calling: device tokens, static keys and roles",
+      "subtitle": "How the core knows who did something, and when it cannot know",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every /api/ route needs a bearer credential. There are two kinds, and they are not equal. A device token is issued to one operator on one device, by signing in with email and password or by exchanging a one-time enrolment code; the core keeps only a SHA-256 hash of it and refuses it once the device is revoked or the operator is disabled. A static API key is a shared secret the administrator configures for scripts and collectors; it works, but it carries no identity. Because the core stamps records with the signed-in operator's LO number only when a device token is used, the kind of credential decides whether the record of who did something can be trusted. Roles exist too, but the core uses them in one place only: team management.",
+      "keyPoints": [
+        "GET /healthz needs no credential. Sign-in (POST /api/v1/auth/login) and enrolment (POST /api/v1/auth/enrol) are the only other routes open without one, and both allow ten attempts per client address per minute before answering 429.",
+        "Sign-in at the core looks the operator up by email address; an LO number is not a sign-in name.",
+        "A device token is long-lived and stored by the core only as a hash. A revoked device, or any device of a disabled operator, is refused with 401.",
+        "With a device token, the core overwrites the LO number on incidents, evidence and reports with the signed-in operator's own. With a static key, the LO number is whatever the client sent, so it is a claim, not an identity.",
+        "Roles are SUPER_USER, ANALYST and OFFICER. Only team routes (invite, list operators, set a password for someone, disable or enable) require SUPER_USER. Every other route, including creating incidents, changing their status, uploading evidence and running analysis, accepts any valid credential, static keys included.",
+        "Enrolment codes are single-use and valid for 24 hours. Passwords must be at least 12 characters. A super user cannot disable themselves.",
+        "Where the access lock is on (UAT), an operator cannot change their own password; a super user can still set one for someone else."
+      ],
+      "operationalProcedures": [
+        "1. Check the core answers: GET /healthz.",
+        "2. Give each person their own account and sign each device in with its own token, through login or an enrolment code.",
+        "3. Send the token on every request as Authorization: Bearer <token> (or ?token= for EventSource only).",
+        "4. Confirm the identity behind a credential with GET /api/v1/auth/me; a static key answers keyed with no operator.",
+        "5. Keep static keys for unattended scripts and collectors, and record which script holds which key.",
+        "6. When a device is lost or retired, revoke it (POST /api/v1/devices/<id>/revoke or POST /api/v1/auth/logout from the device itself)."
+      ],
+      "takeaways": [
+        "Only a device token gives a trustworthy who. Anything done with a static key is attributed to whatever the client claimed.",
+        "The core does not separate ANALYST from OFFICER. Who may change an incident or run analysis is decided by your unit's procedure, not by the software."
+      ],
+      "guides": ["authenticate-a-client", "manage-operators-and-devices"],
+      "quiz": [
+        {
+          "question": "An evidence item was uploaded with a static API key and recorded_by_lo set to a colleague's LO number. What does the core store as the recorder?",
+          "options": [
+            "The super user's LO number, because static keys belong to the administrator",
+            "The colleague's LO number exactly as supplied, because a static key carries no identity to override it",
+            "Nothing; the core refuses evidence uploads made with static keys",
+            "The LO number of the last operator who signed in on that machine"
+          ],
+          "correctIndex": 1,
+          "explanation": "loName in the core stamps the signed-in operator's LO only when the request carries a device token. With a static key it keeps the value the client supplied, so the record is a claim."
+        },
+        {
+          "question": "Which action does the core refuse to an ANALYST's device token?",
+          "options": [
+            "Marking an incident INACTIVE_OPEN",
+            "Running a SITREP analysis",
+            "Uploading a hash-verified image",
+            "Inviting a new operator"
+          ],
+          "correctIndex": 3,
+          "explanation": "Only the team routes check for SUPER_USER. Status changes, analysis and evidence upload accept any valid credential."
+        },
+        {
+          "question": "What happens to an operator's devices when a super user disables the operator?",
+          "options": [
+            "Their tokens are refused from the next request, because the core rejects tokens whose operator is disabled",
+            "Nothing until each device is revoked one by one",
+            "The devices keep working until their 24-hour token lifetime ends",
+            "Only devices signed in with a password stop; enrolled devices keep working"
+          ],
+          "correctIndex": 0,
+          "explanation": "DeviceByToken returns no identity when the owning operator is disabled, so every device of that operator answers 401 from then on."
+        }
+      ]
+    },
+    {
+      "id": "opsystemcore-02-incident-statuses",
+      "moduleNumber": 2,
+      "title": "Incidents, statuses and the 48-hour active window",
+      "subtitle": "What each status means to the core, and what it does not enforce",
+      "badge": "Casework",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "An incident is the container that evidence, posts, OSINT documents and reports attach to. The core accepts five statuses and computes one more idea, the active incident, on the fly. Knowing which parts are rules in the code and which are conventions for people is what keeps casework accountable: the core never changes a status by itself, it does not stop evidence arriving on a closed incident, and it does not record who changed a status.",
+      "keyPoints": [
+        "POST /api/v1/incidents needs a title. Status defaults to ACTIVE_DISPATCH and threat level to MEDIUM.",
+        "Accepted statuses are ACTIVE_DISPATCH, CONTAINMENT_IN_PROGRESS, INACTIVE_OPEN, INACTIVE and RESOLVED_LOCKED. POST /incidents/<id>/close sets RESOLVED_LOCKED; POST /incidents/<id>/inactive sets INACTIVE_OPEN; POST or PATCH /incidents/<id>/status sets any of the five.",
+        "The active incident (GET /api/v1/incidents/active, and active_incident in /api/v1/status) is the newest incident that is not RESOLVED_LOCKED, INACTIVE or INACTIVE_OPEN and was opened less than 48 hours ago.",
+        "The 48 hours run from the moment the incident was created. Setting it back to ACTIVE_DISPATCH does not restart the clock, so an incident older than 48 hours never becomes the active incident again.",
+        "An incident past 48 hours keeps its status. It is listed in pending_48h_incidents in /api/v1/status until a person marks it inactive or closes it.",
+        "One active incident at a time is the apps' convention; the core does not enforce it.",
+        "RESOLVED_LOCKED is a label. The core still accepts new evidence for a closed incident, because the upload checks only that the incident exists.",
+        "A status change updates updated_at and publishes incident.updated, but no LO number is recorded for it. Only the creator's LO is kept on the incident."
+      ],
+      "operationalProcedures": [
+        "1. Create the incident with POST /api/v1/incidents and a meaningful title.",
+        "2. Read GET /api/v1/status regularly; act on every entry in pending_48h_incidents.",
+        "3. To stand down field operations while the investigation continues, POST /api/v1/incidents/<id>/inactive.",
+        "4. To finish, POST /api/v1/incidents/<id>/close.",
+        "5. Record who changed a status, and why, in your unit's own log, because the core does not."
+      ],
+      "takeaways": [
+        "The 48-hour rule decides which incident is active; it never changes a status on its own.",
+        "Closing an incident does not stop uploads to it. Stopping them is a procedure, not a lock."
+      ],
+      "guides": ["create-an-incident-and-upload-evidence"],
+      "quiz": [
+        {
+          "question": "An incident opened 50 hours ago is set back to ACTIVE_DISPATCH. What does GET /api/v1/incidents/active return for it?",
+          "options": [
+            "It returns this incident, because its status is ACTIVE_DISPATCH again",
+            "It returns this incident only if no newer incident exists",
+            "It does not return it, because the core measures 48 hours from creation and the reactivation does not reset that",
+            "It returns an error until a super user authorises the extension"
+          ],
+          "correctIndex": 2,
+          "explanation": "ActiveIncident skips any incident whose created_at is more than 48 hours ago, whatever its status."
+        },
+        {
+          "question": "A client uploads evidence to an incident whose status is RESOLVED_LOCKED. What does the core do?",
+          "options": [
+            "Refuses with 409 because the incident is locked",
+            "Accepts it, because the upload only checks that the incident exists",
+            "Accepts it but marks hash_verified false",
+            "Reopens the incident as ACTIVE_DISPATCH"
+          ],
+          "correctIndex": 1,
+          "explanation": "uploadEvidence looks the incident up and does not check its status, so the lock is a label that people must respect."
+        },
+        {
+          "question": "What does the core record when an operator marks an incident INACTIVE_OPEN?",
+          "options": [
+            "The new status and an updated_at time, with no record of who made the change",
+            "The new status plus the operator's LO number in a status history",
+            "A chain-of-custody entry on every evidence item",
+            "Nothing until a super user confirms the change"
+          ],
+          "correctIndex": 0,
+          "explanation": "The Incident record holds only created_by_lo. A status change sets status and updated_at and publishes incident.updated."
+        }
+      ]
+    },
+    {
+      "id": "opsystemcore-03-evidence-custody",
+      "moduleNumber": 3,
+      "title": "Hash-verified evidence and chain of custody",
+      "subtitle": "What hash_verified proves, and what the custody record holds",
+      "badge": "Evidence",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The core's integrity guarantee is narrow and precise. The capturing device computes a SHA-256 of the exhibit and sends it as client_sha256; the core hashes the bytes it actually received and sets hash_verified only when the two are equal. That proves the stored bytes are the bytes the device hashed. It says nothing about whether the content is true, who is shown in it, or what happened to it before the device hashed it. The custody record the core writes is a single entry at sealing time, so any later handling must be recorded by people.",
+      "keyPoints": [
+        "POST /api/v1/evidence is multipart: incident_id and evidence_type are required (IMAGE, VIDEO, AUDIO, POST, SPECTRUM, GSM_LOG, DOCUMENT), with a file or text_content.",
+        "For a file the core hashes the received bytes; for text it hashes text_content. hash_verified is true only when client_sha256 was sent and equals that hash.",
+        "A mismatch is not rejected. The item is stored with hash_verified false and the core logs both hashes, so a false value must be investigated, not ignored.",
+        "Without client_sha256, hash_verified is always false: nothing was compared.",
+        "Files are stored once per hash (deduplicated), but every upload gets its own evidence record.",
+        "The core writes one chain-of-custody entry, SEALED_AT_CORE with the origin, the recorder's LO and the core's own time. It does not log later reads, downloads or exports.",
+        "captured_at, if sent, sets the evidence timestamp from the client; the custody entry time is the core's clock.",
+        "The API has no route to edit or delete an evidence item.",
+        "GET /api/v1/evidence/<id>/file returns the bytes with the X-Evidence-SHA256 header so a recipient can re-hash them."
+      ],
+      "operationalProcedures": [
+        "1. Hash the exhibit on the capturing device before it leaves the device.",
+        "2. Upload with incident_id, evidence_type, client_sha256 and the recorder's details.",
+        "3. Read hash_verified in the response. If it is false, keep the local sealed copy, record the mismatch and re-upload from that copy.",
+        "4. When handing evidence on, download it and compare its SHA-256 with X-Evidence-SHA256 and with the hash recorded at capture.",
+        "5. Record every later access, transfer and export in your unit's custody register."
+      ],
+      "takeaways": [
+        "hash_verified proves the bytes match what the device hashed. It does not prove the content is accurate or lawfully obtained.",
+        "The core's custody chain ends at sealing. Everything after that is your register's job."
+      ],
+      "guides": ["create-an-incident-and-upload-evidence"],
+      "quiz": [
+        {
+          "question": "A client uploads an image without client_sha256. What is hash_verified?",
+          "options": [
+            "True, because the core computed the hash itself",
+            "True once the thumbnail job finishes",
+            "Not set until a super user reviews it",
+            "False, because there was no client hash to compare"
+          ],
+          "correctIndex": 3,
+          "explanation": "hash_verified is client_sha256 != empty AND equal to the server hash. With no client hash nothing was compared."
+        },
+        {
+          "question": "The device's hash and the core's hash differ. What does the core do with the upload?",
+          "options": [
+            "Stores it with hash_verified false and logs both hashes",
+            "Rejects it with 400 and stores nothing",
+            "Replaces the client hash with its own and marks it verified",
+            "Quarantines the file and alerts every connected device"
+          ],
+          "correctIndex": 0,
+          "explanation": "The upload is stored either way; the mismatch is visible through hash_verified false and a log line, so people must act on it."
+        },
+        {
+          "question": "Which handling does the core's chain_of_custody record?",
+          "options": [
+            "Every download of the file",
+            "Every dossier export that includes the item",
+            "Only the SEALED_AT_CORE entry made when it was stored",
+            "Every analysis report that cites it"
+          ],
+          "correctIndex": 2,
+          "explanation": "uploadEvidence writes a single custody entry. No other code path appends to it, so later handling must be recorded outside the core."
+        }
+      ]
+    },
+    {
+      "id": "opsystemcore-04-jobs-and-search",
+      "moduleNumber": 4,
+      "title": "Background jobs, page fetches and search",
+      "subtitle": "How work is queued, followed and found again",
+      "badge": "Operations",
+      "duration": "10 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Slow work runs as jobs so a request never waits on it. Jobs are persisted, so a restart re-queues anything that was running. The search index is in memory and rebuilt from stored data at every start. Categories shown on evidence and documents come from a short, visible keyword table, not from a model, and should be read as a filing aid rather than a finding.",
+      "keyPoints": [
+        "POST /api/v1/jobs accepts four types only: osint.fetch, evidence.thumbnail, evidence.categorise and osint.categorise; anything else is a 400.",
+        "A job moves queued, running, then done or failed with a reason. Jobs that were running at a restart go back to queued.",
+        "POST /api/v1/osint/fetch takes a URL and an incident, fetches the page, strips it to text, categorises it and indexes it. Only http and https are accepted.",
+        "The fetch refuses some local addresses by name (localhost, 127., 10., 192.168., link-local, the all-zeros address). It is not a complete guard: it checks the name as written, not where the name resolves.",
+        "GET /api/v1/search?q= searches incidents, evidence text, OSINT documents, posts and reports; a term ending in * prefix-matches; default limit is 50.",
+        "Categorisation is keyword matching on title and text against a fixed table in jobs.go. A word like suspect or vehicle in the text is enough to add a category.",
+        "IMAGE uploads queue a thumbnail job automatically."
+      ],
+      "operationalProcedures": [
+        "1. Queue work with POST /api/v1/jobs or POST /api/v1/osint/fetch.",
+        "2. Follow it with GET /api/v1/jobs?status=queued|running|done|failed or GET /api/v1/jobs/<id>.",
+        "3. When a job fails, read its error before retrying.",
+        "4. Search with GET /api/v1/search?q=<words> and follow each hit's id to the resource.",
+        "5. Treat category labels as hints for filing; read the item before relying on it."
+      ],
+      "takeaways": [
+        "A category is a keyword match, not an assessment.",
+        "Fetching a page is collection for a case. Do it only within the incident's lawful purpose and authorisation."
+      ],
+      "guides": ["run-background-jobs-and-collect-osint", "search-the-core"],
+      "quiz": [
+        {
+          "question": "How does the core decide that an evidence item belongs in the PERSON_OF_INTEREST category?",
+          "options": [
+            "An AI model classifies the item",
+            "A super user tags it in the team panel",
+            "The item's title or text contains one of a fixed list of keywords",
+            "The item was cited in an ENTITIES report"
+          ],
+          "correctIndex": 2,
+          "explanation": "Categorise in jobs.go matches lower-cased text against a visible keyword table; there is no model involved."
+        },
+        {
+          "question": "The core restarts while an osint.fetch job is running. What happens to the job?",
+          "options": [
+            "It is put back in the queue and runs again",
+            "It is marked failed and must be resubmitted",
+            "It is lost, because jobs live only in memory",
+            "It completes from where it stopped"
+          ],
+          "correctIndex": 0,
+          "explanation": "Jobs are persisted, and on start any job found in the running state is reset to queued."
+        },
+        {
+          "question": "What should an integrator understand about the page fetch's refusal of local addresses?",
+          "options": [
+            "It blocks every private network range, including all RFC 1918 blocks",
+            "It checks the address as written against a short list, so it is a partial guard and not a network boundary",
+            "It resolves every name and refuses any private result",
+            "It only applies to the static API keys, not device tokens"
+          ],
+          "correctIndex": 1,
+          "explanation": "isLoopbackHost compares the hostname text against a few prefixes; it does not resolve names and does not cover every private range."
+        }
+      ]
+    },
+    {
+      "id": "opsystemcore-05-dossier-and-ai",
+      "moduleNumber": 5,
+      "title": "The dossier and AI analysis, and their limits",
+      "subtitle": "What the model reads, what it is told, and why a person signs off",
+      "badge": "Analysis",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The dossier is everything the core holds on one incident, in one document: the record, evidence with hashes and text, OSINT documents in full, posts and a timeline. Analysis sends that dossier, as text, to an AI provider with one of a fixed set of tasks and stores the answer as a report. The model is instructed to cite IDs, to separate verified from reported from inferred, and to invent nothing, but instructions are not guarantees. A report is a draft for a person to check against the evidence it cites.",
+      "keyPoints": [
+        "GET /api/v1/incidents/<id>/dossier returns JSON; ?format=text returns the exact text the model is given.",
+        "The model never sees images, video or audio. It sees their type, title, size, hash, hash_verified flag, metadata and any text.",
+        "Tasks offered by the apps are sitrep, action_plan, timeline, entities, osint_leads and ask (ask needs a question).",
+        "The model is told to work only from the dossier, cite evidence, OSINT or post IDs in square brackets, separate verified (hash_verified true) from reported (posts, OSINT) and from inference, and treat open sources as leads.",
+        "Until an AI provider key is configured the analysis route answers 503. The core never writes a placeholder report.",
+        "If the model declines, the request fails with an error and no report is stored. If the answer hits the length limit, the report ends with a note saying so.",
+        "Each report stores the task, model, stop reason, token counts, time and the requester's LO (trustworthy only with a device token).",
+        "A report is stored as markdown; nothing in the core checks that its citations exist or say what the report claims."
+      ],
+      "operationalProcedures": [
+        "1. Export the dossier as text and read what the model will be given.",
+        "2. Run the narrowest task that answers the need.",
+        "3. Check every factual claim against the item it cites; strike anything uncited.",
+        "4. Treat anything marked reported or inferred as a lead to be verified, never a finding.",
+        "5. Before acting on an action plan, obtain any warrant or authorisation it flags, and record who reviewed and approved the report."
+      ],
+      "takeaways": [
+        "An AI report is a draft. A named person checks it against the cited evidence before anyone acts on it.",
+        "The model has not looked at a single picture. Anything it says about images comes from their titles, metadata and text."
+      ],
+      "guides": ["export-a-dossier-and-run-analysis"],
+      "quiz": [
+        {
+          "question": "A SITREP describes what a suspect is wearing in a sealed photo. Where could that description have come from?",
+          "options": [
+            "The model inspected the photo's pixels",
+            "The core ran image recognition during the thumbnail job",
+            "The photo's title, metadata or another text item in the dossier, or invention that must be checked",
+            "The hash_verified flag confirms the description"
+          ],
+          "correctIndex": 2,
+          "explanation": "dossierText includes hashes, sizes and text, never blob contents. A visual description must come from text, or it is unsupported."
+        },
+        {
+          "question": "No AI provider key is configured on the core. What does POST /api/v1/analysis return?",
+          "options": [
+            "503, and no report is created",
+            "A template report marked DRAFT",
+            "A report generated by the keyword categoriser",
+            "202, and the job waits until a key is added"
+          ],
+          "correctIndex": 0,
+          "explanation": "The handler checks Configured() first and answers 503 with a not-configured error; the core never fakes a report."
+        },
+        {
+          "question": "What is the right use of a report's claims marked as reported?",
+          "options": [
+            "Act on them if two posts agree",
+            "Treat them as verified once the report is stored",
+            "Copy them into the incident summary as findings",
+            "Treat them as leads to verify, because they come from open sources such as posts and OSINT"
+          ],
+          "correctIndex": 3,
+          "explanation": "The analysis instructions separate verified sealed evidence from reported open sources, which are leads, not findings."
+        }
+      ]
+    },
+    {
+      "id": "opsystemcore-06-backup-and-restore",
+      "moduleNumber": 6,
+      "title": "Backups, off-host copies and restore",
+      "subtitle": "Keeping the evidence store recoverable",
+      "badge": "Resilience",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The core stores its data as append-only files plus one file per evidence hash, and it backs that up itself. Each archive is read back in full before it is kept, so a broken archive is deleted rather than counted. A backup on the same machine it protects is not enough: the fetch script exists so another machine copies the archives off on a schedule. Restoring is deliberate and refuses to overwrite data unless told to.",
+      "keyPoints": [
+        "A nightly backup runs at the configured UTC hour, minute 45 (default 23:45 UTC), and once at start if there is no archive from the last 24 hours.",
+        "Each archive holds the data logs, read under the store lock for a consistent point in time, plus every evidence file and thumbnail.",
+        "Every archive is verified by reading it back before it is kept; archives are kept for 14 days.",
+        "/healthz reports backup.stale; with backups enabled and no verified archive younger than 48 hours it answers 503 once the core has been up ten minutes.",
+        "Take one now with POST /api/v1/backups or ./start.sh backup [stage]; list them with GET /api/v1/backups. These routes need a valid credential but no particular role.",
+        "scripts/fetch-backup.sh pulls the latest archive (or a live snapshot with --snapshot) to another machine and checks it with tar before keeping it.",
+        "Restore with ./start.sh restore <archive> [stage] (stop, restore, start) or opsystemcore -restore <archive>. It verifies the archive, refuses unsafe paths and refuses a non-empty data directory without -force.",
+        "At uat and prod the core refuses to start without a backup directory configured; deployments put it on its own volume so a damaged data volume does not take its backups with it."
+      ],
+      "operationalProcedures": [
+        "1. Check /healthz daily; treat backup.stale true as an incident.",
+        "2. Schedule scripts/fetch-backup.sh on a different machine and keep its copies.",
+        "3. Before risky work, take a backup with POST /api/v1/backups.",
+        "4. To restore, stop the service through ./start.sh restore, which stops and starts it for you.",
+        "5. Use -force only when you have decided to overwrite the current data, and record that decision.",
+        "6. Practise a restore into an empty directory and compare the evidence files' hashes."
+      ],
+      "takeaways": [
+        "An archive that exists only on the host it protects is not a backup.",
+        "Restore never overwrites data silently. -force is a decision someone makes and records."
+      ],
+      "guides": ["back-up-and-restore"],
+      "quiz": [
+        {
+          "question": "A nightly archive fails to read back during verification. What does the core do?",
+          "options": [
+            "Keeps it and marks it unverified",
+            "Deletes it and does not record it as a success",
+            "Keeps it but excludes evidence files",
+            "Retries the next night and keeps both"
+          ],
+          "correctIndex": 1,
+          "explanation": "Run verifies the archive in full before keeping it; an archive that does not verify is removed and the error is reported."
+        },
+        {
+          "question": "When does /healthz answer 503 because of backups?",
+          "options": [
+            "Whenever the last backup is more than 24 hours old",
+            "Immediately after start, until the first backup completes",
+            "When fetch-backup.sh has not run that day",
+            "When backups are enabled, the core has been up ten minutes and no verified archive is younger than 48 hours"
+          ],
+          "correctIndex": 3,
+          "explanation": "Status marks stale when no verified archive is younger than 48 hours, and healthz turns that into 503 after ten minutes of uptime."
+        },
+        {
+          "question": "opsystemcore -restore is run into a data directory that already holds data. What happens?",
+          "options": [
+            "It refuses unless -force is given",
+            "It merges the archive into the existing data",
+            "It overwrites the data and keeps the old files as .bak",
+            "It restores only the evidence files that are missing"
+          ],
+          "correctIndex": 0,
+          "explanation": "Restore returns an error for a non-empty directory unless force is set, and verifies the archive before writing anything."
+        }
+      ]
+    }
+  ]
+}

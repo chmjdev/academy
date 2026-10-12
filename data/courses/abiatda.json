@@ -1,0 +1,680 @@
+{
+  "course": {
+    "id": "abiatda",
+    "system": "abiatda",
+    "name": "AI Internal Audit & Data Analytics Course",
+    "tagline": "Understand how the platform runs a municipal internal audit from risk-based plan to closed finding, and why every control in it exists.",
+    "summary": "The AI Internal Audit & Data Analytics Platform supports public-sector internal audit: analytics over whole transaction populations, evidence vouching, the engagement workflow from planning to closure, findings written with the 5 Cs, remediation tracking, an assistant that only proposes steps a person confirms, and a hash-chained audit trail. This course explains the concepts, roles and controls behind those features for everyone who uses the platform, from staff auditors to the Audit Committee and IT administrators.",
+    "audience": [
+      "Staff / Senior Auditor",
+      "Audit Manager / Director",
+      "Chief Audit Executive",
+      "Process Owner / Auditee",
+      "Executive Management",
+      "Audit Committee / Board",
+      "IT & System Administrator"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "abiatda-01-orientation",
+      "moduleNumber": 1,
+      "title": "Orientation: Roles, Scope and Signing In",
+      "subtitle": "Seven roles, server-enforced access, and why seniority confers nothing",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The platform serves seven user groups, each mapped to one role: Staff / Senior Auditor, Audit Manager / Director, Chief Audit Executive (CAE), Process Owner / Auditee, Executive Management, Audit Committee / Board and IT & System Administrator. Roles carry explicit permissions and seniority confers nothing beyond them. Access is enforced by the server, not by the screen: a record outside your scope answers as if it does not exist, and an operation your role does not hold is refused. The navigation and buttons you see are built from the same checks, so the menu shows only the pages your role can use. Accounts are issued, not self-registered, and the most powerful roles must use a second factor in a customer installation.",
+      "keyPoints": [
+        "Each role sees a defined scope: auditors see the engagements they are assigned to, audit managers the engagements they manage, the CAE all internal audit content, process owners their own department's findings from approval onwards, executives approved findings and actions of every department, and the Audit Committee reported findings.",
+        "The IT & System Administrator manages users, access and the audit trail and sees no audit content.",
+        "A record outside your scope is answered as not found, so its existence is not disclosed; an operation your role does not hold is refused as forbidden.",
+        "A super user may configure settings within its own role's domain only; it gains no approval authority and no evidence access.",
+        "Accounts are issued by an IT administrator with a temporary password that must be changed at first sign-in and expires after 72 hours. Auditor, audit manager, CAE, IT administrator and super-user accounts need a second person's approval before they are issued.",
+        "Two-factor sign-in (an authenticator app code) is required for the CAE, audit managers and IT administrators in a customer installation; five failed passwords or codes lock the account for 15 minutes.",
+        "Dashboards say Live only while connected and current; otherwise they show Cached as of a time, so you know how fresh a figure is."
+      ],
+      "operationalProcedures": [
+        "1. Open the platform and sign in on the Sign in page with your Email address and Password (usernames are not accepted).",
+        "2. At a first sign-in with a temporary password, choose your own password; nothing else opens until you do.",
+        "3. If your role requires it, set up two-factor sign-in from the QR code and keep the ten recovery codes safe.",
+        "4. Land on your home page (the Executive Dashboard, or My work for process owners) and check the status line: Live, or Cached as of.",
+        "5. Open My work and the Notifications bell for everything awaiting you, and Help & Training for the guide written for your role."
+      ],
+      "takeaways": [
+        "If a page or record is missing, the cause is usually your role or scope, not a fault: the server shows you only what you may see.",
+        "Being a super user never lets you approve anything your role cannot already approve.",
+        "In the demonstration instance and in UAT, issued credentials stay fixed, so password changes are switched off there."
+      ],
+      "guides": [
+        "sign-in-and-two-factor",
+        "monitor-dashboards"
+      ],
+      "quiz": [
+        {
+          "question": "A process owner follows a shared link to a finding of another department. What does the platform do?",
+          "options": [
+            "Shows the finding read-only with a warning banner",
+            "Shows the finding with personal details masked",
+            "Answers as if the record does not exist, so its existence is not disclosed",
+            "Asks the CAE to approve temporary access"
+          ],
+          "correctIndex": 2,
+          "explanation": "Records outside a user's scope answer as not found. The server enforces scope, and it does not reveal that the record exists."
+        },
+        {
+          "question": "What does being a super user add to a role?",
+          "options": [
+            "Configuration of settings within that role's own domain, and nothing else",
+            "The right to approve findings the role could not otherwise approve",
+            "Read access to all evidence files",
+            "The ability to issue accounts for any role"
+          ],
+          "correctIndex": 0,
+          "explanation": "A super user holds the role's own settings permissions only. It confers no approval authority and no evidence access."
+        },
+        {
+          "question": "Which statement describes the IT & System Administrator's access?",
+          "options": [
+            "All audit content plus users and the audit trail",
+            "Findings and actions of every department, read only",
+            "Reported findings and their actions",
+            "Users, access and the audit trail, with no audit content"
+          ],
+          "correctIndex": 3,
+          "explanation": "The IT administrator runs accounts, access and the audit trail and is deliberately kept out of audit content."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-02-governance-plan-risk",
+      "moduleNumber": 2,
+      "title": "Governance: Charter, Risk-Based Plan and Controls",
+      "subtitle": "Versioned charter and plan, the risk register, the audit universe and control evaluations",
+      "badge": "Governance",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Internal audit works under a charter and a rolling, risk-based audit plan, and both are governed documents. The CAE drafts each version and the Audit Committee approves it or returns it with a note. Changing an approved charter or plan never edits it in place: an amendment is a new draft version with a reason, and the approved version stays in force until the amendment is approved. The plan draws on the risk register, where each risk is rated by likelihood and impact, and on the audit universe, the auditable units with their highest risk score. Controls are kept in a control library, and a control's conclusion changes only through a control evaluation that someone other than the tester accepts.",
+      "keyPoints": [
+        "Charter and plan versions move draft → submitted → approved, or are returned to draft with a note. Approving a version supersedes the previously approved one in the same step.",
+        "The plan is rolling and covers several financial years; a draft is compared with the approved version item by item (added, changed, removed).",
+        "Risks are rated on likelihood × impact using 1–5 scales: 16 and above is critical, 10–15 high, 5–9 medium and below 5 low. The register holds inherent and residual ratings.",
+        "The audit universe lists auditable units with their highest risk score from the risk register.",
+        "A control evaluation records the aspect (design adequacy or operating effectiveness), the conclusion, its basis, the tester, the date and the evidence; only an evaluation accepted by a manager other than the tester changes the control's conclusion.",
+        "Workflow settings are changed by super users and every change is an audit event. Defaults: notification letter lead time 14 days, Audit Committee reporting period 6 months, information requests due in 7 days, management responses due in 14 days, significant findings Critical and High. Several of these are product defaults, not values taken from any standard.",
+        "An engagement can be started from an approved plan item that has no engagement yet."
+      ],
+      "operationalProcedures": [
+        "1. Open Plan & charter.",
+        "2. To change an approved charter or plan, choose Amend (new version) and give a reason.",
+        "3. Edit the draft and choose Submit to the Audit Committee.",
+        "4. Audit Committee member: choose Approve plan or Approve charter, or Return plan / Return charter with a note.",
+        "5. Once the plan is approved, choose Start engagement on an approved plan item.",
+        "6. Review the Audit universe and Workflow settings."
+      ],
+      "takeaways": [
+        "An amendment never weakens what is in force: the approved version applies until the new one is approved.",
+        "Only one version can be in draft or submitted at a time; finish or return it before amending again.",
+        "A tester never accepts their own control evaluation."
+      ],
+      "guides": [
+        "plan-and-charter"
+      ],
+      "quiz": [
+        {
+          "question": "A risk is rated likelihood 4 and impact 3. What is its rating?",
+          "options": [
+            "Critical",
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "correctIndex": 1,
+          "explanation": "4 × 3 = 12, and scores from 10 to 15 are rated high."
+        },
+        {
+          "question": "The CAE submits an amendment to the approved audit plan. Until the Audit Committee approves it, which plan applies?",
+          "options": [
+            "No plan; engagements are paused",
+            "The submitted amendment",
+            "Whichever version the CAE chooses",
+            "The previously approved version"
+          ],
+          "correctIndex": 3,
+          "explanation": "The approved version stays in force until the amendment is approved; approving the new version supersedes it in the same step."
+        },
+        {
+          "question": "When does a control's conclusion in the control library change?",
+          "options": [
+            "When a manager other than the tester accepts a control evaluation",
+            "As soon as a tester records an evaluation",
+            "When the CAE edits the control library",
+            "When an analytics rule raises a case against it"
+          ],
+          "correctIndex": 0,
+          "explanation": "Only an accepted evaluation changes the control's conclusion, and the acceptor must be someone other than the tester."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-03-analytics-populations",
+      "moduleNumber": 3,
+      "title": "Data Analytics over Whole Populations",
+      "subtitle": "Population imports, analytics rules, and why a case is never a finding",
+      "badge": "Analytics",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Instead of testing a sample, the platform runs analytics rules over whole transaction populations: vendors, purchase orders, payments, employees, payroll lines and journal lines. Rules are grouped into four modules, Procurement & SCM, Disbursements & AP, Payroll & HR and General Ledger, and each rule states the populations it needs, its parameters and how many records it evaluated. What a rule raises is a case: a candidate for an auditor's review, never a finding and never proof of wrongdoing. Populations from the municipality's financial system enter through governed imports that keep the file exactly as received, validate it with control totals and record, on every stored row, the file and row it came from.",
+      "keyPoints": [
+        "Example rules: split orders below a threshold, vendor–employee conflicts (shared bank account, address or director ID number), duplicate payments, dormant vendor reactivation, Benford's law on first digits, shared bank accounts in payroll, no leave and no deductions, paid after termination, excessive overtime, weekend and after-hours journals, round-amount journals and manual journals by unusual users.",
+        "Thresholds such as procurement or overtime limits are configurable rule parameters chosen for the demonstration, not statutory values; they must be confirmed against the municipality's own policies.",
+        "A case shows why it was flagged, the rule and parameters, the population records behind it with identity and bank numbers masked, evidence, status history and any linked finding.",
+        "Case statuses are flagged, under review, confirmed, cleared and escalated. In this release a status cannot be set directly; linking a case to a draft finding moves it to under review.",
+        "Re-running analytics updates cases whose details changed and never changes a status a reviewer set.",
+        "Imports accept CSV and Excel (.xlsx). Macro-enabled workbooks, legacy .xls and password-protected files are refused; formulas are not calculated and links to other files are not followed.",
+        "An import is kept with its SHA-256 fingerprint, mapped, validated with control totals and a row-level error report, then committed as a new dataset or a new version of one. Rules that need data the file did not provide are listed as not run, with the reason.",
+        "Analytics, datasets, cases and imports are a licensed module (data analytics); the server refuses them when the licence does not include it."
+      ],
+      "operationalProcedures": [
+        "1. Open Imports, choose the population and engagement, choose the File and choose Upload.",
+        "2. Under Map the columns match every required field; optionally Save mapping for later files.",
+        "3. Choose Validate and read the control totals and every error; use Error report if needed.",
+        "4. Choose Commit N rows, then Run analytics on the dataset.",
+        "5. Open an analytics module or Cases, choose Show these on a rule, and open a case to read its explanation and records.",
+        "6. If a case supports a finding, draft a finding from it; the case moves to under review."
+      ],
+      "takeaways": [
+        "Treat every case as a question to answer, not a conclusion: only an approved finding states a conclusion.",
+        "Never rely on demonstration thresholds as policy.",
+        "Commit is only possible against a current validation; changing the mapping means validating again."
+      ],
+      "guides": [
+        "import-population-file",
+        "review-analytics-cases"
+      ],
+      "quiz": [
+        {
+          "question": "An analytics rule flags a vendor that shares a bank account with an employee. What is that case?",
+          "options": [
+            "A confirmed finding sent to the process owner",
+            "Evidence of fraud that must be escalated",
+            "A candidate for review by internal audit",
+            "An automatic control failure recorded in the control library"
+          ],
+          "correctIndex": 2,
+          "explanation": "Cases are always candidates for review, never findings or proof of wrongdoing. A conclusion is reached only through a finding that a manager approves."
+        },
+        {
+          "question": "A reviewer linked a case to a draft finding, and later analytics is re-run. What happens to that case's status?",
+          "options": [
+            "It is reset to flagged",
+            "It is kept; a re-run never changes a status a reviewer set",
+            "It is set to cleared if the rule no longer fires",
+            "It is deleted and recreated"
+          ],
+          "correctIndex": 1,
+          "explanation": "A re-run updates cases whose details changed, but never changes a status set by a reviewer."
+        },
+        {
+          "question": "Commit is greyed out on an import you validated earlier. Which cause fits?",
+          "options": [
+            "The file has a SHA-256 fingerprint",
+            "The engagement is in fieldwork",
+            "Analytics has not yet been run",
+            "The mapping changed after validation and the file must be validated again"
+          ],
+          "correctIndex": 3,
+          "explanation": "Commit needs a current validation; a mapping change, unconfirmed rejected rows or a missing dataset name keep it disabled."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-04-evidence-vouching-sampling",
+      "moduleNumber": 4,
+      "title": "Evidence, Vouching and Sampling",
+      "subtitle": "Extracted invoice fields, decisions with reasons, and repeatable samples",
+      "badge": "Evidence",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Supporting documents are uploaded as evidence and, where the platform can read them, their invoice fields are extracted and matched to payments. The point is not to trust the machine but to make every gap visible: each extracted value shows where it was found and with what confidence, every item that is not a clean match goes to an exception queue, and a person decides each one with a reason. A correction never overwrites what was read; the value as read is kept beside it. For tests, auditors draw samples of payments that are repeatable, because the sample records the seed and the population's fingerprint, so the same inputs always give the same sample.",
+      "keyPoints": [
+        "Evidence can be PDF, Excel, CSV, Word, PowerPoint or an image. Text recognition of scans and images is not available in this release; images and PowerPoint files are stored only.",
+        "Vouching outcomes are matched, partially matched, duplicate suspect and unmatched, with which details agreed.",
+        "Decisions on the exception queue: Confirm (a reason unless it is a clean match), Correct a value (with a reason; the value as read is kept beside the correction and the item is matched again) or Record an exception (with a reason).",
+        "An item that did not vouch cleanly can be raised as a case under the Vouching exception rule (analytics runs never produce these) or drafted as a finding, which then follows the normal workflow.",
+        "Samples use simple random, systematic or monetary unit selection, optionally limited to one vendor, an amount band or payment dates; each sampled payment shows Vouched, Exception, Awaiting review or No evidence yet.",
+        "Text read from documents is treated as data, never as instructions, by the assistant and the rest of the platform.",
+        "Extraction and vouching are a licensed module (extraction)."
+      ],
+      "operationalProcedures": [
+        "1. Open Evidence & Vouching, choose the engagement and what to Match against, choose the file and choose Upload and extract.",
+        "2. Open the document and read each extracted field with its location and confidence.",
+        "3. For each exception choose Confirm, Correct a value or Record an exception, with a reason.",
+        "4. Choose Raise as a case or Draft a finding for an item that did not vouch cleanly.",
+        "5. Open Samples for tests, choose the Test, Population, Method and Sample size (and optionally a Seed), and choose Draw the sample.",
+        "6. Download the Vouching schedule to keep values as read and as corrected with each decision."
+      ],
+      "takeaways": [
+        "Every decision on an exception carries a reason; nothing is silently accepted.",
+        "A sample is evidence of method: the seed and fingerprint let a reviewer reproduce it.",
+        "No fields read from a scan means no OCR in this release, not a clean document."
+      ],
+      "guides": [
+        "vouch-invoices",
+        "draw-sample"
+      ],
+      "quiz": [
+        {
+          "question": "Why does a drawn sample record its seed and the population's SHA-256 fingerprint?",
+          "options": [
+            "So the same inputs give the same sample and a reviewer can reproduce it",
+            "So the sample is encrypted on the device",
+            "So the process owner can approve the sample",
+            "So the analytics rules can re-run on it"
+          ],
+          "correctIndex": 0,
+          "explanation": "The seed and fingerprint make the sample repeatable, which is what lets a reviewer rely on how it was drawn."
+        },
+        {
+          "question": "An auditor corrects an extracted invoice amount. What happens to the original value?",
+          "options": [
+            "It is overwritten by the correction",
+            "It is kept beside the correction, and the item is matched again",
+            "It is deleted after the CAE approves the correction",
+            "It is sent to the process owner for confirmation"
+          ],
+          "correctIndex": 1,
+          "explanation": "The value as read is kept beside the correction, with the reason, and the item is re-matched."
+        },
+        {
+          "question": "A scanned invoice image is uploaded and no fields are read. What does that mean?",
+          "options": [
+            "The invoice is a clean match",
+            "The upload failed and must be repeated",
+            "Text recognition of scans is not available in this release, so the file is stored only",
+            "The vendor is not in the population"
+          ],
+          "correctIndex": 2,
+          "explanation": "OCR of scans and images is not available in this release; such files are stored as evidence without extraction."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-05-engagement-lifecycle",
+      "moduleNumber": 5,
+      "title": "The Engagement Lifecycle and Its Gates",
+      "subtitle": "Planning to quality assurance, and why the server refuses a step",
+      "badge": "Workflow",
+      "duration": "18 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "An engagement moves through planning, fieldwork, review, quality assurance, reporting, follow-up and closed, and can be returned from review to fieldwork or from quality assurance to review with a reason. Each move is guarded by a gate that the server checks: the same functions that decide whether a button is offered also enforce the step, so a blocked step shows its reasons, and a step called any other way is still refused. Approvals are bound to the exact content they approved: changing approved planning or an approved working paper voids the approval, visibly, rather than leaving a stale approval in place. Overdue status is computed whenever a record is read; nothing stores 'overdue'.",
+      "keyPoints": [
+        "Submit planning needs objectives and scope, at least one risk and one control in scope, and at least one procedure, each linked to a risk in scope. The approver must not be the person who submitted it.",
+        "The planning approval is bound to a fingerprint of the objectives, scope, risks, controls and procedures; any later change voids it.",
+        "Start fieldwork needs a team, the notification letter recorded at least the configured lead time before (14 days by default), the entrance meeting recorded and a current planning approval.",
+        "Submit for review needs every procedure completed with a result, every exception described, every procedure documented in a working paper and every working paper prepared.",
+        "Working papers move draft → prepared → in review → changes requested → approved; an approval applies to one content version and any later edit returns the paper to draft and voids it, keeping the voided approval on the record.",
+        "Complete review needs every working paper approved at its current version, every review note cleared, every finding approved or later and no information request open.",
+        "Quality assurance is an eight-item checklist completed by a manager and signed by someone who did not complete it and prepared none of the engagement's working papers (the CAE or another manager).",
+        "Refusals name their cause: a missing permission, segregation of duties, the wrong state, a gate with its list of blockers, or a version conflict when the record changed since it was read."
+      ],
+      "operationalProcedures": [
+        "1. Open Engagements and choose the engagement; read the phase and what blocks the next step.",
+        "2. Write objectives and scope, choose risks and controls on Risks & controls, and build the Programme.",
+        "3. Record the notification letter and the entrance meeting on Overview; the team chooses Submit planning for approval and the manager Approve planning, then Start fieldwork.",
+        "4. Record each test result, write working papers and choose Mark as prepared, then Submit fieldwork for review.",
+        "5. Manager: Start review on each paper, Request changes or Approve working paper, clear notes, then Complete review.",
+        "6. Complete the QA checklist; an eligible reviewer chooses Sign quality assurance."
+      ],
+      "takeaways": [
+        "A greyed-out step always shows why; complete its blockers rather than looking for another route.",
+        "Editing approved content voids the approval: that is the control, not a fault.",
+        "The person who completed the QA checklist or prepared a working paper cannot sign quality assurance."
+      ],
+      "guides": [
+        "engagement-planning-fieldwork",
+        "review-qa-issue-report"
+      ],
+      "quiz": [
+        {
+          "question": "The notification letter was recorded 10 days ago and the lead time setting is 14 days. What happens when the manager chooses Start fieldwork?",
+          "options": [
+            "Fieldwork starts with a warning",
+            "The CAE is asked to override",
+            "Fieldwork starts and the letter date is moved",
+            "The step is refused until the lead time has passed"
+          ],
+          "correctIndex": 3,
+          "explanation": "Start fieldwork requires the letter to have been recorded at least the configured lead time before; the gate lists it as a blocker."
+        },
+        {
+          "question": "A preparer edits a working paper after it was approved. What happens?",
+          "options": [
+            "The edit is refused permanently",
+            "The paper returns to draft and the approval is voided, kept visible on the record",
+            "The approval carries over to the new content",
+            "The reviewer is removed from the engagement"
+          ],
+          "correctIndex": 1,
+          "explanation": "An approval applies to one content version; changing the paper voids it visibly and notifies the reviewer."
+        },
+        {
+          "question": "Who may sign quality assurance for an engagement?",
+          "options": [
+            "The manager who completed the checklist",
+            "Any auditor on the engagement team",
+            "The CAE, or a manager who neither completed the checklist nor prepared any of its working papers",
+            "The IT administrator"
+          ],
+          "correctIndex": 2,
+          "explanation": "The QA signer must be independent of the checklist and of the engagement's working papers."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-06-findings-5cs-sod",
+      "moduleNumber": 6,
+      "title": "Findings: the 5 Cs and Segregation of Duties",
+      "subtitle": "Writing a complete finding and why a different person must approve it",
+      "badge": "Findings",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "A finding is internal audit's formal conclusion, and the platform will not let one go for review unless it is complete. Each finding states its criteria (what should be), condition (what was found), cause (why it happened), consequence (the effect or risk) and a recommendation, with a severity, the value affected and links to the risks, the tests that found it and the controls found deficient. Segregation of duties runs through the workflow: no one approves their own work. A finding is approved by a manager who did not prepare it, and only then does it become visible to the process owners of the department, who are notified and given a response due date.",
+      "keyPoints": [
+        "Submit for review is refused unless criteria, condition, cause, consequence and recommendation are all written.",
+        "Severity is Critical, High, Medium or Low; Critical and High are the default significant findings reported to the Audit Committee.",
+        "Finding states: draft → in review → approved → management response → final (when the final report is issued) → closed. Return for changes sends it back to draft with a note the preparer sees.",
+        "After approval, the department's process owners are notified and the response falls due after the configured number of days (14 by default). Process owners see their department's findings from approval onwards, not before.",
+        "Segregation of duties: a finding's or working paper's reviewer is not its preparer; planning, the draft report, and plan and charter versions are approved by someone other than their preparer; remediation evidence is verified by someone other than the action's owner and its submitter.",
+        "A finding is closed only when it is final, has at least one action and every action is verified or closed.",
+        "A finding can be drafted from an analytics case or a vouching exception, and its version history shows who drafted, reviewed, approved, responded and reported it."
+      ],
+      "operationalProcedures": [
+        "1. In the engagement workspace open Findings and choose New finding (or draft one from a case or vouching exception).",
+        "2. Fill in Title, Severity, Criteria, Condition, Cause, Consequence, Recommendation and Value affected (R), and link the risks, tests and controls.",
+        "3. Choose Submit for review.",
+        "4. A manager who did not prepare it chooses Approve finding, or Return for changes with a note.",
+        "5. After the final report, once every action is verified or closed, a manager or the CAE chooses Close finding."
+      ],
+      "takeaways": [
+        "An incomplete finding cannot be submitted: all five elements are required.",
+        "You can never approve a finding you prepared.",
+        "Process owners do not see draft findings; they see them from approval onwards."
+      ],
+      "guides": [
+        "draft-and-approve-finding"
+      ],
+      "quiz": [
+        {
+          "question": "Which element of a finding describes what the auditor actually found?",
+          "options": [
+            "Criteria",
+            "Condition",
+            "Cause",
+            "Consequence"
+          ],
+          "correctIndex": 1,
+          "explanation": "Condition is what was found; criteria is what should be, cause is why it happened and consequence is the effect."
+        },
+        {
+          "question": "An audit manager prepared a finding. Who can approve it?",
+          "options": [
+            "The same manager, after a waiting period",
+            "The process owner of the department",
+            "The IT administrator",
+            "A manager who did not prepare it"
+          ],
+          "correctIndex": 3,
+          "explanation": "Segregation of duties: a finding's approver is never its preparer."
+        },
+        {
+          "question": "When does a process owner first see a finding about their department?",
+          "options": [
+            "From the moment it is approved",
+            "As soon as the auditor drafts it",
+            "Only after the final report is issued",
+            "When it is submitted for review"
+          ],
+          "correctIndex": 0,
+          "explanation": "Process owners see their department's findings from approval onwards and are notified at that point."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-07-response-reporting-followup",
+      "moduleNumber": 7,
+      "title": "Management Response, Reporting and Follow-Up",
+      "subtitle": "Action plans, verified remediation, frozen report versions and closure",
+      "badge": "Reporting",
+      "duration": "18 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Once a finding is approved, the department responds and commits to actions, and internal audit reports and then follows up until every action is proven. The final report is not just text: when the CAE issues it, the findings become final and a report version is frozen with a SHA-256 that binds the exact finding and action versions, the evidence files, the approvals and the management responses. If anything included changes afterwards, the issued version is marked superseded rather than silently drifting, and the CAE can reissue with a reason. Follow-up ends only when remediation is verified by someone independent of the action, or when the CAE records a risk acceptance for what remains open.",
+      "keyPoints": [
+        "A management response is agreed, partially agreed or disagreed, with comments and an action plan; at least one action is needed unless the department disagrees.",
+        "Information requests move open → submitted → accepted (the files become evidence of the engagement) or returned with a reason; they are due after 7 days by default.",
+        "Actions move open → in progress → evidence submitted → verified → closed, or are rejected with a reason; evidence already rejected does not count again.",
+        "Remediation evidence is verified by an auditor on the engagement who is neither the action's owner nor its submitter.",
+        "The draft report needs an executive summary and approval by a manager who did not write it; issuing the final report needs that approval covering every finding, the exit meeting, a management response to every finding and signed QA. Editing the report or adding a finding afterwards needs a new draft approval.",
+        "A later change to an included finding marks the issued version 'Superseded — changes after issue'; the CAE reissues with a reason, freezing a new version.",
+        "Closing the engagement needs every action verified or closed; otherwise the CAE records a risk acceptance naming what stays open, who accepted it, when and why.",
+        "Exports and dashboards contain only what the reader's role may see; every export is recorded in the audit trail. Executives and the Audit Committee have their own views of overdue remediation, residual risk and issued reports."
+      ],
+      "operationalProcedures": [
+        "1. Process owner: open My work, open the finding and choose Record management response with actions, owners and due dates.",
+        "2. Process owner: on an action choose Start work, Upload remediation evidence and Submit remediation evidence.",
+        "3. Auditor: Verify or Reject evidence with a reason.",
+        "4. Manager: Approve draft report; record the exit meeting; CAE: Approve and issue final report.",
+        "5. On the Report tab use Generate draft version, Open and print or Download; the CAE uses Reissue after changes when a version is superseded.",
+        "6. CAE: Close engagement once every action is verified or closed, or record a risk acceptance."
+      ],
+      "takeaways": [
+        "An issued report version never changes; a later change shows as superseded, never as a quiet edit.",
+        "The owner of an action never verifies their own remediation.",
+        "Nothing stays open at closure without a recorded risk acceptance."
+      ],
+      "guides": [
+        "process-owner-response",
+        "review-qa-issue-report",
+        "report-versions-and-exports",
+        "monitor-dashboards"
+      ],
+      "quiz": [
+        {
+          "question": "After the final report is issued, a new action is added to an included finding. What happens to the issued report version?",
+          "options": [
+            "It is updated in place to include the action",
+            "It is deleted and must be issued again from scratch",
+            "It is marked superseded by changes after issue, and the CAE can reissue with a reason",
+            "Nothing; issued versions ignore later changes"
+          ],
+          "correctIndex": 2,
+          "explanation": "Issued versions never change. A later change marks the version superseded, naming the fields, and the CAE reissues to freeze a new version."
+        },
+        {
+          "question": "Who verifies remediation evidence submitted for an action?",
+          "options": [
+            "An auditor on the engagement who is neither the action's owner nor its submitter",
+            "The process owner who submitted it",
+            "Any executive",
+            "The IT administrator"
+          ],
+          "correctIndex": 0,
+          "explanation": "Verification is independent of the owner and the submitter; that is a segregation-of-duties rule enforced by the server."
+        },
+        {
+          "question": "The CAE wants to close an engagement while one action is still in progress. What is required?",
+          "options": [
+            "Nothing; the CAE can close at any time",
+            "The process owner's approval",
+            "Deleting the open action",
+            "A recorded risk acceptance with a reason, naming what stays open"
+          ],
+          "correctIndex": 3,
+          "explanation": "Closure needs every action verified or closed, or a risk acceptance recording who accepted what remains open, when and why."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-08-assistant-offline",
+      "moduleNumber": 8,
+      "title": "The Assistant and Offline Work: the Server Still Decides",
+      "subtitle": "Grounded answers, confirmed proposals, and drafting without a connection",
+      "badge": "Assistant & Offline",
+      "duration": "18 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Two features change how people reach the workflow without changing who decides. The assistant answers questions from the records the user may see, explains cases and prepares drafts, and can propose a workflow step, but it decides nothing: a proposal happens only when the user confirms it, through the same request and checks as pressing the button. By default the assistant is a local, rule-based engine and no data leaves the server. Offline work follows the same principle: drafting works offline, deciding does not. A device keeps an encrypted copy of the user's in-scope records for a bounded period and queues drafts, and the server checks every queued change again when the device reconnects.",
+      "keyPoints": [
+        "Every assistant answer lists its supporting records and labels each statement Evidence (read from a record), Inference (derived, saying how) or Uncertain. Citations are re-checked against the user's access; a record the user cannot open is treated as not existing.",
+        "A proposal shows what would change, what follows and whether it is allowed now. It can be confirmed once, within 15 minutes, only while the target record is unchanged; it is then carried out with every permission, segregation-of-duties and workflow check, and audited as done by the user through the assistant.",
+        "Document and record text is quoted as data and never followed as an instruction; proposals are built only from the user's own words.",
+        "An external language model can be enabled only with the municipality's written approval reference, because it sends questions and records outside South Africa (POPIA section 72); every user is told when answers come from it.",
+        "Offline, users can draft working papers, record test results, draft and edit findings, draft management responses and capture evidence. Approvals, sign-offs, report issue, verification, closure, access, administration, exports, the assistant and report versions need a connection.",
+        "The offline copy is encrypted on the device and kept for 72 hours after the last online sign-in (a provisional period). Sign-out, expiry, revocation, an account change or another account signing in deletes it. The IT administrator has no offline access.",
+        "On reconnection the server re-checks session, role, scope, state, validation and version. A refused change comes back with the reason; a change drafted from an old version becomes a conflict that keeps both versions until a person chooses.",
+        "Evidence captured offline is pending, not evidence, until it is uploaded and passes the evidence pipeline."
+      ],
+      "operationalProcedures": [
+        "1. Choose Assistant in the header, type a question naming records by id, and read Supporting records and the statement labels.",
+        "2. Ask for a step, read the proposal, and choose Confirm or Cancel.",
+        "3. For offline work, sign in once online on the device, then open Offline work and choose an engagement.",
+        "4. Draft working papers, test results, findings, responses or evidence; watch the Online/Offline indicator.",
+        "5. When online again, open Sync status and choose Synchronise now; resolve Conflicts with Keep the server version, Keep mine or Merge by hand.",
+        "6. Before signing out with unsynchronised work, choose Export my unsynced work and set a passphrase of at least 12 characters."
+      ],
+      "takeaways": [
+        "The assistant proposes; you decide. Nothing changes without your confirmation.",
+        "Proposals are never queued offline; confirm them online.",
+        "A device backup of unsynchronised work is not a cloud backup, and signing out deletes the offline copy."
+      ],
+      "guides": [
+        "use-the-assistant",
+        "work-offline"
+      ],
+      "quiz": [
+        {
+          "question": "A user asks the assistant to approve a finding and confirms the proposal 20 minutes later. What happens?",
+          "options": [
+            "The finding is approved because the user confirmed",
+            "The proposal has expired; proposals can be confirmed once, within 15 minutes, while the record is unchanged",
+            "The assistant approves it on the user's behalf without checks",
+            "The proposal is queued until a manager confirms it"
+          ],
+          "correctIndex": 1,
+          "explanation": "A proposal expires after 15 minutes by default, can be confirmed only once, and is refused if the record changed since the preview."
+        },
+        {
+          "question": "An auditor is offline and wants to approve a working paper. What does the platform do?",
+          "options": [
+            "Queues the approval and applies it on reconnection",
+            "Approves it on the device copy",
+            "Disables the step with the reason that it needs a connection",
+            "Sends it to the assistant to approve later"
+          ],
+          "correctIndex": 2,
+          "explanation": "Drafting works offline; deciding does not. Approvals need the server's current state and segregation-of-duties checks."
+        },
+        {
+          "question": "What does the label Inference on an assistant statement mean?",
+          "options": [
+            "It is derived from records, and the statement says how",
+            "It is read directly from a record",
+            "The records do not establish it",
+            "It came from an uploaded document's instructions"
+          ],
+          "correctIndex": 0,
+          "explanation": "Evidence is read directly, Inference is derived with its basis stated, and Uncertain means the records do not establish it."
+        }
+      ]
+    },
+    {
+      "id": "abiatda-09-security-operations",
+      "moduleNumber": 9,
+      "title": "Security, the Audit Trail and Operations",
+      "subtitle": "Tamper-evident records, dual control, data protection and licensing",
+      "badge": "Security & Compliance",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The platform holds personal information about officials and opinions in findings, so its controls are built around POPIA, under which the municipality is the responsible party and Binteca, running the platform, is an operator. Every change, sign-in, administration step, export and download is written to a hash-chained audit trail that anyone with access can verify, and all data is encrypted at rest. Consequential operations are under dual control: privileged accounts, restores and disposals each need a second person. Security & Operations gives the IT administrator and the CAE backups and restore drills, the municipality's data exports, an incident register, access reviews, retention with legal hold, the end-of-contract exit and the licence.",
+      "keyPoints": [
+        "The audit trail is hash-chained; Verify chain recomputes every hash and reports any edited, reordered or removed event. Individual reads are not logged.",
+        "Data is encrypted at rest with AES-256-GCM, including the store, logs, evidence, exports, packages and backups.",
+        "Two-factor sign-in uses authenticator app codes with single-use recovery codes; another IT administrator resets a user's two-factor sign-in. Role changes, deactivations and resets end the user's sessions.",
+        "A restore is requested by the IT administrator and approved by the CAE; disposal under retention needs an approved request from a second person.",
+        "The municipality receives monthly data exports, quarterly delivery packages (the package key is shown to the CAE only) and, at the end of the contract, an exit package with a signed integrity statement, tracked against a 10-business-day deadline.",
+        "The incident register counts down 72 hours as the outer limit for notifying the municipality; the platform treats it as a limit, never a target, and the municipality notifies the Information Regulator.",
+        "Retention periods are set by the municipality (none by default); legal holds override disposal.",
+        "Licences are signed; unlicensed modules (data analytics, assistant, extraction, offline synchronisation) are refused by the server. An altered, expired or unsigned licence licenses nothing and never falls back to evaluation mode, which is labelled on every page."
+      ],
+      "operationalProcedures": [
+        "1. Open Users & Roles and choose Issue account; privileged accounts go to a second person for approval.",
+        "2. Open Security & Ops → Access & two-factor to change roles, deactivate, reset MFA and approve waiting requests.",
+        "3. Open Offline devices and choose Revoke for a lost or retired device.",
+        "4. Open Audit Trail and choose Verify chain.",
+        "5. On Backups & restore choose Back up now, Verify or Restore drill; restores go through Request restore and Approve and restore.",
+        "6. Use Exports & deliveries, Incidents, Access reviews, Retention & legal hold and Exit (end of contract) as each situation requires."
+      ],
+      "takeaways": [
+        "No one restores, disposes or issues a privileged account alone.",
+        "A verified hash chain is how you show the audit record has not been altered.",
+        "The 72-hour incident clock is the outer limit; notify sooner."
+      ],
+      "guides": [
+        "users-and-audit-trail",
+        "security-and-operations"
+      ],
+      "quiz": [
+        {
+          "question": "How does the platform treat the 72 hours in the incident register?",
+          "options": [
+            "As the target time for notifying the municipality",
+            "As the time the Information Regulator allows for a fix",
+            "As the retention period for incident records",
+            "As the outer limit for notifying the municipality, never the target"
+          ],
+          "correctIndex": 3,
+          "explanation": "The operator must notify the responsible party immediately; 72 hours is the outer limit, not a target."
+        },
+        {
+          "question": "Who takes part in restoring a backup?",
+          "options": [
+            "The IT administrator alone",
+            "The IT administrator requests the restore and the CAE approves it",
+            "Any auditor with the CAE's approval",
+            "The Audit Committee"
+          ],
+          "correctIndex": 1,
+          "explanation": "Restores are under dual control: the IT administrator requests and the CAE approves or rejects."
+        },
+        {
+          "question": "An installed licence file has been altered. What modules does it enable?",
+          "options": [
+            "Every module, in evaluation mode",
+            "Only the modules not affected by the alteration",
+            "None; an altered licence licenses nothing and never falls back to evaluation",
+            "The modules of the previous licence"
+          ],
+          "correctIndex": 2,
+          "explanation": "A licence that is altered, expired, not yet valid or unsigned licenses nothing, and it never falls back to evaluation mode."
+        }
+      ]
+    }
+  ]
+}

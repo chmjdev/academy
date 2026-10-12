@@ -1,0 +1,359 @@
+{
+  "id": "basimo",
+  "name": "BASIMO",
+  "fullName": "Bantu Intelligence Monitor",
+  "category": "Public safety & intelligence",
+  "summary": "A broadcast and open-source monitoring console for South Africa and the SADC region: it stores what its collectors fetch as intercepts, raises alarms over them and lets analysts build cases. Used by liaison officers, analysts and command staff through the web console or the Basimo desktop app.",
+  "audience": ["Liaison officer", "Intelligence analyst", "Senior case officer", "Director / command staff"],
+  "surfaces": ["Web console", "Desktop app"],
+  "gettingAccess": "The console sits behind the platform access gate: your administrator issues you access and you sign in once at the gate. Your officer profile (LO number, agency, role and clearance) is provisioned by a director in the OFFICERS screen. Nobody shares access keys or passwords through this academy; ask your administrator.",
+  "sources": [
+    "README.md",
+    "INSTALL.md",
+    "demo-access.json",
+    "web/src/App.tsx",
+    "web/src/components/",
+    "scripts/build_and_install_mac.sh",
+    "start.sh"
+  ],
+  "guides": [
+    {
+      "id": "find-your-way-around",
+      "title": "Find your way around the console",
+      "goal": "Move between the console's sections on a desktop screen or a phone, and read the status indicators in the header.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": ["You have passed the platform access gate and the console has loaded."],
+      "steps": [
+        "Look at the header: the [section] badge next to C4ISR names the section you are in, and the indicator beside it reads COLLECTORS LIVE (green) when the live connection is up or CONNECTING... (amber) while it reconnects.",
+        "On a desktop-width screen, click a tab in the bar under the header (for example PEACE & STABILITY, LIVE STREAM, 3X3 NEWS, SEARCH & SITREP, FIGURES & BIAS, LINK GRAPH, GEOINT MAP, CASES or MESH). Hover a tab to read its description.",
+        "To see every section with its description, click MENU (top left). The COMMAND NAVIGATION MATRIX drawer opens; click a section to go there, or press ESC to close the drawer.",
+        "On a phone, use the bottom bar: OPS, STREAM, NEWS, TARGETS, SEARCH, and MORE, which opens the same navigation drawer.",
+        "Use the OFFICERS and ADMIN buttons at the top right to reach officer management and system administration; they are not on the tab bar.",
+        "Click Sync All Telemetry (the circular-arrow button) to reload every panel from the server.",
+        "Click your LO badge at the top right to see your agency and clearance; click LOCK to sign out of the console."
+      ],
+      "result": "The chosen section fills the main area and its short name appears in the header badge.",
+      "troubleshooting": [
+        { "problem": "The header keeps showing CONNECTING...", "fix": "The live connection to the server has dropped; the console retries every few seconds. Click Sync All Telemetry, and if it persists tell your administrator." },
+        { "problem": "The tab bar is not visible", "fix": "It is hidden on narrow screens. Use MENU, or the bottom bar on a phone." }
+      ],
+      "sources": ["web/src/App.tsx"]
+    },
+    {
+      "id": "read-peace-and-stability-dashboard",
+      "title": "Read the Peace & Stability dashboard",
+      "goal": "Get the national picture from the default landing section and its four sub-views.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open the PEACE & STABILITY tab (OPS on a phone). It is the section the console opens on.",
+        "Use the switcher at the top of the section to choose a sub-view: SURVEILLANCE HUD, 27,000+ VOTING STATIONS MAP, SAPS CRIME & PUBLIC ORDER HOTSPOTS, or AI THREAT SCAN & SADC REGIONAL.",
+        "In SURVEILLANCE HUD, read the TV, radio, press and social panels. Each lists the newest stored items; a panel with nothing stored says so (for example NO PRESS INTERCEPTS LOGGED YET).",
+        "Click DETAILS on an item to open its full record, or PIN to attach it to a case.",
+        "In SAPS CRIME & PUBLIC ORDER HOTSPOTS, choose a CATEGORY (for example Public violence (Riots & Protests) or Murder) and a province, or type in Search Police Station..., to list matching precincts with their Hotspot Severity.",
+        "In AI THREAT SCAN & SADC REGIONAL, read the NATIONAL STABILITY RATING, RIOT VULNERABILITY INDEX and ELECTORAL SECURITY THREAT cards and the EXECUTIVE PEACE & STABILITY BRIEFING below them."
+      ],
+      "result": "You can see the latest stored items and the crime, voting-station and regional summaries without leaving the section.",
+      "troubleshooting": [
+        { "problem": "A HUD panel is empty", "fix": "Nothing has been stored for that source yet. BASIMO shows only what its collectors have fetched; it never fills a panel with sample data." }
+      ],
+      "sources": ["web/src/App.tsx", "web/src/components/LiveOpsHud.tsx", "web/src/components/SapsCrimeDashboard.tsx", "web/src/components/EnvironmentalScanView.tsx", "README.md"]
+    },
+    {
+      "id": "flag-a-voting-station-incident",
+      "title": "Flag or resolve a security incident at a voting station",
+      "goal": "Mark a voting station red with a reported security issue, and restore it to green once it is resolved.",
+      "role": "Any signed-in user",
+      "level": "Intermediate",
+      "before": ["You have verified information about an incident at a specific station."],
+      "steps": [
+        "Open the VOTING STATIONS tab, or PEACE & STABILITY then 27,000+ VOTING STATIONS MAP.",
+        "Narrow the list with the province selector (All 9 Provinces, Gauteng, KwaZulu-Natal and so on) and the ALL / GREEN (NORMAL) / RED (ALERT) filter, or type in Search Station, VD, Ward....",
+        "Select the station to see its Registered Voters, Ward Info and NEAREST POLICE PRECINCT.",
+        "Click FLAG SECURITY INCIDENT (TURN RED).",
+        "Under Report Security Threat at Station, choose the level (Level: Medium Threat, Level: High Risk or Level: Critical Violence / Riot) and describe what you know in the text box.",
+        "Click SUBMIT ALERT.",
+        "When the issue is over, select the same station and click MARK RESOLVED (RESTORE GREEN STATUS)."
+      ],
+      "result": "The station shows SECURITY THREAT / INCIDENT in red while flagged, and NORMAL OPERATION in green after it is resolved; the summary counts refresh.",
+      "troubleshooting": [
+        { "problem": "The station list does not change after submitting", "fix": "Click Refresh Voting Stations Telemetry (the refresh button) to reload the list." }
+      ],
+      "sources": ["web/src/components/VotingStationsMap.tsx"]
+    },
+    {
+      "id": "follow-the-live-stream",
+      "title": "Follow the live report stream",
+      "goal": "Watch new intercepts arrive in real time, filter them, and act on one.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open the LIVE STREAM tab (STREAM on a phone). The header reads LIVE RECEPTION ACTIVE and the counters show TOTAL DISPATCHES, CRITICAL THREATS, HIGH THREATS and ACTIVE ALARMS.",
+        "Type words into Search live stream ... to narrow the list, and use the threat buttons (ALL THREATS, CRITICAL, HIGH, MEDIUM, LOW).",
+        "Click AUTO-SCROLL: ON to pause scrolling while you read (it then reads AUTO-SCROLL: PAUSED); click it again to resume.",
+        "Click RUN INTELLIGENCE SWEEP to ask the server to fetch new items now; a SWEEP COMPLETE line reports how many were ingested.",
+        "On a dispatch, click INSPECT to open its full record, COPY INTEL to copy a formatted summary, LIVE ARTICLE to open the original source, or PIN TO CASE to attach it to a case.",
+        "In the full record, read the transcript, any OCR text and the captured clip, then click PIN TO CASE or CLOSE."
+      ],
+      "result": "New intercepts appear at the top of the stream as they are stored, and the one you pinned appears in the chosen case's evidence.",
+      "troubleshooting": [
+        { "problem": "NO DISPATCHES MATCH FILTER", "fix": "Clear the search box or choose ALL THREATS; if the store is genuinely empty, click RUN INTELLIGENCE SWEEP." },
+        { "problem": "The sweep reports SWEEP FAILED or SWEEP ERROR", "fix": "The server could not complete the collection run. Try again later and report it to your administrator if it repeats." }
+      ],
+      "sources": ["web/src/components/LiveReportStream.tsx", "web/src/components/InterceptDetailModal.tsx"]
+    },
+    {
+      "id": "investigate-and-resolve-an-alarm",
+      "title": "Investigate and resolve an alarm",
+      "goal": "Open an active alarm, look at the intercept that raised it, and acknowledge it.",
+      "role": "Any signed-in user",
+      "level": "Intermediate",
+      "before": ["An alarm is showing in the alarm banner at the top of the main area."],
+      "steps": [
+        "Find the alarm banner above the current section. When nothing is outstanding it reads TACTICAL PERIMETER SECURE: ZERO UNRESOLVED ALARMS.",
+        "Use ALARM AUDIO: ON / OFF to switch the alarm buzzer on or off.",
+        "Click INVESTIGATE on an alarm (or click its text) to open the full alarm dossier.",
+        "Read ALARM NARRATIVE & THREAT TRIGGER DETAILS and INTERCEPTED EVIDENCE TRANSMISSION, including the channel, threat, sentiment and COMPLETE INTERCEPT TRANSCRIPT.",
+        "To look for related items, click 360° SEARCH & SITREP; the console moves to SEARCH & SITREP with the query filled in.",
+        "To keep the evidence, click PIN TO ACTIVE CASE DOSSIER.",
+        "When the alarm has been dealt with, click ACK / RESOLVE in the banner (or resolve it from the dossier), then CLOSE."
+      ],
+      "result": "The alarm's status changes to RESOLVED and it leaves the list of active alarms.",
+      "troubleshooting": [
+        { "problem": "No intercept is shown in the dossier", "fix": "The alarm was raised by a rule rather than a single stored item. Use 360° SEARCH & SITREP to find related intercepts." }
+      ],
+      "sources": ["web/src/components/AlarmsBanner.tsx", "web/src/components/AlarmInvestigationModal.tsx", "web/src/App.tsx", "README.md"]
+    },
+    {
+      "id": "search-and-generate-a-sitrep",
+      "title": "Search intercepts and generate a SitRep",
+      "goal": "Find stored intercepts by keyword, source and threat level, and produce a situation report for the last 24 hours.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open the SEARCH & SITREP tab (SEARCH on a phone).",
+        "Type into Search by keywords, politician, frequency, unit, or location....",
+        "Optionally choose a source (All Sources (TV, Radio, Press, Social), TV Broadcasts, Radio & SDR Signals, Online & Printed Press, Social Media & Telegram) and a threat level (All Threat Levels, Critical, High, Medium, Low).",
+        "Click SEARCH. Click OPEN FULL UNCLIPPED TRANSCRIPT & MEDIA DOSSIER on a result to read it in full, and PIN TO ACTIVE CASE to keep it.",
+        "If a result is marked RESTRICTED because it is above your clearance, click REQUEST ACCESS TO ND OFFICE, enter your reason under OPERATIONAL JUSTIFICATION / CASE RATIONALE and click TRANSMIT TO DIRECTOR.",
+        "Click GENERATE AI SITREP to produce a C4ISR EXECUTIVE SITUATION REPORT (SITREP) covering the preceding 24 hours: TOTAL INTERCEPTS, ACTIVE ALARMS, SENTIMENT INDEX, ACTIVE CASES and KEY THREAT DEVELOPMENTS. Click DISMISS to close it."
+      ],
+      "result": "Matching intercepts are listed with restricted items redacted, and the SitRep shows counts over the window plus the high-priority items.",
+      "troubleshooting": [
+        { "problem": "No intelligence intercepts matched the specified criteria.", "fix": "Widen the search: remove the source or threat filter, or use fewer words." },
+        { "problem": "The SitRep has little in it", "fix": "It is computed only from stored items in the window; no narrative is invented. A quiet period produces a short report." }
+      ],
+      "sources": ["web/src/components/SearchPanel.tsx", "web/src/App.tsx", "README.md"]
+    },
+    {
+      "id": "open-a-case",
+      "title": "Open a new investigation case",
+      "goal": "Create a case file with a priority, clearance level, assigned officer and lead agency.",
+      "role": "Senior case officer, Director / command staff",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open the CASES tab. It opens in C4ISR DOSSIER view in the browser and in DESK VIEW in the desktop app.",
+        "In C4ISR DOSSIER view click + NEW beside OPEN PRIORITY INVESTIGATIVE CASES; in DESK VIEW click OPEN NEW CASE.",
+        "Enter the case title and the operational description.",
+        "Choose PRIORITY (CRITICAL, HIGH, MEDIUM or LOW) and CLEARANCE (LEVEL 1 // CONFIDENTIAL to LEVEL 4 // TOP SECRET SCI).",
+        "Choose the ASSIGNED LO and the LEAD AGENCY.",
+        "Tick Share case summary with Inter-Agency Mesh only if the case may be shared with other agencies.",
+        "Click CREATE CASE FILE (C4ISR DOSSIER view) or INITIALIZE CASE (DESK VIEW)."
+      ],
+      "result": "The new case appears in the case list and the CASES tab count goes up by one.",
+      "troubleshooting": [
+        { "problem": "The C4ISR DOSSIER view lists cases you did not create when there are none", "fix": "That view shows placeholder entries when the case list is empty. Use DESK VIEW to see only the cases actually stored." }
+      ],
+      "sources": ["web/src/components/InvestigationsCases.tsx", "web/src/App.tsx"]
+    },
+    {
+      "id": "attach-evidence-to-a-case",
+      "title": "Attach evidence to a case",
+      "goal": "Pin intercepts to a case and review the case's evidence locker.",
+      "role": "Any signed-in user",
+      "level": "Intermediate",
+      "before": ["At least one case exists."],
+      "steps": [
+        "From any intercept (in the stream, search results, HUD or full record), click PIN TO CASE.",
+        "If there is only one case, the intercept is attached to it straight away. Otherwise the PIN EVIDENCE TO CASE window opens: click the case you want (ATTACH →) or CANCEL.",
+        "To attach something by reference, open the case in CASES, click ATTACH EVIDENCE, enter an intercept ID or media / photo URL in INTERCEPT ID OR MEDIA / PHOTO URL and click ATTACH.",
+        "In the selected case, use the EVIDENCE VIEW selector to show ALL EVIDENCE, PHOTOS & MEDIA, SOCIAL POSTS, PRESS & WIRES, SIGNALS (TV/RADIO/SDR) or LIVE TRACKING MAP.",
+        "Click Refresh Case Evidence (the refresh icon) if a newly pinned item has not appeared."
+      ],
+      "result": "A confirmation reads Intercept pinned successfully to Case ..., and the item is listed in the case's evidence locker with its SHA-256 checksum.",
+      "troubleshooting": [
+        { "problem": "No active cases available. Please create a case under the CASES & DOSSIERS tab first.", "fix": "Open a case first (see Open a new investigation case), then pin the intercept again." }
+      ],
+      "sources": ["web/src/App.tsx", "web/src/components/InvestigationsCases.tsx"]
+    },
+    {
+      "id": "export-a-case-dossier",
+      "title": "View and export a case dossier",
+      "goal": "Read a case's compiled dossier and save it as a Markdown file.",
+      "role": "Senior case officer, Director / command staff",
+      "level": "Basic",
+      "before": ["The case has evidence attached."],
+      "steps": [
+        "Open the CASES tab and select the case.",
+        "Click DOSSIER in the case's action bar.",
+        "Read the OFFICIAL NATIONAL SECURITY INTELLIGENCE DOSSIER window.",
+        "Click EXPORT MD to download it as DOSSIER-<case number>.md.",
+        "Close the window with the X."
+      ],
+      "result": "A Markdown file of the dossier is saved to your downloads.",
+      "troubleshooting": [
+        { "problem": "You were told to look for a Compile Dossier button or a PDF", "fix": "The console's button is DOSSIER and its export is Markdown (EXPORT MD)." }
+      ],
+      "sources": ["web/src/components/InvestigationsCases.tsx"]
+    },
+    {
+      "id": "review-figures-and-bias",
+      "title": "Review public figures and media bias",
+      "goal": "See how often monitored office holders are mentioned, with what sentiment, and how each source covers them.",
+      "role": "Intelligence analyst",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open the FIGURES & BIAS tab.",
+        "Choose METRICS GRID for the figures computed from stored intercepts (the desktop app opens there by default).",
+        "Use Search figure... to find a person, then select their card to analyse them.",
+        "Read MENTIONS, RECORDED AIRTIME, LAST SEEN and SENTIMENT for the figure.",
+        "Under CROSS-NETWORK ANALYSIS, read each source's share of mentions split into POSITIVE, NEUTRAL and CRITICAL.",
+        "Read the quoted declarations below, each linked to the intercept it came from."
+      ],
+      "result": "You see counts and sentiment computed from stored intercepts for the chosen figure, by source.",
+      "troubleshooting": [
+        { "problem": "Every figure shows zero", "fix": "On a fresh install nothing has been stored yet; the numbers fill in as intercepts arrive." },
+        { "problem": "A source shows INSUFFICIENT_SAMPLE", "fix": "Fewer than three mentions were found for that source and figure, so no share is reported." },
+        { "problem": "The C4ISR MATRIX view shows fixed percentages", "fix": "Use METRICS GRID for figures computed from the stored data." }
+      ],
+      "sources": ["web/src/components/FiguresBiasMatrix.tsx", "README.md"]
+    },
+    {
+      "id": "use-the-map-and-link-graph",
+      "title": "Use the GEOINT map and link graph",
+      "goal": "See where geocoded intercepts are and how figures, sources, cases and places connect.",
+      "role": "Intelligence analyst",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open the GEOINT MAP tab.",
+        "Choose a base layer: TACTICAL DARK, OSM STREETS or SATELLITE.",
+        "Click a marker. The INCIDENT DOSSIER panel shows its SOURCE, THREAT LEVEL, LATITUDE and LONGITUDE; click PAN TO TARGET to centre it.",
+        "Open the LINK GRAPH tab to see the entity network. The NODE CLASSIFICATION legend distinguishes Public Figure, Investigative Case, Broadcast Media Station and Geospatial Location.",
+        "Click RE-LAYOUT if the graph is tangled."
+      ],
+      "result": "You can locate an intercept on the map and see which entities co-occur.",
+      "troubleshooting": [
+        { "problem": "An intercept you expected is not on the map", "fix": "Coordinates are attached only when a known place name appears in the text; items without one have no location." },
+        { "problem": "The map tiles do not load", "fix": "The map draws tiles from OpenStreetMap; check this device's network connection." }
+      ],
+      "sources": ["web/src/components/TacticalMap.tsx", "web/src/components/NetworkGraph.tsx", "README.md"]
+    },
+    {
+      "id": "watch-the-news-grid",
+      "title": "Watch several news channels at once",
+      "goal": "Monitor broadcast channels side by side with one audio channel at a time.",
+      "role": "Any signed-in user",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open the 3X3 NEWS tab (NEWS on a phone).",
+        "Choose a layout: GRID (full grid), QUAD (first four) or FOCUS (single stream).",
+        "Click UNMUTE on one channel to hear it. Only one channel plays audio at a time; MUTE ALL silences everything.",
+        "Reorder feeds by dragging them, or with the move-earlier and move-later arrows; RESET puts them back in live on-air order.",
+        "Use Reload Video Stream on a tile that has stalled, or Open Stream in Independent Window to pop it out."
+      ],
+      "result": "The chosen channels play in the layout you picked, with audio from one channel.",
+      "troubleshooting": [
+        { "problem": "A channel tile does not play", "fix": "Some channels broadcast live only for specific events. Click Reload Video Stream, or check the channel later." }
+      ],
+      "sources": ["web/src/components/NewsStreamGrid.tsx", "README.md"]
+    },
+    {
+      "id": "send-flash-alerts-and-rfis",
+      "title": "Send a flash alert or a request for information to another agency",
+      "goal": "Use the inter-agency mesh to broadcast a flash alert, raise an RFI, and answer one.",
+      "role": "Senior case officer, Director / command staff",
+      "level": "Advanced",
+      "before": ["Your unit's procedures allow the information to be shared with the receiving agency."],
+      "steps": [
+        "Open the MESH tab. The summary shows PEERS ONLINE, INTER-AGENCY SIGNALS and PENDING RFIs, and DISPATCHING AS names your officer profile.",
+        "To broadcast an alert, click DISPATCH FLASH ALERT, choose THREAT TYPE, enter the OPERATIONAL SECTOR / CORRIDOR, choose the SEVERITY LEVEL, write the TACTICAL BRIEF & INCIDENT SUMMARY and click BROADCAST ALERT.",
+        "To ask another agency for information, click CREATE RFI, choose the TARGET AGENCY, optionally add a CASE REFERENCE (OPTIONAL), enter the INQUIRY SUBJECT and OPERATIONAL SPECIFICATION & SCOPE, and click SUBMIT RFI.",
+        "To answer an RFI addressed to you, click PROVIDE INTELLIGENCE on it, enter your findings under INTELLIGENCE REPORT & AUDIT FINDINGS and click TRANSMIT INTELLIGENCE.",
+        "When a flash alert or RFI arrives from elsewhere, a banner appears at the top of the main area; click DISMISS once you have read it."
+      ],
+      "result": "Your alert appears under FLASH ALERTS (IAFA), your RFI under REQUESTS FOR INFORMATION, and an answered RFI is marked fulfilled.",
+      "troubleshooting": [
+        { "problem": "PEERS ONLINE is zero", "fix": "No peer agency is configured or answering its heartbeat. That is set up by your administrator, not in this screen." }
+      ],
+      "sources": ["web/src/components/InterAgencyMesh.tsx", "web/src/App.tsx", "README.md"]
+    },
+    {
+      "id": "manage-liaison-officers",
+      "title": "Provision a liaison officer and read the audit trail",
+      "goal": "Register a new officer profile with the right clearance, and check who accessed what.",
+      "role": "Director / command staff",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Click OFFICERS at the top right. The LIAISON OFFICERS & CLEARANCE GOVERNANCE screen opens.",
+        "Click PROVISION LIAISON OFFICER.",
+        "Fill in LO NUMBER, AGENCY, OFFICER FULL NAME & RANK, OPERATIONAL ROLE (Investigator, Senior Case Officer, Intelligence Analyst or Director / Command Staff), CLEARANCE LEVEL and STATION / HEADQUARTERS LOCATION. SECURE COMMS EMAIL (OPTIONAL) may be left blank.",
+        "Click REGISTER OFFICER.",
+        "To work from another officer's perspective, click SWITCH PERSPECTIVE on their card, or use Switch Active Officer Profile from your LO badge in the header.",
+        "Scroll to IMMUTABLE AUDIT TRAIL // RECORDING ALL CROSS-AGENCY INTEL ACCESS to read TIMESTAMP, OFFICER (LO), AGENCY, ACTION, TARGET, CLEARANCE and EVENT DETAILS for each access."
+      ],
+      "result": "The new officer appears in the directory and the OFFICERS count goes up; the audit trail records the change.",
+      "troubleshooting": [
+        { "problem": "The new officer does not appear", "fix": "Click Refresh Directory." }
+      ],
+      "sources": ["web/src/components/UserManagement.tsx", "web/src/App.tsx"]
+    },
+    {
+      "id": "set-the-operational-focus",
+      "title": "Set the operational focus",
+      "goal": "Choose which priority (for example elections or defence) the console weights when classifying threats.",
+      "role": "Director / command staff",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Click the FOCUS badge in the header, or click ADMIN and choose 🎯 OPERATIONAL FOCUS & RECON SERVICES in the ADMIN SECTION selector.",
+        "Under 1. OPERATIONAL INTELLIGENCE FOCUS & THREAT SCOPE, click the focus card you want (for example Elections & Democracy or Defense & Borders).",
+        "Click SAVE FOCUS.",
+        "To go back to the default, click RESET TO DEFAULT (ELECTIONS)."
+      ],
+      "result": "A confirmation reads Operational Focus aligned to ..., and the header FOCUS badge shows the new focus.",
+      "troubleshooting": [
+        { "problem": "The save is refused", "fix": "System administration is restricted to the national director's profile. Ask a director to make the change." }
+      ],
+      "sources": ["web/src/components/SettingsConfig.tsx", "web/src/components/SystemAdminPage.tsx", "web/src/App.tsx"]
+    },
+    {
+      "id": "install-the-desktop-app",
+      "title": "Install and open the Basimo desktop app (macOS)",
+      "goal": "Install Basimo.app on a Mac and check which capture devices the machine can see.",
+      "role": "Workstation administrator",
+      "level": "Intermediate",
+      "before": ["A Mac with the BASIMO project folder and Node.js.", "Homebrew installed if you also run the local backend (see INSTALL.md)."],
+      "steps": [
+        "In a terminal in the project folder, run ./start.sh install. It builds the app, removes any previous Basimo.app from /Applications and ~/Applications, and installs the new one.",
+        "Open the app with ./start.sh run, or from /Applications.",
+        "In the app, click the BUS button in the header (it shows the number of devices, for example 0 DEV). The HARDWARE & DEVICE MANAGER window lists USB PERIPHERALS, RTL-SDR RECEIVER, GSM LTE MODEM and DVB-T2 TUNER.",
+        "Click RE-PROBE BUS after plugging in a device, then DISMISS.",
+        "On a Linux or Mac edge station that runs its own backend, use INSTALL.md's ./install.sh; afterwards visictl status and visictl open check and open the console."
+      ],
+      "result": "Basimo opens in its own window with the same sections as the web console, and the device manager reflects what is attached.",
+      "troubleshooting": [
+        { "problem": "A device you attached is not listed", "fix": "Click RE-PROBE BUS. Nothing is listed for a device that is not present; on Linux, unplug and replug an SDR dongle after the installer has added its USB rules." }
+      ],
+      "sources": ["README.md", "INSTALL.md", "start.sh", "scripts/build_and_install_mac.sh", "web/src/components/HardwareDeviceStatusModal.tsx"]
+    }
+  ]
+}

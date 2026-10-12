@@ -1,0 +1,407 @@
+{
+  "id": "iafrp",
+  "name": "Integrated Accounting & Financial Reporting",
+  "fullName": "Integrated Accounting & Financial Reporting Platform",
+  "category": "Accounting and financial reporting",
+  "summary": "One controlled ledger for South African accounting practices, from source evidence through bookkeeping to management packs and annual financial statements, with maker/reviewer separation, governed imports, bank reconciliation, a client portal and offline drafts. Used by practice administrators, directors, accountants, bookkeepers, viewers and the practice's clients.",
+  "audience": [
+    "Practice administrator",
+    "Director (reviewer / approver)",
+    "Accountant (preparer)",
+    "Bookkeeper",
+    "Viewer",
+    "Client portal user"
+  ],
+  "surfaces": [
+    "Web application (responsive, desktop and phone)",
+    "Windows desktop app (an installed shell around the same web client; not released)",
+    "Offline drafts (encrypted outbox in the browser or desktop app)",
+    "Imports (CSV, TSV, fixed-width text, XLSX, canonical JSON/XML)",
+    "Exports (CSV, XLSX, JSON with a hashed manifest) and PDF, Excel and Word reports",
+    "Client portal",
+    "Practice administration pages (Team & access, Devices, Retention)"
+  ],
+  "gettingAccess": "A practice administrator grants access on Team & access, choosing a role and a scope (the whole practice, one client or one entity). Someone already in the practice gets the role at once; anyone else receives a one-time invitation code, shown once to the administrator, and joins by choosing \"I have an invitation code\" on the sign-in page (or by signing in and accepting it on Invitations). Practice administrators and directors must use an authenticator app for two-step verification by default. In demo mode the sign-in page lists synthetic demo accounts with their roles and a Use button; the demo practice and its entities are synthetic.",
+  "sources": [
+    "README.md",
+    "desktop/README.md",
+    "demo-access.json",
+    "src/routes.ts",
+    "src/components/Layout.tsx",
+    "src/bookkeeping/nav.ts",
+    "src/afs/paths.ts",
+    "core/permissions.ts",
+    "docs/architecture/OFFLINE-CONTRACT.md",
+    "docs/architecture/IMPORTS.md"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-and-verification",
+      "title": "Sign in, accept an invitation and set up two-step verification",
+      "goal": "You are signed in to your practice with your own password and, where required, an authenticator app.",
+      "role": "Any user",
+      "level": "Basic",
+      "before": [
+        "An invitation code from your practice administrator, or an existing account.",
+        "For two-step verification: an authenticator app (TOTP) on your phone."
+      ],
+      "steps": [
+        "To join with an invitation, on the Sign in page choose I have an invitation code. Enter your Email, the Invitation code and a Password (at least 12 characters if you are new), then choose Accept invitation.",
+        "To sign in normally, enter your Email and Password and choose Sign in. In demo mode, choose Use next to a demo account to fill in the form.",
+        "If your role requires two-step verification and you have not enrolled, the Set up two-step verification screen shows a QR code. Scan it (or use Copy key), enter the Code from the app and choose Confirm.",
+        "On later sign-ins, enter the Code from your authenticator on the Verification code screen and choose Verify. In demo mode the screen shows the demo authenticator's current code; choose Use code.",
+        "If you belong to more than one practice, choose it in the Practice selector in the navigation.",
+        "To change your password or enrol an authenticator later, open Security from the account menu or the navigation.",
+        "If an invitation is waiting, open Invitations and choose Accept."
+      ],
+      "result": "You land on Entities, showing the entities your role and scope allow.",
+      "troubleshooting": [
+        { "problem": "Password changes are turned off.", "fix": "Shared demo accounts are immutable while the demo runs, and the UAT environment keeps issued credentials fixed." },
+        { "problem": "You are signed in but not in a practice yet.", "fix": "Accept an invitation on Invitations, or ask a practice administrator to grant you access." },
+        { "problem": "The invitation code was lost.", "fix": "Codes are shown once and not stored. Ask the administrator to withdraw the invitation and issue a new one." }
+      ],
+      "sources": ["src/pages/SignIn.tsx", "src/pages/Security.tsx", "src/pages/Invitations.tsx", "src/pages/Access.tsx", "src/components/Layout.tsx", "README.md"]
+    },
+    {
+      "id": "add-entity-and-chart",
+      "title": "Add an entity and set up its chart of accounts",
+      "goal": "A legal entity exists with its financial year, currency and reporting framework, and a chart of accounts and dimensions ready for journals.",
+      "role": "Practice administrator or Director (entity); Accountant, Director or Practice administrator (accounts and dimensions)",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open Entities and choose Add entity.",
+        "Under Add an entity choose the Client (or New client… and type the New client name), then enter the Entity name, Legal type, Financial year starts in, First financial year begins, Functional currency and Reporting framework.",
+        "Answer Publicly accountable? and, where offered, Early adoption of the third edition?, then choose Create entity.",
+        "Choose the entity in the Entity selector and open Chart of accounts.",
+        "Add each account: enter the Code (text, so leading zeros are kept), Name, Type, Normal balance and optional Tax default, then choose Add account.",
+        "Under Add a dimension enter a Code, Name and Kind (departments, projects or other analysis) and choose Add dimension; then choose Add value to add its values.",
+        "To stop using an account, choose Deactivate and give a Reason. Used accounts are deactivated, never deleted."
+      ],
+      "result": "The entity's Overview shows its profile, open periods and configuration history, and the chart is ready for journals and imports.",
+      "troubleshooting": [
+        { "problem": "You need to change an account's code or name.", "fix": "An account cannot be edited once created. Deactivate it and add a new one." },
+        { "problem": "Add entity is not shown.", "fix": "Ask your practice administrator for access to an entity, or for a role that can create one." }
+      ],
+      "sources": ["src/pages/Entities.tsx", "src/pages/EntityOverview.tsx", "src/pages/Accounts.tsx", "README.md"]
+    },
+    {
+      "id": "journal-prepare-approve-post",
+      "title": "Prepare, approve and post a journal",
+      "goal": "A balanced journal is prepared, approved and posted to the ledger by different users, with its evidence attached.",
+      "role": "Accountant or Bookkeeper (prepares); Director or Practice administrator who did not prepare or submit it (approves and posts)",
+      "level": "Basic",
+      "before": ["The entity has accounts and an open period for the journal date."],
+      "steps": [
+        "Open Journals and choose New journal.",
+        "Under Details enter the Date, an optional Reference and the Description.",
+        "Under Lines choose an account for each line and enter a Debit or a Credit, with an optional Memo. Choose Add line for more lines; use Foreign currency… for a line in another currency.",
+        "Choose Save draft, or Save and submit for review once the journal balances.",
+        "Open the journal and use Attach file under Evidence to add the source document (PDF, PNG, JPEG or TIFF up to 20 MB).",
+        "Reviewer: open the journal and choose Approve, or Return to preparer with a Reason the preparer sees.",
+        "A user who did not prepare or submit it chooses Post to ledger. The official number is given at posting.",
+        "To undo a posted journal, choose Reverse, enter the Reversal date (in an open period) and choose Create reversal. Posted lines are never changed."
+      ],
+      "result": "The journal shows its Provenance (prepared, submitted, approved, posted) and a hash-chained Audit trail, and its lines appear in the Trial balance.",
+      "troubleshooting": [
+        { "problem": "\"You prepared or submitted this journal, so a different user must approve it.\"", "fix": "Maker/reviewer separation: ask another authorised user to approve and post it." },
+        { "problem": "Save and submit for review is disabled.", "fix": "The journal does not balance, has problems listed under it, or you are offline (offline you can only save a draft on the device)." }
+      ],
+      "sources": ["src/pages/Journals.tsx", "src/pages/JournalEditor.tsx", "src/pages/JournalDetail.tsx", "core/permissions.ts", "README.md"]
+    },
+    {
+      "id": "evidence-and-legal-holds",
+      "title": "Store evidence and place legal holds",
+      "goal": "Source documents are stored encrypted and identified by their SHA-256 hash, with retention classes and legal holds that override disposal.",
+      "role": "Accountant, Bookkeeper, Director, Practice administrator (upload); Director or Practice administrator (legal holds and retention)",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open Evidence for the entity. Under Upload choose the Retention class and choose Choose file (PDF, PNG, JPEG or TIFF, up to 20 MB; the contents must match the type).",
+        "Find the file under Stored evidence with its hash; choose Download to retrieve it.",
+        "To protect one document, choose Legal hold on its row, give a Reason and choose Place hold. Release hold reverses it, with a reason.",
+        "For a hold on an entity, a client or the whole practice, open Retention, choose what to place it on under Hold, give a Reason and choose Place legal hold.",
+        "On Retention, under Record classes, record a reviewed retention period: enter Period (years) and Legal basis confirmed by review, then choose Record reviewed period."
+      ],
+      "result": "Held items are badged Legal hold; nothing in a class is disposed of until its reviewed period is recorded, and holds override disposal.",
+      "troubleshooting": [
+        { "problem": "An image or PDF is refused.", "fix": "The file's contents must match its type and be within 20 MB." },
+        { "problem": "There is no malware scan on uploads.", "fix": "Malware scanning is not built; treat uploaded files accordingly." }
+      ],
+      "sources": ["src/pages/Evidence.tsx", "src/pages/Retention.tsx", "README.md"]
+    },
+    {
+      "id": "governed-import",
+      "title": "Import a file through the governed import pipeline",
+      "goal": "A journal, chart, contacts, invoices, budget or bank-statement file is mapped, validated, approved by a second person and committed in one step.",
+      "role": "Accountant or Bookkeeper (prepares); Director or Practice administrator (approves and commits)",
+      "level": "Advanced",
+      "before": ["The file is CSV, TSV, fixed-width text, XLSX or the canonical JSON/XML. Legacy XLS workbooks are refused: save them as XLSX."],
+      "steps": [
+        "Open Imports and choose Choose a file… under Upload a file. The file is checked and kept in quarantine before anything else happens.",
+        "Target: choose what The file contains and the Financial year (and a bank account or budget version where asked), then choose Save target.",
+        "Layout: set the Header row, Rows to skip first and, for a workbook, the Sheet and optional Range (or the Separator and Text encoding for text files). Choose Preview with this layout, then Confirm layout.",
+        "Mapping: choose a saved mapping under Use a saved mapping and Apply saved mapping, or match each field to a column. Say how amounts, numbers and dates are written. Optionally tick Save this mapping for files from the same source. Choose Apply mapping and preview.",
+        "Preview and validation: answer any questions about dates, number formats or signs and choose Confirm and re-read the file. Check the control totals and download Error report (CSV) or Error report (XLSX) if needed.",
+        "If unknown account codes are found, open the review queue (Review queues): Create account…, Map to an account… or Reject… each one. Duplicate overrides are approved or rejected there too.",
+        "Choose Submit for approval.",
+        "Reviewer: choose Approve these totals, then the commit button (for example Commit to the ledger, Commit the statement or Commit and issue the invoices), or Return to the preparer… with what needs to change."
+      ],
+      "result": "The Receipt shows the committed records, lines posted and duplicates skipped; every posted line carries its provenance. Reverse this import… creates a linked reversal for approval.",
+      "troubleshooting": [
+        { "problem": "\"This file has been imported before\".", "fix": "Duplicate control caught a repeat. Check the earlier import before continuing." },
+        { "problem": "An invoice naming an unknown customer or supplier is refused.", "fix": "Add the contact in Customers & suppliers first; imports never create them implicitly." },
+        { "problem": "The approval was lost after a change.", "fix": "An approval applies to exactly the totals fingerprint it saw; any change needs a new approval." }
+      ],
+      "sources": ["src/pages/imports/Imports.tsx", "src/pages/imports/ImportBatch.tsx", "src/pages/imports/TargetStep.tsx", "src/pages/imports/LayoutStep.tsx", "src/pages/imports/MappingStep.tsx", "src/pages/imports/CheckStep.tsx", "src/pages/imports/DecisionStep.tsx", "src/pages/imports/ImportReviews.tsx", "docs/architecture/IMPORTS.md"]
+    },
+    {
+      "id": "bank-reconciliation",
+      "title": "Import a bank statement and reconcile the bank account",
+      "goal": "A bank account's statement is matched to the ledger as at a date and the reconciliation is signed off.",
+      "role": "Accountant or Bookkeeper (reconciles); Director or Practice administrator (signs off)",
+      "level": "Intermediate",
+      "before": ["An active asset account in the chart for the bank balance."],
+      "steps": [
+        "Open Bank. If the account is not listed, choose Add bank account, pick the Ledger account, enter a Name and optionally the Bank and Last four digits, and choose Add bank account.",
+        "Choose Import a statement and take the file through the import pipeline. The opening + movements = closing proof must balance.",
+        "Back on Bank, choose Reconcile on the account and set Reconcile as at.",
+        "On To match, review Suggested matches and choose Accept N selected.",
+        "For a remaining statement line choose Match… and pick the ledger entries, then Match. Record any entry missing from the ledger as a journal.",
+        "Check Bank against ledger: the Difference must be zero.",
+        "Choose Sign off as at …, write what was checked, and confirm with Sign off.",
+        "Download the Report (CSV) or Report (XLSX). Undo a match with Unmatch… and a reason; it stays in History."
+      ],
+      "result": "The reconciliation is signed off as at the date; month close reads it for every bank account with imported statements.",
+      "troubleshooting": [
+        { "problem": "A named bank format (OFX, MT940, camt) is not accepted.", "fix": "Bank format adapters and feeds are designed only; import CSV or XLSX statements with a declared layout." }
+      ],
+      "sources": ["src/pages/bank/BankAccounts.tsx", "src/pages/bank/Reconciliation.tsx", "README.md"]
+    },
+    {
+      "id": "customers-and-suppliers",
+      "title": "Add customers and suppliers and approve bank-detail changes",
+      "goal": "Customers and suppliers are recorded without duplicates, and their bank details are used only after a different user approves them.",
+      "role": "Accountant or Bookkeeper (records); Director or Practice administrator (approves bank details)",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open Customers & suppliers and choose New contact.",
+        "Under Details enter the Name, optional Code, whether it is a Customer and/or Supplier, VAT number, Company registration number, Email, Phone and Address.",
+        "Under Terms and tax set the Payment terms (days), Counted from and Default tax code.",
+        "If Possible duplicates are listed, check them; to continue anyway choose Save anyway and flag the matches for review and give Why this is a separate contact.",
+        "To add or change bank details, open the contact and under Bank details choose Request a change.",
+        "A different authorised user opens the contact and chooses Approve on the pending change."
+      ],
+      "result": "The contact shows its Sales documents and Purchase documents; only approved bank details can be chosen as Pay to on a payment.",
+      "troubleshooting": [
+        { "problem": "A payment says the supplier has no approved bank details.", "fix": "The bank-detail change is still waiting for approval by a different user." }
+      ],
+      "sources": ["src/bookkeeping/pages/Contacts.tsx", "src/bookkeeping/pages/DocumentEditor.tsx", "README.md"]
+    },
+    {
+      "id": "invoices-receipts-allocation",
+      "title": "Raise invoices, record receipts and payments, and allocate them",
+      "goal": "Sales and supplier documents are issued with official numbers and posted, and receipts and payments are allocated to the invoices they settle.",
+      "role": "Accountant or Bookkeeper (prepares); Director or Practice administrator who did not prepare it (issues or approves and posts)",
+      "level": "Intermediate",
+      "before": ["Bookkeeping setup has the receivables and payables control accounts, VAT accounts and cashbook accounts."],
+      "steps": [
+        "In Bookkeeping setup set the Receivables control account, Payables control account, VAT output account and VAT input account, tick The entity is registered for VAT where it applies, and choose Save setup. Add bank and cash accounts under Cashbook accounts with Add account.",
+        "Open Sales and choose New invoice (or New quote). Enter the Date, optional Due date and Description, choose the customer, and add lines with Account, Quantity, Unit price and Tax code; tick Prices include VAT if they do. Save it.",
+        "Open the document and choose Submit for approval. A different authorised user chooses Issue; the official number comes from the entity's gapless series at that moment.",
+        "For a quote, choose Mark as sent, then Customer accepted or Customer declined, and Convert to invoice when accepted.",
+        "To credit an issued invoice choose Credit. For supplier documents use Purchases: New supplier invoice or New supplier return (Record a return), and Approve and post.",
+        "Open Cashbook and choose New receipt, New payment, New other receipt, New other payment or New transfer. Submit it and have it approved and posted.",
+        "On a receipt or payment choose Allocate to settle one or more invoices. Reverse an allocation with Reverse; it stays in the history.",
+        "Open Ageing, choose the Side and As at date, and check the Reconciliation to the control account."
+      ],
+      "result": "Each document shows its Posting preview or Posted to the ledger lines and its Settlement; ageing at any date equals the control account.",
+      "troubleshooting": [
+        { "problem": "\"Waiting for a different authorised user to approve it.\"", "fix": "The preparer and submitter cannot issue their own document." },
+        { "problem": "Possible duplicate — held for review.", "fix": "Choose Review possible duplicate and record your decision with a reason." }
+      ],
+      "sources": ["src/bookkeeping/pages/Setup.tsx", "src/bookkeeping/pages/Documents.tsx", "src/bookkeeping/pages/DocumentEditor.tsx", "src/bookkeeping/pages/DocumentDetail.tsx", "src/bookkeeping/pages/Ageing.tsx", "core/documents.ts"]
+    },
+    {
+      "id": "vat-workpaper",
+      "title": "Set up tax codes and prepare the VAT workpaper",
+      "goal": "Tax codes with explicit treatments are configured and a VAT workpaper is prepared and reviewed for a period.",
+      "role": "Accountant (prepares); Director or Practice administrator (reviews)",
+      "level": "Intermediate",
+      "before": ["Bookkeeping setup has VAT accounts and VAT registration."],
+      "steps": [
+        "Open VAT. Under Tax codes choose New tax code, enter the Code, Name, Treatment, Applies to and Effective from, then choose Create tax code.",
+        "Set the rate: tick Use the statutory standard rate configured for the date, or enter a Rate (%) and its Source of the rate. A rate change is added later with Add rate as a new effective-dated version.",
+        "Under Open a period's workpaper choose the Period and choose Open workpaper.",
+        "Choose Prepare workpaper (or Prepare a new version).",
+        "Reviewer: choose Mark reviewed."
+      ],
+      "result": "The workpaper appears under Prepared workpapers with its content hash. It is a VAT workpaper, not a VAT return.",
+      "troubleshooting": [
+        { "problem": "\"The ledger moved after it was prepared.\"", "fix": "Prepare a new version; the old one is kept." }
+      ],
+      "sources": ["src/bookkeeping/pages/Vat.tsx", "README.md"]
+    },
+    {
+      "id": "month-close-and-packs",
+      "title": "Close a month and produce a management pack",
+      "goal": "A period is closed (and locked) once its blocking controls pass, and an approved management pack is exported as PDF or Excel.",
+      "role": "Accountant (attests, prepares packs); Director or Practice administrator (closes, locks, approves packs; only the practice administrator unlocks)",
+      "level": "Advanced",
+      "before": ["Bank reconciliations signed off and the VAT workpaper reviewed for the period."],
+      "steps": [
+        "Open Month close and choose the Period.",
+        "Work through the checklist. Where a control needs a person's attestation, choose Attest, write What was checked, and where the evidence is, and choose Record attestation.",
+        "When the blocking controls pass, choose Close. To stop all further changes, choose Lock (with a reason). Periods can also be managed on Periods, where Add next financial year opens the next year.",
+        "To correct a closed period, choose Reopen with a reason; a locked period must first be returned to closed with Unlock.",
+        "Open Management packs and choose New pack. Choose the Period, an approved Budget version (or No budget comparison), an optional Title, and choose Create pack.",
+        "Check the pack sections and the Tie-out against its snapshot, add commentary, and choose Submit for approval.",
+        "Reviewer: choose Approve pack (or Return). Download it with PDF or Excel."
+      ],
+      "result": "The period history records each change with its reason; an approved pack is frozen and exportable.",
+      "troubleshooting": [
+        { "problem": "\"Closing was refused\".", "fix": "The listed blocking controls are not met, for example a bank account not reconciled and signed off as at the period end." },
+        { "problem": "Period actions are disabled offline.", "fix": "Closing, locking and reopening periods need a connection." }
+      ],
+      "sources": ["src/bookkeeping/pages/Close.tsx", "src/pages/Periods.tsx", "core/periods.ts", "core/permissions.ts", "src/bookkeeping/pages/Packs.tsx"]
+    },
+    {
+      "id": "budgets-recurring-assets",
+      "title": "Set up budgets, recurring entries and fixed-asset depreciation",
+      "goal": "Approved budget versions exist for variance reporting, recurring journals post once per period, and depreciation runs monthly.",
+      "role": "Accountant (prepares); Director or Practice administrator (approves and posts)",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open Budgets and choose New budget. Choose the Financial year, a Name and a First version label, and choose Create budget.",
+        "Add rows with Add an account (and optional Dimension) and Add row, enter amounts by period and choose Save amounts, then Submit for approval. The reviewer chooses Approve and freeze. Use New version from this for a revision and Variance report to compare.",
+        "Open Recurring entries and choose New schedule. Enter the Name, Journal description, Day of the month, Starts and optional Ends, and the Journal lines. Choose Submit for approval; a different authorised user chooses Approve.",
+        "Under Run due entries set Due on or before and choose Run due entries; occurrences already posted are skipped.",
+        "Open Fixed assets and choose Register asset to add an asset (for example from a posted supplier invoice line).",
+        "Under Prepare depreciation choose the Period and Prepare run. A different authorised user chooses Post run (or Cancel run)."
+      ],
+      "result": "Budgets are frozen on approval, each recurring occurrence posts exactly once, and the asset roll-forward shows cost, depreciation and carrying amounts.",
+      "troubleshooting": [
+        { "problem": "A second depreciation run for the period is refused.", "fix": "Only one run per period is allowed; cancel the existing run first if it is wrong." }
+      ],
+      "sources": ["src/bookkeeping/pages/Budgets.tsx", "src/bookkeeping/pages/Recurring.tsx", "src/bookkeeping/pages/Assets.tsx", "README.md"]
+    },
+    {
+      "id": "annual-financial-statements",
+      "title": "Prepare, review and issue annual financial statements",
+      "goal": "An engagement takes an ended financial year through mapping, working papers, statements, review and issue as a PDF and Word package with a signed manifest.",
+      "role": "Accountant (prepares); Director (reviews, approves and issues)",
+      "level": "Advanced",
+      "before": [
+        "The financial year has ended and its ledger is posted.",
+        "The entity is in scope: a South African private company or close corporation that is not publicly accountable, under the IFRS for SMEs Accounting Standard."
+      ],
+      "steps": [
+        "Open Annual statements and choose Open an engagement. Choose the Financial year, Presentation and Materiality, and choose Open engagement.",
+        "Open Mapping catalogue, choose New version and Create draft, then Use the suggestions and map every account with a balance. A different user chooses Approve version.",
+        "On the engagement's Overview choose Take a new snapshot if the ledger changed, then Generate statements.",
+        "On Trial balance & bridge check that the Difference is 0; add any New adjustment.",
+        "On Working papers add reconciliations, memos and checklists with New working paper; preparers choose Sign as preparer and directors Sign as reviewer. Answer the Questionnaire.",
+        "On Statements check the Checks and the Rounding schedule; the reviewer chooses Approve these statements. Use PDF, Word or Reproduce for drafts.",
+        "On Review raise any issue with Raise an issue; owners choose Resolve, and reviewers Send back or Close. Choose Check now to detect ledger changes since the snapshot.",
+        "On Issue enter Approved by the directors on and choose Approve and issue version N. Choose Verify on an issued package; Reopen for a new version prepares a new version beside it.",
+        "On Roll forward choose Prepare the roll-forward; a director chooses Approve and post. On Versions choose Preview an upgrade to the latest and Accept or Discard."
+      ],
+      "result": "The issued package (PDF, Word and a signed manifest) appears under Issued packages and never changes; every statement line traces to its accounts, journals and evidence.",
+      "troubleshooting": [
+        { "problem": "\"The statements cannot be produced yet\".", "fix": "Every account with a balance must be mapped to a concept in the mapping catalogue." },
+        { "problem": "Statements show Out of date.", "fix": "A material change to a linked balance invalidated approvals. Take a new snapshot, regenerate and approve again." }
+      ],
+      "sources": ["src/afs/paths.ts", "src/afs/pages/Engagements.tsx", "src/afs/pages/Mapping.tsx", "src/afs/pages/Engagement.tsx", "src/afs/pages/Bridge.tsx", "src/afs/pages/Workpapers.tsx", "src/afs/pages/Statements.tsx", "src/afs/pages/Review.tsx", "src/afs/pages/Issue.tsx", "src/afs/pages/Rollforward.tsx", "src/afs/pages/Upgrade.tsx", "README.md"]
+    },
+    {
+      "id": "client-portal",
+      "title": "Request documents and answers through the client portal",
+      "goal": "The practice asks the client for a document or an answer, the client responds in the app, and the practice accepts or returns it.",
+      "role": "Accountant, Director or Practice administrator (requests and decides); Client portal user (responds)",
+      "level": "Basic",
+      "before": ["An annual-statements engagement exists; the client has a Client portal user account."],
+      "steps": [
+        "Practice: on the engagement's Client requests tab choose New request. Choose the Kind (A document to upload or A question to answer), enter the Title, What is needed, the Due date and the Owner in the practice, and choose Send request.",
+        "Client: open Client portal (and Notifications for new requests), open the request, upload the requested Files or write the Answer, and choose Send.",
+        "Practice: open the request and choose Accept, or Return so the client can try again. Cancel request withdraws it.",
+        "Open Notifications to see in-app notices and choose Mark all read."
+      ],
+      "result": "Accepted uploads are stored as evidence with their SHA-256 hash; the request moves to Completed.",
+      "troubleshooting": [
+        { "problem": "The client did not get an e-mail.", "fix": "The portal sends in-app notifications only, never e-mail." },
+        { "problem": "A client cannot see a request.", "fix": "Clients see only their own organisation's requests." }
+      ],
+      "sources": ["src/afs/pages/Portal.tsx", "src/afs/pages/Notifications.tsx", "core/permissions.ts", "README.md"]
+    },
+    {
+      "id": "offline-drafts-and-desktop",
+      "title": "Capture drafts offline in the browser or the Windows desktop app",
+      "goal": "Journals, invoices, cashbook entries, import files and working-paper notes are drafted without a connection and checked by the server when you reconnect.",
+      "role": "Any practice user who prepares drafts",
+      "level": "Intermediate",
+      "before": [
+        "Sign in once online on the device.",
+        "The Windows desktop app loads the same web client and sign-in from the server; it is unsigned and not released."
+      ],
+      "steps": [
+        "While online, open Offline & sync and choose Turn on offline drafts, then Download for offline. Note the Offline until time under This device.",
+        "While offline, create drafts as usual, for example New journal then Save draft on this device. On Imports choose Read a file… and Queue for when I am back online.",
+        "Review Queued on this device on Offline & sync. Drafts have no number, are not posted and are not in any report; cached reports show as provisional.",
+        "When back online choose Sync now. The server checks every draft again.",
+        "If a draft conflicts with a newer server version, open Offline conflicts and choose Apply this proposal to the draft, Keep the server version, or Save as a separate new draft (then Create the draft).",
+        "To stop offline use on a device, choose Turn off on this device and confirm with Confirm: turn off and erase."
+      ],
+      "result": "Accepted drafts appear on the server as drafts for review; nothing is ever submitted, approved, posted or issued from the queue.",
+      "troubleshooting": [
+        { "problem": "Offline drafts are Locked.", "fix": "The grant has ended or the device was revoked. Sign in again online." },
+        { "problem": "The desktop app says it is older than the server accepts.", "fix": "Update the app; your queued drafts stay on the device." },
+        { "problem": "Submit or approve buttons are disabled offline.", "fix": "Submitting, approving, posting, period control, issuing and access changes need a connection." }
+      ],
+      "sources": ["src/pages/Offline.tsx", "src/pages/SyncConflicts.tsx", "src/pages/imports/OfflineImport.tsx", "src/pages/JournalEditor.tsx", "core/offline.ts", "desktop/README.md", "docs/architecture/OFFLINE-CONTRACT.md"]
+    },
+    {
+      "id": "practice-administration",
+      "title": "Manage team access, verification policy, offline policy and devices",
+      "goal": "The right people hold the right roles, two-step verification and offline grants follow practice policy, and lost devices are revoked.",
+      "role": "Practice administrator",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Open Team & access. Under Grant access enter the Email, Name, Role and Scope (Whole practice, a client or one entity) and choose Grant access.",
+        "Give the one-time invitation code, shown once, to the person. They choose \"I have an invitation code\" on the sign-in page. Withdraw an unaccepted invitation with Withdraw.",
+        "Under Members choose Revoke to remove a membership.",
+        "Under Two-step verification policy choose which roles must use an authenticator to sign in online.",
+        "Under Offline access set the Offline grant (hours) (1 to 72) and choose Confirm policy.",
+        "Open Devices to see Registered devices; choose Revoke, give a Reason and choose Revoke device for a lost or retired device."
+      ],
+      "result": "Revoking a device ends its sessions and grant and refuses its queued drafts.",
+      "troubleshooting": [
+        { "problem": "Data already downloaded to a revoked device.", "fix": "It cannot be recalled; revocation stops further access and refuses its queued drafts." },
+        { "problem": "Team & access is not in the menu.", "fix": "Only a practice administrator can manage team access." }
+      ],
+      "sources": ["src/pages/Access.tsx", "src/pages/Devices.tsx", "core/permissions.ts", "README.md"]
+    },
+    {
+      "id": "trial-balance-and-exports",
+      "title": "View the trial balance and export your data",
+      "goal": "You read the trial balance from posted journals and download your data in open formats with a manifest that proves completeness.",
+      "role": "Any user with report access (trial balance); Accountant, Director or Practice administrator (exports)",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open Trial balance and choose a period. It shows Opening, Debits, Credits and Closing from posted journals only.",
+        "Open Exports. Under Export package tick the Datasets (ledger, trial balance, chart, dimensions, evidence index, import receipts) and Formats (CSV, XLSX or JSON).",
+        "For the trial balance choose the Trial balance period, then choose Download package to get one ZIP with manifest.json.",
+        "Use Single files to download one dataset at a time."
+      ],
+      "result": "The ZIP's manifest.json carries the hashes that let anyone check the files are complete and unchanged.",
+      "troubleshooting": [
+        { "problem": "Customers, suppliers, open items or reports are missing from the export.", "fix": "They are not in the export in this version." },
+        { "problem": "Drafts on this device appear above the trial balance.", "fix": "They are provisional, not posted and not in the balances." }
+      ],
+      "sources": ["src/pages/TrialBalance.tsx", "src/pages/exports/Exports.tsx", "README.md"]
+    }
+  ]
+}

@@ -1,0 +1,421 @@
+{
+  "id": "abiatda",
+  "name": "AI Internal Audit & Data Analytics",
+  "fullName": "AI Internal Audit & Data Analytics Platform",
+  "category": "Internal audit",
+  "summary": "A web platform for municipal and public-sector internal audit: analytics over whole transaction populations, findings documented with the 5 Cs, the full engagement workflow from plan to closure, remediation tracking, evidence vouching, an assistant that only proposes steps you confirm, and a hash-chained audit trail. Used by internal auditors, audit managers, the Chief Audit Executive, process owners, executives, the Audit Committee and IT administrators.",
+  "audience": [
+    "Staff / Senior Auditor",
+    "Audit Manager / Director",
+    "Chief Audit Executive",
+    "Process Owner / Auditee",
+    "Executive Management",
+    "Audit Committee / Board",
+    "IT & System Administrator"
+  ],
+  "surfaces": [
+    "Web application (responsive, desktop and phone)",
+    "Installable offline web app (service worker and encrypted on-device copy)",
+    "Assistant (panel on every page and the Assistant page, with optional voice input)",
+    "Imports (CSV and Excel population files)",
+    "Exports and downloads (Excel, CSV, PDF, Word, PowerPoint)",
+    "Security & Operations administration pages"
+  ],
+  "gettingAccess": "An IT & System Administrator issues your account on Users & Roles. You receive a temporary password, shown once to the administrator (or to the approver, for auditor, audit manager, Chief Audit Executive, IT administrator and super-user accounts, which need a second person's approval). You sign in with your email address and choose your own password at the first sign-in; a temporary password stops working after 72 hours. The Chief Audit Executive, audit managers and IT administrators must set up two-factor sign-in in a customer installation. In the demonstration instance the sign-in page lists one synthetic account per role with a Use button; the demonstration data is synthetic and is not a record of any municipality.",
+  "sources": [
+    "README.md",
+    "docs/USER_GUIDE.md",
+    "demo-access.json",
+    "src/app/nav.ts",
+    "src/router.tsx",
+    "shared/workflow.ts",
+    "docs/lifecycle/WORKFLOW.md",
+    "docs/offline/OFFLINE-CONTRACT.md",
+    "docs/assistant/ASSISTANT.md"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-and-two-factor",
+      "title": "Sign in, set up two-factor sign-in and change your password",
+      "goal": "You are signed in with your own password and, where your role requires it, an authenticator app as a second factor.",
+      "role": "Any user",
+      "level": "Basic",
+      "before": [
+        "Your account has been issued by an IT administrator, or you are using the demonstration instance.",
+        "For two-factor sign-in: an authenticator app on your phone (for example Microsoft Authenticator, Google Authenticator or FreeOTP)."
+      ],
+      "steps": [
+        "Open the platform. On the Sign in page enter your Email address and Password. Usernames are not accepted.",
+        "In the demonstration instance, choose Use next to the account for the role you want to try; it fills in the form. Then choose Sign in.",
+        "If this is your first sign-in with a temporary password, choose your own password when asked; nothing else opens until you do.",
+        "If your role requires two-factor sign-in and you have not set it up, a QR code is shown. Scan it with your authenticator app, enter the 6-digit code it shows, and save the ten recovery codes somewhere safe.",
+        "On later sign-ins, enter the current 6-digit code after your password. Each code works once.",
+        "To turn two-factor sign-in on yourself, or to issue new recovery codes, open the account menu (top right) and choose Two-factor sign-in, then Set up two-factor sign-in or New recovery codes.",
+        "To change your password, open the account menu and choose Change password.",
+        "For training material, open Help & Training (in the menu and the account menu): it lists the guide written for your role and the one for every user, with Word document for a printable copy.",
+        "To end your session, open the account menu and choose Sign out."
+      ],
+      "result": "You land on your home page (the Executive Dashboard, or My work for process owners), and the navigation shows only the pages your role can use.",
+      "troubleshooting": [
+        { "problem": "The account is locked after several attempts.", "fix": "After 5 failed passwords or 5 wrong codes the account is locked for 15 minutes. Wait and try again." },
+        { "problem": "Lost your phone with the authenticator app.", "fix": "Sign in with one of your recovery codes, then issue new ones on Two-factor sign-in. Without a recovery code, ask another IT administrator to reset your two-factor sign-in on Security & Ops → Access & two-factor." },
+        { "problem": "Change password is not offered.", "fix": "Shared demonstration accounts and the UAT environment keep their issued credentials, so password changes are switched off there." },
+        { "problem": "Your temporary password no longer works.", "fix": "Temporary passwords expire after 72 hours. Ask your IT administrator to reset it." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/components/Login.tsx", "src/templates/AppTemplate.tsx", "src/security/AccountSecurityPage.tsx", "src/pages/HelpPage.tsx", "README.md"]
+    },
+    {
+      "id": "monitor-dashboards",
+      "title": "Monitor findings and remediation from the dashboards",
+      "goal": "You can see severity, remediation status, analytics anomalies, overdue actions and residual risk, and open the records behind each figure.",
+      "role": "Audit Manager / Director, Chief Audit Executive, Executive Management, Audit Committee / Board (each sees only their own scope)",
+      "level": "Basic",
+      "before": ["You are signed in."],
+      "steps": [
+        "Open Dashboard (the Executive Dashboard). The tiles summarise the records analysed, the payments analysed, the open cases with the money at stake, and the last analytics run.",
+        "Under Autonomous Audit Anomalies & Red Flags, select an item to open its case, or the N flagged badge to list the cases not yet reviewed.",
+        "Under Audit Finding Severity, select Critical, High, Medium or Low / Advisory to open the Findings register filtered to that severity.",
+        "Under Audit Findings Tracking, select Implemented, Outstanding or Overdue to open the actions with that status.",
+        "Executives: open Executive view for overdue remediation by department, the risks still rated high after controls and progress against the approved plan.",
+        "Audit Committee: open Committee view for the significant findings of the reporting period, overdue actions, residual risk by month (Show table lists the numbers), control effectiveness and the issued reports.",
+        "Check the status line under the page title: Live · as of … means the data is current; As of … · updates delayed or Cached as of … means it is not. Choose Refresh to read it again.",
+        "Open My work at any time for everything awaiting you, and the bell in the header (Notifications) for your inbox and overdue reminders."
+      ],
+      "result": "Every count you select opens a list with exactly that number of rows, filtered in the address so you can bookmark or share it; the recipient sees only what their own role permits.",
+      "troubleshooting": [
+        { "problem": "The page says Cached as of …", "fix": "The page is not connected (for example you are offline). Reconnect and choose Refresh." },
+        { "problem": "A page you expect is missing from the menu.", "fix": "You only see the pages your role can use. On a narrow screen open Menu (top left); on a computer look under More." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/app/nav.ts", "src/modules/ExecutiveAuditDashboard.tsx", "src/pages/ExecutivePage.tsx", "src/pages/CommitteePage.tsx"]
+    },
+    {
+      "id": "review-analytics-cases",
+      "title": "Review analytics anomalies and cases",
+      "goal": "You have examined the cases the analytics rules raised over the whole population and know which records triggered each rule.",
+      "role": "Staff / Senior Auditor, Audit Manager / Director, Chief Audit Executive",
+      "level": "Intermediate",
+      "before": ["Populations are loaded (see Data Ingestion)."],
+      "steps": [
+        "Open one of the analytics modules: Procurement & SCM, Disbursements & AP, Payroll & HR or General Ledger.",
+        "Read the populations, the rules that ran with their parameters, and how many records each rule evaluated.",
+        "Choose Show these on a rule to list only its cases.",
+        "Open a case to see why it was flagged (in words and as facts), the rule and its parameters, the population records behind it (identity and bank numbers masked), evidence files, its status history and any linked finding.",
+        "Open Cases for the full list of analytics cases across modules.",
+        "To refresh the analytics after data changes, open Data Ingestion and choose Re-run analytics. A re-run updates cases whose details changed and never changes a status a reviewer set.",
+        "If a case supports a finding, draft one from it, for example by asking the assistant \"Draft a finding from CASE-…\"; a linked draft finding moves the case to under review."
+      ],
+      "result": "Each case shows its explanation, records and evidence. A case is a candidate for review, never a finding by itself.",
+      "troubleshooting": [
+        { "problem": "You want to mark a case as confirmed, cleared or escalated directly.", "fix": "Setting a case's status directly is not available in this release. Link it to a draft finding instead." },
+        { "problem": "Thresholds such as the procurement or overtime limits look wrong for your municipality.", "fix": "They are configurable rule parameters chosen for the demonstration, not statutory values; confirm them against your own policies." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/app/nav.ts", "src/pages/CasesPage.tsx", "src/pages/CaseDetailPage.tsx"]
+    },
+    {
+      "id": "import-population-file",
+      "title": "Import a population file (CSV or Excel)",
+      "goal": "A population from the financial system (vendors, purchase orders, payments, employees, payroll lines or journal lines) is stored as a validated dataset and analysed.",
+      "role": "Staff / Senior Auditor, Audit Manager / Director (the Chief Audit Executive can read imports)",
+      "level": "Intermediate",
+      "before": [
+        "You are assigned to the engagement the import is filed under.",
+        "The file is CSV or Excel (.xlsx). Macro-enabled workbooks, legacy .xls files and password-protected files are refused."
+      ],
+      "steps": [
+        "Open Imports. Under New import choose the population and the engagement, choose the File, then choose Upload. The file is kept exactly as received with its SHA-256 fingerprint.",
+        "On the import page, under Map the columns, match each field the platform needs to a column of your file. Required fields must be mapped. If needed, change the Sheet to read and the Header row under Source file and choose Apply.",
+        "Optionally type a name under Save this mapping as and choose Save mapping, so a later file with the same columns is mapped automatically.",
+        "Choose Validate. Read the control totals and every error with its row, field, value, reason and suggested fix. Use Error report to download the full list as Excel or CSV.",
+        "Under Commit, choose whether to store the rows as a new dataset (give a Dataset name) or as a new version of an earlier one. If rows were rejected, tick the box to exclude them.",
+        "Choose Commit N rows. You are taken to the dataset.",
+        "On the dataset page choose Run analytics. What the rules find are listed with the other cases as candidate cases (\"Candidate from import: …\"). Rules that need data the file did not provide are listed as not run, with the reason."
+      ],
+      "result": "The dataset appears under Imported datasets; each stored row records the file and row it came from, and the candidate cases wait for internal audit to review.",
+      "troubleshooting": [
+        { "problem": "The file was not accepted.", "fix": "Save it as .xlsx or CSV without macros or a password. Formulas are not calculated and links to other files are not followed." },
+        { "problem": "Commit is greyed out.", "fix": "The mapping changed since validation (validate again), rejected rows have not been confirmed as excluded, or a new dataset has no name." },
+        { "problem": "Imports says there is no engagement to import into.", "fix": "Imports are filed under an engagement you are assigned to. Ask your audit manager to add you to the team." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "docs/FILE-FORMATS.md", "src/files/ImportsPage.tsx", "src/files/ImportBatchPage.tsx", "src/files/DatasetPage.tsx"]
+    },
+    {
+      "id": "vouch-invoices",
+      "title": "Upload invoices and vouch them to payments",
+      "goal": "Supporting documents are stored as evidence, their invoice fields extracted and matched to payments, and every item that is not a clean match is decided.",
+      "role": "Staff / Senior Auditor, Audit Manager / Director (the Chief Audit Executive can read)",
+      "level": "Intermediate",
+      "before": ["An engagement you work on, and payments loaded or imported."],
+      "steps": [
+        "Open Evidence & Vouching. Under Upload evidence choose the engagement and, in Match against, the loaded payments or an imported payments dataset.",
+        "Choose the file (PDF, Excel, CSV, Word, PowerPoint or a JPEG, PNG or TIFF image) and choose Upload and extract.",
+        "Open the document. Each extracted field (supplier, registration and VAT numbers, invoice number and date, amounts) shows where it was found and a confidence; highlighted text shows each value in place.",
+        "Read each item's outcome: matched, partially matched, duplicate suspect or unmatched, with which details agreed.",
+        "For an item in the exception queue choose Confirm (give a reason unless it is a clean match), Correct a value (with a reason; the value as read is kept beside your correction and the item is matched again) or Record an exception (with a reason), then save.",
+        "For an item that did not vouch cleanly, choose Raise as a case or Draft a finding to start the normal workflow.",
+        "Use Vouching schedule to download every item, with values as read and as corrected, the outcome, payment and decision, as Excel or CSV."
+      ],
+      "result": "Each decision is recorded; a matched payment's analytics case is linked and lists the document back.",
+      "troubleshooting": [
+        { "problem": "No fields were read from a scanned invoice or image.", "fix": "Text recognition (OCR) of scans and images is not available in this release; images and PowerPoint files are stored only." },
+        { "problem": "The upload card is not shown.", "fix": "Only auditors and audit managers on an engagement can upload; the Chief Audit Executive has read access." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/files/VouchingPage.tsx", "src/files/DocumentPage.tsx", "src/reports/ExceptionActions.tsx"]
+    },
+    {
+      "id": "draw-sample",
+      "title": "Draw and vouch a sample of payments for a test",
+      "goal": "A repeatable, seeded sample of payments is drawn for a test and each sampled payment is shown as vouched, exception, awaiting review or without evidence.",
+      "role": "Staff / Senior Auditor (during fieldwork)",
+      "level": "Intermediate",
+      "before": ["The engagement is in fieldwork and has a programme with tests."],
+      "steps": [
+        "Open Samples for tests from Evidence & Vouching (or from the engagement's workspace) and choose the Engagement.",
+        "Under Draw a sample for a test choose the Test (procedure), optionally the Working paper, the Population and the Method (simple random, systematic, or monetary unit).",
+        "Enter the Sample size. Optionally enter a Seed, Only this vendor, an amount band (From R / To R) or payment dates.",
+        "Choose Draw the sample. The sample records the population's SHA-256 fingerprint and the seed, so the same inputs give the same sample.",
+        "Choose Upload evidence and upload the invoices in Evidence & Vouching for the same engagement and population.",
+        "Return to the sample: each payment shows Vouched, Exception, Awaiting review or No evidence yet."
+      ],
+      "result": "The sample page lists its population, method, seed, who drew it and each payment's vouching status.",
+      "troubleshooting": [
+        { "problem": "The draw form is not shown.", "fix": "Only someone on the engagement team who may perform tests can draw a sample." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/reports/SamplesPages.tsx"]
+    },
+    {
+      "id": "plan-and-charter",
+      "title": "Draft and approve the charter and the risk-based audit plan",
+      "goal": "A new version of the internal audit charter or audit plan is approved by the Audit Committee and in force.",
+      "role": "Chief Audit Executive (drafts); Audit Committee / Board (approves)",
+      "level": "Advanced",
+      "before": ["For the plan: risks in the register and auditable units in the audit universe."],
+      "steps": [
+        "Open Plan & charter.",
+        "To change an approved charter or plan, choose Amend (new version) and give a reason. The approved version stays in force until the amendment is approved.",
+        "Edit the draft. For a charter write the title, Charter text and Change summary; for a plan add items, including at least one for the first year. A draft plan shows what changed against the approved one.",
+        "Choose Submit to the Audit Committee.",
+        "Audit Committee member: open Plan & charter and choose Approve plan or Approve charter, or Return plan / Return charter with a note for the Chief Audit Executive.",
+        "Once the plan is approved, choose Start engagement on an approved plan item that has no engagement yet.",
+        "Review the Audit universe (auditable units with their highest risk score) and Workflow settings (notification letter lead time, reporting period and default due dates)."
+      ],
+      "result": "The approved version is marked in force and the previous approved version is superseded in the same step.",
+      "troubleshooting": [
+        { "problem": "Amend is refused.", "fix": "Another version is already in draft or submitted. Finish or return that one first." },
+        { "problem": "A super user cannot approve.", "fix": "Being a super user lets you configure settings within your own role's domain; it gives no approval rights." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/GovernancePage.tsx", "docs/lifecycle/WORKFLOW.md"]
+    },
+    {
+      "id": "engagement-planning-fieldwork",
+      "title": "Plan an engagement and carry out fieldwork",
+      "goal": "An engagement is planned, approved, started and its fieldwork submitted for review.",
+      "role": "Staff / Senior Auditor (engagement team); Audit Manager / Director (approves)",
+      "level": "Advanced",
+      "before": ["The engagement exists (New engagement on Engagements, or Start engagement from the plan) and a team is assigned."],
+      "steps": [
+        "Open Engagements and choose the engagement. The workspace shows the phase, what blocks the next step, and the tabs Overview, Risks & controls, Programme, Working papers, Evidence, Requests, Findings, Review notes, QA, Report and Follow-up.",
+        "Write the objectives and scope, choose the risks and controls in scope on Risks & controls, and build the Programme with at least one procedure linked to a risk in scope.",
+        "On Overview, record the notification letter (Record the notification letter) and the entrance meeting (Record the entrance meeting).",
+        "Team: choose Submit planning for approval. Manager: choose Approve planning.",
+        "Manager: choose Start fieldwork once the letter was recorded at least the configured lead time before (14 days by default).",
+        "During fieldwork record each test's result and describe any exceptions, document the work with New working paper and mark each paper as prepared (Mark as prepared), attach evidence on Evidence, and send information requests to the auditee on Requests.",
+        "Raise exceptions as draft findings with New finding on the Findings tab, and record control evaluations on Risks & controls → Evaluations.",
+        "When every test has a result and every working paper is prepared, choose Submit fieldwork for review."
+      ],
+      "result": "The engagement moves to review; the audit trail records every step with who did it and when.",
+      "troubleshooting": [
+        { "problem": "A step is greyed out.", "fix": "The reasons are shown beside it, for example \"Record the entrance meeting with the auditee.\" Complete them first." },
+        { "problem": "Approved planning was voided.", "fix": "Changing the objectives, scope, risks, controls or programme after approval voids it. Submit the planning again." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/EngagementWorkspacePage.tsx", "src/pages/engagement/WorkTabs.tsx", "src/pages/EngagementsPage.tsx"]
+    },
+    {
+      "id": "review-qa-issue-report",
+      "title": "Review working papers, sign quality assurance and issue the final report",
+      "goal": "The engagement passes review and quality assurance, and the Chief Audit Executive issues the final report.",
+      "role": "Audit Manager / Director (review, QA checklist, draft report approval); Chief Audit Executive (QA sign-off, issue, close)",
+      "level": "Advanced",
+      "before": ["Fieldwork has been submitted for review."],
+      "steps": [
+        "Manager: on Working papers choose Start review on each paper, then Request changes (with a note) or Approve working paper. Preparers answer notes on Review notes with Answer note; the reviewer chooses Clear note or Reopen note.",
+        "Manager: when every paper is approved at its current version, every note cleared, every finding approved and no request open, choose Complete review (or Return to fieldwork with a reason).",
+        "Manager: on QA answer the eight checklist questions and choose Complete checklist.",
+        "Chief Audit Executive, or another manager who neither completed the checklist nor prepared any working paper: choose Sign quality assurance, or Return to review with a reason.",
+        "On Report write the report and its executive summary. A manager who did not write it chooses Approve draft report.",
+        "Make sure management has responded to every finding and record the exit meeting on Overview (Record the exit meeting).",
+        "Chief Audit Executive: choose Approve and issue final report. The findings become final, the report is kept as it was at that moment and a frozen report version is stored with it.",
+        "In follow-up, once every action is verified or closed, the Chief Audit Executive chooses Close engagement (or records a risk acceptance with a reason for what remains open)."
+      ],
+      "result": "Open the issued report prints the report as issued; the engagement moves to follow-up and finally to closed.",
+      "troubleshooting": [
+        { "problem": "A working paper's approval disappeared.", "fix": "An approval belongs to the version approved; any later edit voids it. Review the paper again." },
+        { "problem": "Approve draft report is needed again.", "fix": "Editing the report or adding a finding after approval needs the draft approved again." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "docs/lifecycle/WORKFLOW.md", "src/pages/EngagementWorkspacePage.tsx"]
+    },
+    {
+      "id": "draft-and-approve-finding",
+      "title": "Draft a finding with the 5 Cs and take it through review",
+      "goal": "A finding is written with criteria, condition, cause, consequence and recommendation, approved and sent to the process owners for a management response.",
+      "role": "Staff / Senior Auditor (prepares); Audit Manager / Director who did not prepare it (approves)",
+      "level": "Intermediate",
+      "before": ["You are on the engagement team."],
+      "steps": [
+        "In the engagement workspace open the Findings tab and choose New finding (or draft one from a case or a vouching exception).",
+        "Fill in the Title, Severity, Criteria, Condition, Cause, Consequence, Recommendation and Value affected (R), and link the Risks, Tests that found it and Controls found deficient.",
+        "Choose Submit for review.",
+        "Manager: open the finding and choose Approve finding, or Return for changes with a note the preparer sees on the draft.",
+        "After approval the process owners of the department are notified and the response falls due after the configured number of days (14 by default).",
+        "Use Download on the finding page to get it as PDF or Word.",
+        "After the final report, once every action is verified or closed, a manager or the Chief Audit Executive chooses Close finding."
+      ],
+      "result": "The finding's Version history shows who drafted, reviewed, approved, responded and reported it, and when.",
+      "troubleshooting": [
+        { "problem": "Submit for review is refused.", "fix": "Criteria, condition, cause, consequence and recommendation must all be written." },
+        { "problem": "You cannot approve your own finding.", "fix": "Segregation of duties: a manager who did not prepare it must approve it." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/engagement/WorkTabs.tsx", "src/pages/FindingDetailPage.tsx", "src/reports/Integrations.tsx"]
+    },
+    {
+      "id": "process-owner-response",
+      "title": "Respond to a finding, answer information requests and submit remediation evidence",
+      "goal": "Your department's management response is recorded, information requests are answered, and your actions carry proof of remediation for internal audit to verify.",
+      "role": "Process Owner / Auditee",
+      "level": "Basic",
+      "before": ["A finding for your department has been approved, or a request has been sent to your department."],
+      "steps": [
+        "Open My work. It lists the findings awaiting your response, the information requests sent to your department and your actions, with what is overdue.",
+        "Open a finding and choose Record management response. Choose agreed, partially agreed or disagreed, write your comments, and add the actions with their owners and due dates (Add an action). At least one action is needed unless you disagree.",
+        "Open an information request, attach the files or write your answer, and choose Submit response. Internal audit accepts it or returns it with a reason.",
+        "Open one of your actions. Choose Start work when you begin.",
+        "Use Upload remediation evidence to attach the proof, then choose Submit remediation evidence.",
+        "An auditor on the engagement then chooses Verify or Reject evidence (with a reason); if rejected, upload new evidence and submit again."
+      ],
+      "result": "The finding moves to management response, and verified actions show as Implemented on the dashboards.",
+      "troubleshooting": [
+        { "problem": "You cannot see a finding yet.", "fix": "Process owners see their department's findings from approval onwards." },
+        { "problem": "Submit remediation evidence is greyed out.", "fix": "At least one remediation evidence file must be uploaded since the last rejection." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/MyWorkPage.tsx", "src/components/lifecycle/FindingWorkflowPanel.tsx", "src/pages/ActionDetailPage.tsx", "src/pages/RequestDetailPage.tsx"]
+    },
+    {
+      "id": "report-versions-and-exports",
+      "title": "Generate report versions and export registers and summaries",
+      "goal": "You have frozen report versions to read, print or download, and working exports of the registers and summaries you need.",
+      "role": "Engagement team, Audit Manager / Director, Chief Audit Executive; executives and the Audit Committee see issued versions and summaries",
+      "level": "Intermediate",
+      "before": ["For report versions: the engagement is in review or later."],
+      "steps": [
+        "In the engagement workspace open the Report tab. Under Report versions choose Generate draft version to freeze the report, the approved findings with their 5 Cs, responses, action plans and evidence, and the approvals so far.",
+        "Choose Open and print to show a version ready to print, or Download for PDF or Word. The version page shows whether its fingerprint still matches its content.",
+        "If an issued version is marked Superseded — changes after issue, the Chief Audit Executive chooses Reissue after changes and gives a reason.",
+        "On Findings, Actions or Cases, open the Export menu to download the rows you see, with your filters, as Excel or CSV.",
+        "On the Dashboard open Reports for the Findings summary (PDF or Word) and the Audit Committee deck (PowerPoint) or summary (PDF).",
+        "Download a single finding or working paper as PDF or Word with Download on its page."
+      ],
+      "result": "Each file carries the product name, generation time and page or slide numbers; every export is recorded in the audit trail.",
+      "troubleshooting": [
+        { "problem": "Generate draft version is disabled.", "fix": "Generating and reissuing a version need a connection." },
+        { "problem": "An export has fewer rows than you expected.", "fix": "Exports only ever contain what your role may see, with the filters in force." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/reports/ReportVersionsPanel.tsx", "src/reports/ReportVersionPage.tsx", "src/files/ui.tsx", "src/modules/ExecutiveAuditDashboard.tsx"]
+    },
+    {
+      "id": "use-the-assistant",
+      "title": "Ask the assistant and confirm a proposed step",
+      "goal": "You get grounded answers, explanations and drafts from the records you can see, and carry out a workflow step only after confirming the assistant's proposal.",
+      "role": "Any signed-in user whose licence includes the assistant",
+      "level": "Basic",
+      "before": ["You are online. The assistant needs a connection."],
+      "steps": [
+        "Choose Assistant in the header of any page to open the panel, or open the Assistant page for your conversation history (Conversation history, New conversation).",
+        "Type in plain words in Your question, naming records by id or reference, for example \"Which actions are overdue?\", \"Explain CASE-0001\" or \"Draft a finding from CASE-0005\", and choose Send.",
+        "Read the answer. Under Supporting records each record it rests on is listed (choose Open the record); each statement is marked Evidence, Inference or Uncertain.",
+        "Drafts are for you to check and copy; complete any text in [square brackets].",
+        "To act, ask for a step (for example \"Approve finding FND-0016\"). The assistant shows a proposal: what would change, what follows and whether you may do it now.",
+        "Choose Confirm to carry it out through the normal workflow with every check, or Cancel to discard it. A proposal can be confirmed once, within 15 minutes, while the record is unchanged.",
+        "Where your browser supports it, choose Speak to dictate, check the text, then send. Choose Read replies aloud to hear answers."
+      ],
+      "result": "Confirmed steps appear in the audit trail as done by you through the assistant; nothing changes without your confirmation.",
+      "troubleshooting": [
+        { "problem": "The assistant says it cannot see a record.", "fix": "It sees only what you can open; a record outside your access is answered as if it does not exist." },
+        { "problem": "Confirm and Cancel are disabled.", "fix": "You are offline. Proposals are never queued on the device; confirm when you are online again." },
+        { "problem": "The microphone is not shown.", "fix": "Your browser has no speech recognition. Some browsers send recordings to their maker's speech service; the panel says so." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "docs/assistant/ASSISTANT.md", "src/assistant/AssistantPanel.tsx", "src/assistant/AnswerView.tsx", "src/assistant/AssistantPage.tsx"]
+    },
+    {
+      "id": "work-offline",
+      "title": "Work offline and synchronise your changes",
+      "goal": "You capture working papers, test results, draft findings, management responses and evidence without a connection, and they reach the server safely when you reconnect.",
+      "role": "Every role except the IT & System Administrator",
+      "level": "Intermediate",
+      "before": [
+        "Sign in once with a connection on the device. The device keeps an encrypted copy of the records your role may see for 72 hours after that sign-in (a provisional period).",
+        "Use a browser that supports offline storage; Chrome can install the application."
+      ],
+      "steps": [
+        "Watch the indicator at the top right: it shows Online or Offline and how many changes and files are waiting. Selecting it opens Sync status.",
+        "Open Offline work and choose an engagement.",
+        "Under Working papers edit the title and summary of a paper you prepare, or start a new one. Under Tests choose Record result. Under Findings draft a finding with the 5 Cs or choose Edit draft. Under Evidence capture a file; it shows as pending — not yet evidence until uploaded and checked.",
+        "Process owners: under Findings awaiting your response draft the management response and action plan.",
+        "When the connection returns the device synchronises by itself, or open Sync status and choose Synchronise now.",
+        "On Sync status check Rejected by the server (your content is kept with the reason) and Conflicts. Open a conflict and choose Keep the server version, Keep mine or Merge by hand.",
+        "To protect unsynchronised work, choose Export my unsynced work on Sync status and set a passphrase of at least 12 characters; Import unsynced work puts it back in the queue on the same account."
+      ],
+      "result": "Accepted changes become the new versions of the records; every choice on a conflict is recorded in the audit trail.",
+      "troubleshooting": [
+        { "problem": "Approve, Submit or Issue buttons are disabled offline.", "fix": "Every workflow step, administration, backups and exports, the assistant and report versions need a connection; the reason is shown on the button." },
+        { "problem": "The offline copy disappeared.", "fix": "Signing out, the end of the grant period, a change to your account or an IT administrator's revocation deletes it. Export unsynced work before signing out." },
+        { "problem": "Sync status says this browser cannot keep an offline copy.", "fix": "The browser has no IndexedDB or WebCrypto, or blocks site storage. Work online, or use another browser." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "docs/offline/OFFLINE-CONTRACT.md", "src/offline/OfflineWorkPage.tsx", "src/offline/SyncStatusPage.tsx", "src/offline/ConflictPage.tsx"]
+    },
+    {
+      "id": "users-and-audit-trail",
+      "title": "Issue accounts, manage access and verify the audit trail",
+      "goal": "New users have accounts with the right roles, access is kept current, and the audit trail's hash chain is shown intact.",
+      "role": "IT & System Administrator (the Chief Audit Executive can read users and the audit trail)",
+      "level": "Advanced",
+      "before": ["Two-factor sign-in is set up on your account."],
+      "steps": [
+        "Open Users & Roles. Under Issue an account enter the Email address, Display name, Title, role and department, and tick Super user only for configuration within the role. Choose Issue account.",
+        "Pass on the temporary password shown once. For auditor, audit manager, CAE, IT administrator and super-user accounts the request goes to a second person (a CAE or another IT administrator) for approval, and the approver receives the password.",
+        "To reset a user's password choose Reset password on their row.",
+        "Open Security & Ops → Access & two-factor to change a role, Deactivate or Reactivate an account, Reset MFA for another user, set the two-factor policy (Save the policy) and Approve requests waiting for a second person.",
+        "Open Offline devices to see every device grant and choose Revoke to make a device delete its copy the next time it connects.",
+        "Open Audit Trail to list every event with its channel; choose Verify chain to recompute every hash and compare it with the recorded head."
+      ],
+      "result": "Role changes, deactivations and resets end the user's sessions; Verify chain reports any edited, reordered or removed event.",
+      "troubleshooting": [
+        { "problem": "Reset password is refused.", "fix": "Resets are refused for shared demonstration accounts and in UAT, where issued credentials stay fixed." },
+        { "problem": "You cannot reset your own two-factor sign-in.", "fix": "Another IT administrator must do it." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/pages/UsersPage.tsx", "src/security/admin/OverviewAccess.tsx", "src/offline/OfflineDevicesPage.tsx", "src/pages/AuditTrailPage.tsx", "docs/security/PERMISSION-MATRIX.md"]
+    },
+    {
+      "id": "security-and-operations",
+      "title": "Run backups, data exports, incidents and access reviews in Security & Operations",
+      "goal": "Backups are taken and verified, the municipality receives its data exports, incidents and access reviews are recorded, and retention is applied.",
+      "role": "IT & System Administrator and Chief Audit Executive (each tab shows only what your role may use)",
+      "level": "Advanced",
+      "before": ["You are online; these steps need a connection."],
+      "steps": [
+        "Open Security & Ops. On Overview read and Acknowledge open alerts, and check the encryption key id, the licence, the latest backup, drill and monthly export.",
+        "On Backups & restore choose Back up now, then Verify or Restore drill on a backup. To restore, the IT administrator chooses Request restore and the CAE chooses Approve and restore (or Reject). Change schedules and retention with Save settings.",
+        "On Exports & deliveries choose Export all data, Export the audit trail or Export the system log. For the quarterly package choose Prepare the package, then Show the key (CAE only), Record delivery and Upload acknowledgement.",
+        "On Incidents choose Record an incident, then Add an update, Regulator hand-off and Close as it progresses; the 72-hour outer limit for notifying the municipality is counted down.",
+        "On Access reviews choose Generate a review; the CAE chooses Sign off.",
+        "On Retention & legal hold choose Set the period for a record class, place a Legal hold, Request disposal (approved by a second person) or Release a hold.",
+        "On Exit (end of contract) the CAE chooses Start the exit and an IT administrator chooses Approve and build the package; record the hand-overs against the 10-business-day deadline.",
+        "On Licence read what the installed licence allows."
+      ],
+      "result": "Every operation is recorded, with alerts raised for failed backups, verifications, drills, exports and restores.",
+      "troubleshooting": [
+        { "problem": "A tab is missing.", "fix": "Each tab is shown only to roles with that permission; for example only the CAE sees the package key." },
+        { "problem": "Nothing is disposed of under retention.", "fix": "The municipality sets retention periods (none by default), legal holds override disposal, and disposal happens only through an approved request." }
+      ],
+      "sources": ["docs/USER_GUIDE.md", "src/security/AdministrationPage.tsx", "src/security/admin/OverviewAccess.tsx", "src/security/admin/BackupsExports.tsx", "src/security/admin/GovernanceTabs.tsx", "docs/operations/BACKUP-RECOVERY-RUNBOOK.md"]
+    }
+  ]
+}

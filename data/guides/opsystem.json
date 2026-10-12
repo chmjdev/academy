@@ -1,0 +1,522 @@
+{
+  "id": "opsystem",
+  "name": "OpSystem",
+  "fullName": "Binteca Policing Operations Field System (BPOFS)",
+  "category": "Public safety & policing",
+  "summary": "A field command and evidence system for police response units, rapid response vehicles and mobile command posts. Officers open incidents, watch social, video, broadcast and cellular panels, seal evidence with SHA-256, and run search, OSINT collection and AI reports against OpSystem Core.",
+  "audience": [
+    "Field officer",
+    "Field intelligence analyst",
+    "Commander (super user)"
+  ],
+  "surfaces": [
+    "Desktop app",
+    "Android app",
+    "Web console"
+  ],
+  "gettingAccess": "A commanding officer (super user) invites you from the Team panel in the Analysis desk. You receive a one-use enrolment link, valid for 24 hours, and paste it on the ENROLMENT LINK tab of the sign-in screen, or sign in with the account a commander issued you. In this build the app runs in the desktop (Electron) and Android apps; opened in an ordinary browser it shows only the OpSystem logo. Never share enrolment links, device tokens or gate keys outside a channel your unit trusts.",
+  "sources": [
+    "README.md",
+    "INSTALL.md",
+    "src/renderer/src/App.tsx",
+    "src/renderer/src/components/",
+    "src/renderer/src/core.ts",
+    "start.sh"
+  ],
+  "guides": [
+    {
+      "id": "sign-in-or-enrol",
+      "title": "Sign in or enrol this device",
+      "goal": "Get this desktop or phone onto OpSystem with your own operator account.",
+      "role": "Any operator",
+      "level": "Basic",
+      "before": [
+        "You have an issued account, or an enrolment link from a commander.",
+        "You are using the desktop or Android app."
+      ],
+      "steps": [
+        "Open OpSystem. On a device with no saved session the app opens as its built-in default super-user profile, not the sign-in screen. Click SIGN OUT in the header to reach the sign-in screen (OPSYSTEM · C4ISR TERMINAL) and sign in as yourself before doing any work.",
+        "To enrol with a link: click ENROLMENT LINK, paste the link into ENROLMENT LINK PAYLOAD, and click ENROL & ENTER TACTICAL GRID.",
+        "To sign in with an issued account: stay on OPERATOR SIGN IN, enter your OFFICER / LO NUMBER or POLICE EMAIL / IDENTITY and your OPERATIONAL SECURITY PIN / PASSWORD, complete the station and rank fields, and click AUTHENTICATE & ENTER C4ISR COMMAND CENTER.",
+        "Check the header: your name and the VEHICLE STATION badge show who is signed in on this device.",
+        "To leave, click SIGN OUT in the header."
+      ],
+      "result": "The tactical grid opens and the device keeps its own token, so it reconnects by itself next time.",
+      "troubleshooting": [
+        {
+          "problem": "Invalid OpSystem enrolment link. Please verify the QR/link payload.",
+          "fix": "Paste the whole link exactly as you received it. Links are single-use and expire after 24 hours; ask the commander for a new one."
+        },
+        {
+          "problem": "Opened in a browser, only the logo appears",
+          "fix": "The browser build is closed in this version. Use the desktop or Android app."
+        },
+        {
+          "problem": "Sign-in with your LO number fails",
+          "fix": "The core looks operators up by email. Enter your POLICE EMAIL / IDENTITY instead of the LO number."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/TacticalWebLogin.tsx",
+        "src/renderer/src/App.tsx",
+        "src/renderer/src/components/HeaderTacticalBar.tsx",
+        "src/renderer/src/core.ts",
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "id": "choose-a-layout",
+      "title": "Choose a layout and focus a panel",
+      "goal": "Arrange the screen for the job: four panels, three, two, or one full-screen panel.",
+      "role": "Any operator",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "In the header, click a layout button: QUAD (alerts, video, social and news), 3-SPLIT, DUAL, VIDEO GRID, SOCIAL INTEL, MAP / HOTSPOTS, MISSING PERSONS, ANALYSIS or ADMIN. On narrower screens pick the same choices from the layout dropdown (QUAD 4-SPLIT, 3-SPLIT DOMINANT, DUAL SPLIT and so on).",
+        "In DUAL, use SELECT: to choose the panel on each side, and ⇄ SWAP to swap them.",
+        "To enlarge one panel, use its focus button (for example Focus Video Panel or Focus GSM Telemetry). The panel fills the screen under FULL VIEW FOCUS.",
+        "Click RESTORE MULTI-VIEW to go back to the grid. Full-page views such as SOCIAL INTEL, MISSING PERSONS and ADMINISTRATION have BACK TO GRID or RETURN TO GRID instead.",
+        "On a phone (below 768 px wide) one panel shows at a time; switch with the bottom tabs ALERTS, PERSONS, SOCIAL, VIDEO, NEWS, GSM and ANALYSE.",
+        "Use Toggle fullscreen in the header for a vehicle display."
+      ],
+      "result": "The grid shows the panels you chose, and the choice stays until you change it.",
+      "troubleshooting": [
+        {
+          "problem": "A panel shows Tactical Grid Fault",
+          "fix": "That panel failed to draw; the reset returns you to the QUAD layout. Try the layout again."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/HeaderTacticalBar.tsx",
+        "src/renderer/src/components/MultiViewGrid.tsx",
+        "src/renderer/src/App.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "launch-an-incident",
+      "title": "Launch a new incident",
+      "goal": "Open an incident with a callsign, priority, geofence and watch keywords, so evidence and monitoring attach to it.",
+      "role": "Field officer, Commander",
+      "level": "Intermediate",
+      "before": [
+        "The app shows CORE online (an incident is created on OpSystem Core)."
+      ],
+      "steps": [
+        "With no active incident, click 1-CLICK SITUATION DISPATCH / DRIVE OUT in the incident bar; with one already active, click NEW SITUATION.",
+        "Optionally pick a preset from ⚡ SELECT HIGH-RISK SITUATION PRESET TO LOAD... to fill the form, or describe the situation in the AI SITUATION ASSIST box and click AI AUTO-FILL. AI AUTO-FILL sends the brief from this device to an external AI service, and any field the model leaves out is filled with a fixed default (threat priority CRITICAL, a default Gauteng location and coordinates, a 15 km radius), so check every field before launching.",
+        "Enter the TACTICAL INCIDENT TITLE and COMMAND CALLSIGN, and choose the THREAT PRIORITY (CRITICAL, HIGH or MEDIUM).",
+        "Enter the OPERATIONAL LOCATION NAME. Use the INTERACTIVE OPENSTREETMAP GEOFENCE PICKER (search and click FIND, or click/drag on the map) to set LATITUDE (WGS-84) and LONGITUDE (WGS-84), then set the GEOFENCE RADIUS.",
+        "Enter the 24/7 MONITORED SITUATIONAL KEYWORDS (COMMA-SEPARATED) and a TACTICAL INCIDENT SUMMARY.",
+        "Click LAUNCH INVESTIGATION & DRIVE OUT."
+      ],
+      "result": "The incident bar shows the new incident with its title, ID, callsign, geofence and first keywords, and its status is ACTIVE_DISPATCH.",
+      "troubleshooting": [
+        {
+          "problem": "The launch fails",
+          "fix": "The core must be reachable and the title is required. Check the core connection in the Analysis desk (gear icon)."
+        },
+        {
+          "problem": "The form came back as CRITICAL with a location you did not give",
+          "fix": "Those are AI AUTO-FILL's defaults for fields the model left empty. Correct the priority, location, coordinates and radius by hand."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/IncidentLauncherModal.tsx",
+        "src/renderer/src/components/ActiveIncidentBar.tsx",
+        "src/renderer/src/App.tsx",
+        "src/renderer/src/services/osintEngine.ts"
+      ]
+    },
+    {
+      "id": "launch-from-a-critical-alert",
+      "title": "Respond to a critical public safety alert",
+      "goal": "Turn a critical alert into an active incident in one step, or dismiss it.",
+      "role": "Field officer, Commander",
+      "level": "Basic",
+      "before": [
+        "A CRITICAL PUBLIC SAFETY ALERT banner is showing under the header."
+      ],
+      "steps": [
+        "Read the alert title, summary and the VIA: line naming where it came from.",
+        "To respond, click 1-CLICK LAUNCH & DRIVE OUT. An incident is created from the alert's title, location, geofence, keywords and summary.",
+        "If it does not need a response, click Dismiss Alert.",
+        "Alerts also appear in the Active alerts panel (ALERTS on a phone), where they can be dismissed the same way."
+      ],
+      "result": "The alert leaves the banner and, if launched, the incident bar shows the new incident.",
+      "troubleshooting": [],
+      "sources": [
+        "src/renderer/src/components/CriticalCrimeAlertBanner.tsx",
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "id": "manage-an-incident",
+      "title": "Track, stand down, contain or reactivate an incident",
+      "goal": "Move an incident through its states without losing its evidence.",
+      "role": "Field officer, Commander",
+      "level": "Intermediate",
+      "before": [
+        "An incident is active."
+      ],
+      "steps": [
+        "Click LIVE MAP in the incident bar to show the live tracking map; click HIDE MAP to close it.",
+        "Once an incident is 48 hours old (counted from when it was opened), the app asks whether active operations should stand down (48-HOUR ACTIVE POLICING TIMEOUT // CASE STATUS, and a 48-HOUR ACTIVE WINDOW EXCEEDED line in the incident bar). Choose ✓ MARK AS INACTIVE (STILL OPEN) to stand down while the investigation continues. KEEP ACTIVE (AUTHORISE EXTENSION) / KEEP ACTIVE only hides the prompt on this device; it records no extension anywhere, so record the decision in the case notes.",
+        "To bring an inactive incident back, click REACTIVATE. This does not restart the 48-hour clock, which still runs from when the incident was opened.",
+        "When the incident is contained, click CONTAIN & LOCK to mark it contained and seal its active evidence docket. There is no confirmation step, so be sure before you click; the core still accepts evidence for the incident afterwards."
+      ],
+      "result": "The STATUS in the incident bar changes accordingly. The docket and its sealed exhibits stay open and preserved when an incident is marked inactive.",
+      "troubleshooting": [],
+      "sources": [
+        "src/renderer/src/components/ActiveIncidentBar.tsx",
+        "src/renderer/src/App.tsx",
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "id": "seal-a-social-post",
+      "title": "Watch the social stream and seal a post as evidence",
+      "goal": "Follow posts for the active incident and lock a relevant post into the evidence docket.",
+      "role": "Any operator",
+      "level": "Basic",
+      "before": [
+        "An incident is active."
+      ],
+      "steps": [
+        "Find the social panel in the grid (SOCIAL on a phone). It shows posts the core holds for the active incident.",
+        "Read ATTENTION VELOCITY: the posts-per-minute over the last five minutes against the last hour, with status NORMAL, ELEVATED or CRITICAL_SPIKE.",
+        "Filter by platform (ALL PLATFORMS, CRIME REPORTERS (X), X / TWITTER, TELEGRAM, TIKTOK, FACEBOOK). To watch extra words, type them and press Enter, or click ADD.",
+        "On a post, click SEAL TO DOCKET. The button reads SEALING... and then SEALED IN DOCKET.",
+        "Use VERIFY AT SOURCE to open the original post, or REVERSE LOOKUP IN OSINT to send its photo to the Analysis desk."
+      ],
+      "result": "The post is hashed with SHA-256 on this device, stored in the local docket, and uploaded to the core with that hash; the DOCKET count in the header goes up.",
+      "troubleshooting": [
+        {
+          "problem": "NO SOCIAL POSTS CURRENTLY MATCHING ACTIVE CRITERIA",
+          "fix": "The stream shows only posts that have reached the core for this incident; nothing is invented. Add posts through SOCIAL INTEL, or widen the platform filter."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/SocialAttentionStream.tsx",
+        "src/renderer/src/App.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "capture-video-evidence",
+      "title": "Capture a video snapshot or clip as evidence",
+      "goal": "Grab a frame or a 15-second clip from a camera or stream, sealed with SHA-256.",
+      "role": "Any operator",
+      "level": "Basic",
+      "before": [
+        "Desktop or Android app with camera permission granted.",
+        "An incident is active if the evidence should go to the core."
+      ],
+      "steps": [
+        "Find the TACTICAL VIDEO STREAM & OPTICAL SURVEILLANCE panel (VIDEO on a phone).",
+        "Choose the source with Select from additional tactical video feeds; click Rescan cameras after plugging in a camera.",
+        "Click GRAB SNAPSHOT to seal the current frame.",
+        "Click RECORD CLIP to record 15 seconds; the button reads RECORDING until it finishes.",
+        "Read the notice: it gives the local SHA-256 and either core verified (the core stored the same bytes) or CORE HASH MISMATCH."
+      ],
+      "result": "The frame or clip is saved to this device's evidence folder with a chain-of-custody line, and appears in the DOCKET.",
+      "troubleshooting": [
+        {
+          "problem": "NO TACTICAL VIDEO SOURCE or \"no camera attached\"",
+          "fix": "Attach a camera and click Rescan cameras. On macOS, re-enable Camera access for OpSystem in System Settings › Privacy & Security › Camera if it was denied."
+        },
+        {
+          "problem": "TACTICAL FEED OFFLINE // DEVICE NOT CONNECTED",
+          "fix": "The selected feed has no live source. Choose another feed."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/VideoFeedsPanel.tsx",
+        "src/renderer/src/App.tsx",
+        "INSTALL.md",
+        "README.md"
+      ]
+    },
+    {
+      "id": "review-the-evidence-docket",
+      "title": "Review and export the evidence docket",
+      "goal": "Check every sealed item for the incident and export the docket.",
+      "role": "Any operator",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Click DOCKET in the header (the number beside it is the item count).",
+        "The POLICE INCIDENT EVIDENCE DOCKET opens for the active incident (or GENERAL EVIDENCE VAULT if none is active).",
+        "For each item, read SHA-256, RECORDED BY and SOURCE, and use Copy SHA-256 Hash to copy a hash. The \"✓ SEAL VERIFIED\" label appears on every item whether or not the core confirmed the hash, so do not rely on it: only the notice shown at capture (\"core verified\" or \"CORE HASH MISMATCH\") reflects the core's check.",
+        "Click EXPORT DOSSIER to download the docket as OPSYSTEM-DOCKET-<incident id>.json.",
+        "Close the docket when done."
+      ],
+      "result": "A JSON file of the docket is saved, listing each item with its hash and custody details.",
+      "troubleshooting": [
+        {
+          "problem": "NO EVIDENCE ITEMS SEALED IN THIS DOCKET YET.",
+          "fix": "Capture posts, video snapshots or broadcast frames from the grid first."
+        },
+        {
+          "problem": "RECORDED BY shows an officer other than you",
+          "fix": "Items sealed on the device record the app's built-in default profile rather than the signed-in officer; the core stamps the signed-in operator only on items it receives with the device's own token. Note the correct officer in the case record."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/EvidenceDocketModal.tsx",
+        "src/renderer/src/components/HeaderTacticalBar.tsx",
+        "src/renderer/src/components/EvidenceDocketModal.tsx"
+      ]
+    },
+    {
+      "id": "send-a-field-sms",
+      "title": "Read cellular telemetry and send a field SMS",
+      "goal": "Check the vehicle modem's signal and cell, and send an order to a ground unit by SMS.",
+      "role": "Field officer, Commander",
+      "level": "Intermediate",
+      "before": [
+        "Desktop or Android app with a USB LTE modem attached."
+      ],
+      "steps": [
+        "Find the GSM MODEM & CELLULAR TELEMETRY panel (GSM on a phone).",
+        "Read CARRIER & OPERATOR, SIGNAL STRENGTH (RSSI) and the CELL TOWER TELEMETRY fields CELL ID (CID), LOC AREA (LAC) and PLMN (MCC-MNC).",
+        "Watch the integrity line: CELLULAR RF INTEGRITY: NO ANOMALY SIGNATURE, or CRITICAL: RF DENIAL / ROGUE TOWER SIGNATURE.",
+        "Under TACTICAL GSM MODEM SMS DISPATCH, enter the number (+27…) and the field order (up to 160 characters), and click DISPATCH.",
+        "Read the confirmation SMS ACCEPTED BY MODEM — message reference ..."
+      ],
+      "result": "The modem accepts the SMS, and if an incident is active a GSM log entry is added to its docket.",
+      "troubleshooting": [
+        {
+          "problem": "NO LTE MODEM ANSWERING AT COMMANDS",
+          "fix": "No modem was found on the serial ports the app tried. Check the USB connection; on Android, allow USB permission when asked."
+        },
+        {
+          "problem": "The rogue tower warning appears",
+          "fix": "It is a heuristic from consecutive readings (for example a drop from LTE to GSM, or a cell change without an area change), not a certified detector. Report it through your unit's procedure."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/GsmTelemetryPanel.tsx",
+        "src/renderer/src/App.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "search-and-collect-osint",
+      "title": "Search the core and collect an OSINT source",
+      "goal": "Find anything the core holds, and add a public web page to the active incident.",
+      "role": "Field intelligence analyst",
+      "level": "Intermediate",
+      "before": [
+        "The Analysis desk shows CORE online."
+      ],
+      "steps": [
+        "Click ANALYSIS in the header (ANALYSE tab on a phone), then SITREP & CORE REPORTS.",
+        "Type into search evidence, OSINT, posts, reports and click Search the core. End a word with * to match its prefix (for example grayston*).",
+        "Read each result's kind, title, score and snippet.",
+        "Under COLLECT OSINT SOURCE, paste a page address and click FETCH. The line beside the heading tells you whether it will be attached to the active incident.",
+        "Watch the job list for the outcome; click Refresh if needed."
+      ],
+      "result": "The fetched page is stripped to text, categorised and indexed on the core, and becomes searchable and part of the incident dossier.",
+      "troubleshooting": [
+        {
+          "problem": "Connect to the core to search.",
+          "fix": "Set the core address in the gear-icon panel (see Connect to OpSystem Core and manage your team)."
+        },
+        {
+          "problem": "The fetch job fails",
+          "fix": "The core refuses private and loopback addresses and pages it cannot read. Use a public URL."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/AnalysisView.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "run-ai-reports",
+      "title": "Run an AI report or ask the dossier",
+      "goal": "Produce a SITREP, action plan, timeline, entity list or OSINT leads from the incident's evidence, or ask it a question.",
+      "role": "Field intelligence analyst, Commander",
+      "level": "Intermediate",
+      "before": [
+        "An incident is active.",
+        "The Analysis desk header shows AI with a model name (not AI NOT CONFIGURED ON CORE)."
+      ],
+      "steps": [
+        "Open ANALYSIS, then SITREP & CORE REPORTS.",
+        "Look at the DOSSIER section for the active incident's counts and category chips; click DOSSIER to export the full text the AI reads.",
+        "Click a report button: SITREP, ACTION PLAN, TIMELINE, ENTITIES or OSINT LEADS.",
+        "To ask a question, type it in Ask the dossier: ... and click ASK.",
+        "Read the report in the list; reports cite evidence IDs and separate what is verified from what is reported."
+      ],
+      "result": "A new report appears for the incident.",
+      "troubleshooting": [
+        {
+          "problem": "The report buttons are disabled and the header says AI NOT CONFIGURED ON CORE",
+          "fix": "The core has no AI provider configured. The app never produces a report without one; ask the core's administrator."
+        },
+        {
+          "problem": "Open an incident (NEW SITUATION) to build a dossier and run analysis.",
+          "fix": "Launch or reactivate an incident first."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/AnalysisView.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "connect-to-core-and-manage-team",
+      "title": "Connect to OpSystem Core and manage your team",
+      "goal": "Point this device at the right core, and (as a commander) invite operators, disable them and revoke devices.",
+      "role": "Commander (SUPER_USER) for the team steps; any operator for the connection",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Open ANALYSIS and click Core connection and team (the gear icon).",
+        "Enter the core address, the device token or static key, and (only where the core sits behind a UAT gate) the gate access key, then click APPLY. The header line then reads CORE followed by the address, or CORE OFFLINE.",
+        "As a super user, use TEAM — OPERATORS & DEVICES below: enter email, name, role (OFFICER, ANALYST or SUPER_USER) and LO number, and click INVITE.",
+        "Click COPY on the Enrolment link for ... box and send it over a channel you trust. It is single-use and shows when it expires; it carries this terminal's gate key.",
+        "To stop an operator, click Disable (ends every device) on their row; click again to Enable. To cut off one device, click Revoke this device.",
+        "To remove this device from the core, use Disconnect this device (revokes its token)."
+      ],
+      "result": "The device talks to the chosen core, and the team list shows each operator with their role and active devices.",
+      "troubleshooting": [
+        {
+          "problem": "The team section is missing",
+          "fix": "It appears only for an operator with the SUPER_USER role."
+        },
+        {
+          "problem": "CORE OFFLINE after APPLY",
+          "fix": "Check the address and key with your administrator. On a phone, the address is the vehicle terminal's, not the phone's own."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/AnalysisView.tsx",
+        "src/renderer/src/components/TeamPanel.tsx",
+        "README.md"
+      ]
+    },
+    {
+      "id": "file-a-missing-person",
+      "title": "File and work a missing person dossier",
+      "goal": "Register a missing person, add sightings and evidence, and run an OSINT scan.",
+      "role": "Field officer, Field intelligence analyst",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Click MISSING PERSONS in the header. The MISSING PERSONS & OSINT HUB lists cases; filter with ALL STATUSES, ACTIVE SEARCH, ★ CONCLUSIVE, LEAD FOUND, LOCATED or CLOSED, or Search name, ID....",
+        "Click FILE MISSING PERSON. Fill in FULL LEGAL NAME, identity details, physical description, LAST SEEN DATE & TIME, LAST SEEN LOCATION, DISAPPEARANCE CIRCUMSTANCES, CLOTHING WORN WHEN LAST SEEN and PRIORITY, and attach a SUBJECT PHOTOGRAPH.",
+        "Click REGISTER DOSSIER & START OSINT.",
+        "Select the case and click RUN DEEP OSINT SCAN to run the automated crawl and border checks; results appear under REAL-TIME OSINT & SIGHTING INTERCEPTS.",
+        "To add a sighting, click UPLOAD EVIDENCE, choose the EVIDENCE SOURCE and MEDIA CATEGORY, enter the EVIDENCE TITLE, DETAILED NARRATIVE & SIGHTING CONTEXT and LOCATION, attach the file and click SEAL & SUBMIT EVIDENCE.",
+        "Tick FLAG AS POTENTIALLY CONCLUSIVE EVIDENCE only when the evidence may resolve the case, and give the CONCLUSIVE CORROBORATION REASON. This alerts every connected unit.",
+        "Click DOSSIER to download the case's sealed investigative dossier."
+      ],
+      "result": "The case appears in the hub with its evidence sealed by SHA-256; a conclusive flag raises the POTENTIALLY CONCLUSIVE EVIDENCE ALERT banner on connected terminals, with FOCUS MISSING PERSON HUB to open it.",
+      "troubleshooting": [
+        {
+          "problem": "No active missing person cases match criteria.",
+          "fix": "Set the filter to ALL STATUSES and clear the search box."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/MissingPersonsPanel.tsx",
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "id": "use-the-social-intel-desk",
+      "title": "Follow crime reporters and ingest on-scene posts",
+      "goal": "Monitor chosen accounts and add a post from an active situation to the incident.",
+      "role": "Field intelligence analyst",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Click SOCIAL INTEL in the header. The CRIME DESK INTEL · MONITORED SOCIAL WIRE desk opens.",
+        "To monitor an account, click FOLLOW NEW ACCOUNT, enter ACCOUNT HANDLE *, NAME / DESK, PLATFORM (X / Twitter, News Desk / RSS or Mastodon), OUTLET, CRIME BEAT and PROFILE URL, and click FOLLOW & MONITOR.",
+        "Filter accounts by Account Status (ALL STATUS, ACTIVE ONLY, PAUSED ONLY) and the INTERCEPT FEED by THREAT FILTER (ALL THREATS, CRITICAL ONLY, HIGH ONLY, CORRELATED TO INCIDENTS).",
+        "To add a post from the scene, click INGEST ACTIVE SITUATION POST, fill in ACCOUNT / DISPATCHER HANDLE *, POST TEXT / CRIME SCENE REPORT *, LOCATION NAME and ORIGINAL POST URL, choose the ATTACHMENT TYPE, tick the box to seal it into the active incident's docket if wanted, and click INGEST & TRIGGER ALARM.",
+        "Click BACK TO GRID when done."
+      ],
+      "result": "Followed accounts appear in the account list; an ingested post appears in the intercept feed, and posts matching the active incident are marked 🎯 CORRELATED WITH ACTIVE INCIDENT.",
+      "troubleshooting": [
+        {
+          "problem": "A HIGH THREAT SOCIAL INTERCEPT banner appears elsewhere in the app",
+          "fix": "Click FOCUS SOCIAL WIRE to open this desk on it, or dismiss it with ✕."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/SocialMonitorPanel.tsx",
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "id": "use-the-hotspot-map",
+      "title": "Use the Gauteng hotspot map",
+      "goal": "See recent crime alerts by sector and launch an incident in a hotspot.",
+      "role": "Field officer, Commander",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Click MAP / HOTSPOTS in the header.",
+        "Choose the WINDOW (PAST 1 HOUR to ALL TIME (24H+)) and the REGION (ALL GAUTENG (PROVINCE-WIDE), JHB METRO, TSHWANE / PTA, EKURHULENI, WEST RAND or SEDIBENG), or type in Search sectors, stations, alerts, keywords....",
+        "Switch the base map with DARK, SAT or OSM, and toggle TRAFFIC and HOTSPOTS overlays.",
+        "Click a sector and use ZOOM TO SECTOR; read SAPS CLUSTER, PATROL RADIUS, ACTIVE 24H ALERTS and PRIORITY CRIMES.",
+        "Click LAUNCH TACTICAL SITUATION IN THIS HOTSPOT to open the incident launcher pre-filled for that sector, or INVESTIGATE IN OSINT to take an image to the Analysis desk.",
+        "Click GRID to return to the multi-view grid."
+      ],
+      "result": "The map shows alerts in the chosen window and region, and the launcher opens with the hotspot's details when you launch from it.",
+      "troubleshooting": [
+        {
+          "problem": "No verified crime alerts in this time window.",
+          "fix": "Choose a longer WINDOW or a wider REGION."
+        }
+      ],
+      "sources": [
+        "src/renderer/src/components/GautengMapHotspotsPanel.tsx",
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "id": "install-opsystem",
+      "title": "Install OpSystem on a Mac, Windows or Android device",
+      "goal": "Put the desktop or Android app on a vehicle terminal or phone.",
+      "role": "Terminal administrator",
+      "level": "Intermediate",
+      "before": [
+        "The OpSystem project folder with dependencies installed (npm install).",
+        "For Android: the Android SDK and JDK 21."
+      ],
+      "steps": [
+        "macOS: run ./start.sh install. It builds the app, removes any previous OpSystem.app, and installs the new one; open it from /Applications.",
+        "The macOS bundle is unsigned: the first time, right-click the app and choose Open. Allow Camera access when macOS asks.",
+        "To make an installer to copy to another Mac or a Linux terminal, run ./start.sh package (a .dmg and .zip on macOS; AppImage and .deb on Linux).",
+        "Windows: with Node.js 22, run npm ci, then npm run package:win; run the generated OpSystem installer, which creates a desktop shortcut.",
+        "Android: run ./start.sh android to build a debug APK (installed automatically if a device is connected over adb), or ./start.sh android release for an unsigned release APK.",
+        "Open the app and sign in or enrol (see Sign in or enrol this device)."
+      ],
+      "result": "OpSystem opens on the device at the sign-in screen.",
+      "troubleshooting": [
+        {
+          "problem": "macOS says the app cannot be opened",
+          "fix": "It is unsigned. Right-click → Open the first time."
+        },
+        {
+          "problem": "Camera reads as denied on macOS",
+          "fix": "Re-enable it in System Settings › Privacy & Security › Camera. Launching the app from a non-interactive shell suppresses the prompt."
+        },
+        {
+          "problem": "RTL-SDR or DVB panels say unsupported on a phone",
+          "fix": "Those devices are not supported on Android; the panels say so by design."
+        }
+      ],
+      "sources": [
+        "README.md",
+        "INSTALL.md",
+        "start.sh"
+      ]
+    }
+  ]
+}

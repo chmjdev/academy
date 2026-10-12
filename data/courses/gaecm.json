@@ -1,0 +1,667 @@
+{
+  "course": {
+    "id": "gaecm",
+    "system": "gaecm",
+    "name": "Binteca Grap ECL Model Course",
+    "tagline": "Understand how the model measures GRAP 104 expected credit losses, and prepare, review and issue a valuation you can defend to an auditor.",
+    "summary": "The Binteca Grap ECL Model (technical name gaecm) is a GRAP 104 (Revised 2019) expected credit loss engine with a control portal: it calibrates a provision matrix from monthly aged debtor data, screens a forward-looking macroeconomic overlay, measures the allowance on receivables and on cash and cash equivalents, and issues the statutory report from one auditable pipeline. This course is for the preparers, reviewers, auditors and administrators who use it, and explains the methodology the engine actually implements and the controls around it.",
+    "audience": [
+      "Preparer",
+      "Reviewer / approver",
+      "Viewer / auditor",
+      "Administrator"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "gaecm-01-orientation",
+      "moduleNumber": 1,
+      "title": "What the model is and how it is built",
+      "subtitle": "One engine, one portal, two modes and the instances you work in",
+      "badge": "Foundations",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The model has one architectural commitment: every actuarial decision lives in a single Python engine. The web portal and the month-end scheduler both drive that same engine and neither re-implements any arithmetic, so a figure on the dashboard and the same figure in the PDF report come from one calculation and cannot disagree. Each run writes a run directory — the book (book.json), the validation result, the intermediate CSVs and the report as HTML and PDF — and that directory is the record of truth every screen reads. The engine runs in one of two modes: reference, which emits the signed reference valuation verbatim and is the validation target, and compute, which values the entity the run names at the reporting date it names, recalibrating everything from that entity's own extract. The portal organises the work into six licensed modules plus Controls, and an instance selector switches between the books the deployment holds.",
+      "keyPoints": [
+        "The engine is the only place arithmetic happens; the portal spawns it and renders what comes back.",
+        "Reference mode reproduces the signed reference valuation; compute mode values the entity named in the run from its own data and takes nothing from the reference book but the methodology.",
+        "What a compute run's schedules do not supply, the report says was not supplied — it does not guess.",
+        "The modules are Executive Dashboard, Data Ingestion, Actuarial EDA, Pipeline Control, Statutory Reports and Policy Alignment, plus Controls, which every deployment has.",
+        "The instance, run, view and filter are all in the URL, so a copied link opens the same view of the same run.",
+        "Without an installed licence the portal runs in evaluation mode: every module is open but reports are watermarked as unissued.",
+        "A demonstration instance runs only on a fixed synthetic dataset, and every page of its report carries the synthetic-data notice."
+      ],
+      "operationalProcedures": [
+        "1. Sign in and read the footer: it states the engine version and the licence, or that the deployment is unlicensed.",
+        "2. Check the “Instance” selector before doing anything; it decides which book you are looking at.",
+        "3. Use the module bar to move between modules; a lock icon marks a module the licence does not cover.",
+        "4. Press “Refresh” to pick up a run another user has just completed.",
+        "5. Share a view by copying the address bar, never by describing it."
+      ],
+      "takeaways": [
+        "A figure that appears in two implementations will eventually disagree with itself — which is why there is only one engine.",
+        "Evaluation-mode reports are not for issue.",
+        "Synthetic demonstration data is never a real entity's records."
+      ],
+      "guides": [
+        "sign-in-and-find-your-way",
+        "command-line"
+      ],
+      "quiz": [
+        {
+          "question": "Why can a dashboard figure and the same figure in the PDF report not disagree?",
+          "options": [
+            "The portal recomputes every figure and compares it with the PDF before display",
+            "Both are read from the run the engine wrote; the portal holds no arithmetic of its own",
+            "The PDF is generated from screenshots of the dashboard",
+            "A nightly job reconciles the two and corrects any difference"
+          ],
+          "correctIndex": 1,
+          "explanation": "The portal only spawns the engine and renders the run artefacts it writes; the book is the single record every consumer reads."
+        },
+        {
+          "question": "What does a compute-mode run do?",
+          "options": [
+            "Emits the signed reference valuation verbatim",
+            "Applies the reference book's provision rates to a new entity's balances",
+            "Recalibrates the provision matrix from the named entity's own extract and applies it to its closing exposures",
+            "Runs only the validation checks without measuring an allowance"
+          ],
+          "correctIndex": 2,
+          "explanation": "Compute mode values the entity the run names at its reporting date, taking nothing from the reference book except the methodology."
+        },
+        {
+          "question": "The sign-in page shows an “Evaluation mode” banner. What does that mean for reports?",
+          "options": [
+            "Every module is open but reports are marked as unissued",
+            "Only the Executive Dashboard is available",
+            "Reports are issued automatically without review",
+            "The engine refuses to run until a licence is installed"
+          ],
+          "correctIndex": 0,
+          "explanation": "With no licence file installed the portal runs in evaluation mode: everything is open and reports carry an unissued watermark."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-02-grap104-and-applicability",
+      "moduleNumber": 2,
+      "title": "GRAP 104 as the engine applies it",
+      "subtitle": "Simplified versus general approach, and which entities and years a run may value",
+      "badge": "Standards",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The revised GRAP 104 replaced the incurred-loss model with a forward-looking expected credit loss (ECL) model and a dual measurement: 12-month or lifetime ECL depending on the approach and the asset's credit risk. The engine applies the two approaches to two different populations. Receivables use the simplified approach: a lifetime ECL from initial recognition to derecognition, measured with a provision matrix, which the Standard accepts as a practical expedient — so there is no stage tracking and no significant-increase-in-credit-risk assessment on receivables; every receivable cell is measured at a lifetime rate. Cash and cash equivalents use the general approach: the counterparties are assessed as low credit risk and the allowance is a 12-month ECL of probability of default × loss given default × exposure at default per counterparty. Before anything is valued, the engine checks whether the revised Standard applies to the run at all, from the entity type and the financial year, and records the verdict in the book.",
+      "keyPoints": [
+        "Receivables: simplified approach, lifetime ECL, provision matrix — no stage 1/2/3 tracking.",
+        "Cash and cash equivalents: general approach, 12-month ECL = PD × LGD × EAD per counterparty, the counterparties assessed as low credit risk.",
+        "The revised Standard applies to financial years starting on or after 1 April 2025: public entities from 1 April 2025, municipalities, municipal entities and water boards from 1 July 2025, TVET and CET colleges from 1 January 2026.",
+        "A year starting earlier is refused unless early adoption is declared, which is valued with a warning that adoption is of the whole Standard and must be disclosed.",
+        "National and provincial departments are refused whatever the year: they report under the Modified Cash Standard.",
+        "A reporting date outside the stated financial year is refused; an unstated entity type is valued with a warning.",
+        "Statutory receivables (property rates, fines) fall under GRAP 108; the engine does not split them out — the preparer must, before the extract is valued.",
+        "Historical runs are never migrated: a book written before the applicability check says “not assessed for this run”."
+      ],
+      "operationalProcedures": [
+        "1. In Pipeline Control, under “Reporting framework”, set the “Entity type” and “Financial year starts” date for a computed run.",
+        "2. Tick “The entity adopted the revised Standard early” only if the entity actually did.",
+        "3. After the run, read Statutory Reports → “Disclosures” → “Reporting framework” for the edition, entity type, financial year and verdict.",
+        "4. Before preparing the extract, confirm with the finance team that statutory receivables have been removed from it."
+      ],
+      "takeaways": [
+        "The engine implements only the revised (2019) edition; it will not produce an incurred-loss valuation.",
+        "A refused framework verdict is a stop, not a warning — fix the entity type or year, do not work around it.",
+        "Removing GRAP 108 statutory receivables from the extract is the preparer's job."
+      ],
+      "guides": [
+        "run-a-valuation",
+        "disclosures-and-mscoa"
+      ],
+      "quiz": [
+        {
+          "question": "How does the engine measure the allowance on receivables?",
+          "options": [
+            "General approach with 12-month ECL until credit risk increases significantly",
+            "Three-stage model with a 30-day significant-increase trigger",
+            "Incurred-loss model under the 2009 edition",
+            "Simplified approach: lifetime ECL from a provision matrix for every receivable"
+          ],
+          "correctIndex": 3,
+          "explanation": "Receivables always carry a lifetime ECL under the simplified approach; the provision matrix is the practical expedient. There is no stage tracking."
+        },
+        {
+          "question": "A national department asks for a valuation for a year starting 1 April 2026. What does the engine do?",
+          "options": [
+            "Values it with an early-adoption warning",
+            "Refuses it, because departments report under the Modified Cash Standard",
+            "Values it under the 2009 edition",
+            "Values it normally because the year starts after 1 April 2025"
+          ],
+          "correctIndex": 1,
+          "explanation": "National and provincial departments are refused whatever the year; GRAP 104 does not apply to them."
+        },
+        {
+          "question": "How is the ECL on cash and cash equivalents measured?",
+          "options": [
+            "As PD × LGD × EAD per counterparty, a 12-month ECL under the general approach",
+            "As balance × the provision-matrix rate for the Current bucket",
+            "It is never measured; cash carries no allowance",
+            "As a lifetime ECL under the simplified approach"
+          ],
+          "correctIndex": 0,
+          "explanation": "Cash and cash equivalents use the general approach; the counterparties are assessed as low credit risk, so a 12-month ECL of PD × LGD × EAD applies."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-03-data-and-quality-gates",
+      "moduleNumber": 3,
+      "title": "The data, the schedules and the quality gates",
+      "subtitle": "What the engine needs, what it excludes, and how each excluded row is accounted for",
+      "badge": "Data",
+      "duration": "12 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "A valuation starts from the aged debtor extract: balances by debtor category, month and ageing bucket (Current, 31–60, 61–90, 91–120 and 120+ days). Macroeconomic indicators feed the forward-looking screen. Three optional schedules supply what the extract cannot — segment definitions, cash and cash equivalents, and ledger and rate assumptions — and the report states plainly whatever was not supplied rather than inventing it. Before any calibration, named quality gates run over the data. Population gates decide what is in the book at all; calibration gates decide only what the roll rates are measured on and never touch what is owed at the reporting date. Every row a gate removes is counted, so after a run each exclusion is accounted for by a gate with its rule and rationale.",
+      "keyPoints": [
+        "Files are recognised by their header row: aged debtor extract, macroeconomic indicators, other financial assets, cash and cash equivalents, segment definitions, or ledger and rate assumptions. CSV, TSV and Excel are accepted.",
+        "Population gate duplicate_keys keeps one row per category, month and bucket, because a repeated key double-counts an exposure.",
+        "Population gate policy_population removes VAT and prepayment components — only when the extract carries a component column.",
+        "Calibration gate covid_exclusion drops the excluded calendar years (2020 by default) because the lockdown distorted payment behaviour.",
+        "Calibration gate negative_balances drops negative rows from the history; the closing exposure keeps them, and a credit balance carries no allowance.",
+        "A default_flag column marks accounts defaulted on qualitative grounds; those carry a 100% loss rate whatever bucket they sit in.",
+        "Without a segments schedule, every category in the extract must be one the reference valuation defines; any other is refused rather than described by guesswork.",
+        "Without an assumptions schedule there is no roll-forward, no journal entries and no materiality test; each section reports its absence."
+      ],
+      "operationalProcedures": [
+        "1. Prepare the extract with categories, months and buckets, and remove statutory receivables.",
+        "2. In “Data Ingestion”, upload the extract and any schedules, and check what each file was “Recognised as”.",
+        "3. Add the component and default_flag / default_reason columns if the entity's policy needs them.",
+        "4. After the run, open “Quality gates” and click each gate to read rows in, removed, rows out, scope, rule and rationale.",
+        "5. Read the extract and macro profile cards to confirm what was actually loaded."
+      ],
+      "takeaways": [
+        "A schedule that is not supplied produces a stated absence, never a zero — a zero would be a measurement.",
+        "Calibration gates shape the roll rates only; they never remove what is owed at the reporting date.",
+        "Every excluded row must be explainable by a named gate."
+      ],
+      "guides": [
+        "upload-extracts"
+      ],
+      "quiz": [
+        {
+          "question": "What is the difference between a population gate and a calibration gate?",
+          "options": [
+            "Population gates run only in compute mode, calibration gates only in reference mode",
+            "Population gates decide what is in the book; calibration gates decide only what the roll rates are measured on",
+            "Calibration gates remove rows from the closing exposure; population gates do not",
+            "There is no difference; the scope label is cosmetic"
+          ],
+          "correctIndex": 1,
+          "explanation": "A population gate shapes the closing exposure as much as the history; a calibration gate removes rows only from the transition history."
+        },
+        {
+          "question": "An account in the extract carries a true default_flag. How is it measured?",
+          "options": [
+            "At the terminal rate of the 120+ bucket",
+            "It is excluded from the ECL population",
+            "At a 100% loss rate whatever ageing bucket it sits in",
+            "At the Current bucket rate until it ages"
+          ],
+          "correctIndex": 2,
+          "explanation": "An account defaulted on qualitative grounds carries a 100% loss rate under either measurement basis."
+        },
+        {
+          "question": "What happens to a negative balance in the closing month?",
+          "options": [
+            "It is deleted from the book",
+            "It is netted against positive balances in the same category before measurement",
+            "It is multiplied by the provision rate to reduce the allowance",
+            "It stays in the closing exposure as a credit and carries no allowance"
+          ],
+          "correctIndex": 3,
+          "explanation": "The negative_balances gate removes such rows only from the calibration history; in the closing exposure a credit balance is presented as such and carries no allowance."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-04-provision-matrix",
+      "moduleNumber": 4,
+      "title": "Building the provision matrix",
+      "subtitle": "Steps 1 to 4: groupings, data period, weighted roll rates and the terminal rate",
+      "badge": "Methodology",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The engine follows a seven-step methodology, each step a module that logs what it did. Steps 1 and 2 fix the groupings (debtor categories with similar credit-risk characteristics) and the data period, excluding distorted years. Step 3 measures the payment profile as roll rates: the share of a bucket's balance that rolls into the next bucket one month later. Rates are weighted across every available month pair, r(N) = Σ B(N+1, T+1) ÷ Σ B(N, T), so a month carrying a trivial balance cannot move the rate as much as a month carrying the whole book. The 120+ bucket is the absorbing loss state; with no write-offs, a month-on-month fall in it can only be cash collected, so the recovery rate is the sum of those falls over the sum of the bucket, and the terminal rate is one minus recovery. Step 4 chains every transition still ahead of a bucket into its cumulative lifetime loss rate.",
+      "keyPoints": [
+        "Roll rates are weighted aggregates, not simple averages of monthly rates.",
+        "Recovery rate = Σ |negative Δ in the 120+ bucket| ÷ Σ the 120+ bucket; terminal rate = 1 − recovery rate.",
+        "Current = r1 × r2 × r3 × r4 × Terminal; 31–60 = r2 × r3 × r4 × Terminal; 61–90 = r3 × r4 × Terminal; 91–120 = r4 × Terminal; 120+ = Terminal.",
+        "Calibration is per debtor category; categories come from the segments schedule, not from code.",
+        "Cash application can be “Aggregate — as the signed valuation” or “Oldest bucket first — as the accounting policy”; they give different transition rates on the same book.",
+        "Excluded calendar years are set for a computed run under “Calendar years excluded from calibration”."
+      ],
+      "operationalProcedures": [
+        "1. In Pipeline Control choose “Compute” and the cash application method that matches the entity's decided policy.",
+        "2. Run the pipeline and watch “Seven-step methodology” log steps 1 to 4.",
+        "3. On the Executive Dashboard click a debtor category to read its provision-matrix row, roll rates, terminal rate and exposure.",
+        "4. In Actuarial EDA → “Transition analysis”, read the cumulative provision rates per category and bucket."
+      ],
+      "takeaways": [
+        "A rate for a bucket includes every transition still ahead of it, not just the next one.",
+        "Changing the cash application method changes the rates; it is a policy choice, not a tuning knob."
+      ],
+      "guides": [
+        "run-a-valuation",
+        "read-the-dashboard",
+        "review-screen-and-policy"
+      ],
+      "quiz": [
+        {
+          "question": "Why are roll rates weighted across month pairs rather than averaged?",
+          "options": [
+            "So a month with a trivial balance cannot move the rate as much as a month carrying the whole book",
+            "Because the Standard forbids averaging",
+            "To make the rates independent of the balance sizes",
+            "So that the 120+ bucket is excluded from calibration"
+          ],
+          "correctIndex": 0,
+          "explanation": "r(N) = Σ B(N+1,T+1) ÷ Σ B(N,T): larger exposures contribute proportionately more."
+        },
+        {
+          "question": "What is the cumulative lifetime loss rate for the 61–90 bucket?",
+          "options": [
+            "r1 × r2 × r3 × r4 × Terminal",
+            "r3 alone",
+            "r3 × r4 × Terminal",
+            "Terminal alone"
+          ],
+          "correctIndex": 2,
+          "explanation": "A bucket's rate chains every transition still ahead of it, then the terminal rate: from 61–90 that is r3, r4 and the terminal rate."
+        },
+        {
+          "question": "How does the engine derive the terminal rate of the 120+ bucket?",
+          "options": [
+            "From the entity's write-off ledger",
+            "As one minus the recovery rate, where recovery is the month-on-month falls in the bucket over its balances",
+            "As a fixed 100% for every category",
+            "From the macroeconomic regression"
+          ],
+          "correctIndex": 1,
+          "explanation": "With no write-offs, a fall in the absorbing bucket can only be cash collected; terminal = 1 − recovery."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-05-forward-looking-and-discounting",
+      "moduleNumber": 5,
+      "title": "The forward-looking screen and discounting",
+      "subtitle": "Steps 5 and 6: four conjunctive gates, and why discounting usually nets to nothing",
+      "badge": "Methodology",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "GRAP 104 expects the allowance to reflect forward-looking information, but a macroeconomic overlay is only applied if it earns its place. Step 5 regresses each category's annual default rate on candidate macro factors at lag 0 and lag 1 and admits a candidate only if it clears four gates — a conjunctive test, not a score, where failing one gate is fatal. Gate D, the leave-one-out R², does most of the work: a negative value means a constant-mean prediction would have beaten the fitted model on every held-out year, so the regression found noise. When no candidate clears every gate, no overlay is applied, and the screen says so. Step 6 deals with the time value of money. For interest-bearing segments, projecting a balance forward at the effective interest rate and discounting it back at the same rate cancel exactly, so ECL = EAD × rate. For segments that charge no interest, the engine computes an explicit present-value adjustment and tests it against a materiality threshold of 2% of audited total expenditure; if immaterial, no discounting is applied.",
+      "keyPoints": [
+        "Gate A significance: p < 0.05.",
+        "Gate B economic sign prior: CPI positive, GDP growth negative, repo positive, house price index negative; the accounting policy's prime lending rate and unemployment are also screened, both positive, when the macro file carries them.",
+        "Gate C collinearity: VIF ≤ 5.0, applied to two-variable specifications.",
+        "Gate D out-of-sample power: leave-one-out R² ≥ 0.30.",
+        "A model admits at most two variables.",
+        "Interest-bearing segments: the EIR projection and discount cancel, ECL = EAD × rate.",
+        "Non-interest-bearing segments: a present-value adjustment at the segment's discount rate, tested against 2% of total expenditure from the assumptions schedule.",
+        "The engine compounds annually, (1 + r)^(−months/12), because that is what the signed valuation did."
+      ],
+      "operationalProcedures": [
+        "1. In Actuarial EDA open “Macro correlation matrix” for each category's correlation with each factor at lag 0 and lag 1.",
+        "2. Open “Screening gates” and read “Acceptance gates”; click a category to see every candidate tested and which gates it failed.",
+        "3. In “Transition analysis”, read the “Discounting assessment” of the non-interest-bearing segments.",
+        "4. Check the step 5 and step 6 lines in Pipeline Control's “Seven-step methodology” log."
+      ],
+      "takeaways": [
+        "A strong but counter-intuitive coefficient still fails: the economic sign gate is not negotiable.",
+        "“No overlay applied” is a legitimate, evidenced outcome — not a gap.",
+        "Discounting is a step 6 treatment; it is not the measurement basis."
+      ],
+      "guides": [
+        "review-screen-and-policy",
+        "read-the-dashboard"
+      ],
+      "quiz": [
+        {
+          "question": "A candidate passes significance, sign and collinearity but has a leave-one-out R² of −0.4. What happens?",
+          "options": [
+            "It is accepted with a warning",
+            "It is averaged with the other candidates",
+            "It is accepted because three of four gates passed",
+            "It is rejected: the gates are conjunctive and gate D failed"
+          ],
+          "correctIndex": 3,
+          "explanation": "Failing any one gate is fatal; a negative LOO R² means the model predicted worse than a constant mean."
+        },
+        {
+          "question": "Why does discounting cancel for interest-bearing segments?",
+          "options": [
+            "Because the Standard exempts them from discounting",
+            "Because projecting at the EIR and discounting at the same EIR give EAD × (1+EIR)^t × rate × (1+EIR)^−t = EAD × rate",
+            "Because their balances are always immaterial",
+            "Because they are measured at fair value"
+          ],
+          "correctIndex": 1,
+          "explanation": "The projection and the discount use the same rate and cancel, leaving EAD × rate."
+        },
+        {
+          "question": "For a non-interest-bearing segment, when is a discount applied to the ECL?",
+          "options": [
+            "Only when the present-value adjustment is material against 2% of total expenditure",
+            "Always, at the prime rate",
+            "Never; non-interest-bearing segments carry no allowance",
+            "Only when the macro overlay is accepted"
+          ],
+          "correctIndex": 0,
+          "explanation": "The engine computes the present-value impact and tests it against the materiality threshold; an immaterial impact is not applied."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-06-measurement-basis-validation",
+      "moduleNumber": 6,
+      "title": "Measurement, the policy register and validation",
+      "subtitle": "Step 7, migration versus time value of money, and the checks that guard every book",
+      "badge": "Methodology",
+      "duration": "15 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Step 7 measures the allowance: for each category and bucket, ECL = exposure × the cumulative migration probability. This migration basis is the decided basis and the default. A second basis, time value of money (TVM), is implemented as sensitivity analysis only: it reads a draft accounting policy as making the cost of waiting for collection the allowance itself. That reading was examined and rejected — it assumes away the credit risk the Standard exists to measure, it is not probability-weighted, and its discount-rate wording describes the step 6 treatment the engine already performs. The engine keeps TVM so the decision stays auditable, shows both over the same exposures, and keeps a divergence register of every point where the entity's own policy and the valuation differ, with what the engine did about each. Every book is then validated in families: arithmetic (each total equals its parts, PD × LGD × EAD equals the printed cash ECL, the journal roll-forward ties to the closing allowance), identity (each ECL equals balance × rate), fidelity (reference mode only) and policy.",
+      "keyPoints": [
+        "Migration basis: ECL = exposure × cumulative migration probability — the signed valuation's basis and the default.",
+        "TVM basis is a sensitivity run and Pipeline Control warns “Not the signed valuation's basis”; it is never the reporting position.",
+        "Policy Alignment shows “Both bases over the same exposures” and the “Divergence register”; a run with no entity register says “No entity policy supplied”.",
+        "Validation families: arithmetic, identity, fidelity (reference mode only — a computed book is never compared with another entity's figures) and policy.",
+        "Known discrepancies in the signed source are reproduced faithfully, each tolerated by exactly one named check; an undocumented variance fails.",
+        "Journals keep the prior-year restatement (to accumulated surplus) separate from the current-year movement (to the statement of financial performance).",
+        "An unset signing actuary prints as “[signing actuary not set]” and validation reports the report as not ready to issue."
+      ],
+      "operationalProcedures": [
+        "1. Under “Measurement basis” keep “Migration probability” for a reporting run.",
+        "2. After the run, read “Validation”: Checks, Passed, Known and Failed, and open any check that is not a pass.",
+        "3. In Policy Alignment, compare the two bases per category and read the divergence register.",
+        "4. On the Executive Dashboard click “Movement for the year” to read the roll-forward and the proposed journal entries.",
+        "5. Do not issue a report whose validation banner shows the book does not reconcile."
+      ],
+      "takeaways": [
+        "A failed check means the report is not issued — a wrong ECL that looks authoritative is worse than a late one.",
+        "The engine reproduces known source discrepancies rather than silently correcting them, so its output agrees with the document the auditor holds.",
+        "Choosing a measurement basis is an accounting-policy decision; the actuarial opinion remains the signing actuary's."
+      ],
+      "guides": [
+        "run-a-valuation",
+        "review-screen-and-policy",
+        "read-the-dashboard"
+      ],
+      "quiz": [
+        {
+          "question": "What is the status of the time-value-of-money (TVM) basis in the engine?",
+          "options": [
+            "It is the default reporting basis",
+            "It was deleted after the decision",
+            "It is retained as sensitivity analysis so the alternative stays visible",
+            "It is used automatically when interest rates are high"
+          ],
+          "correctIndex": 2,
+          "explanation": "Migration is the decided basis; TVM remains implemented as sensitivity analysis so the decision is auditable."
+        },
+        {
+          "question": "Which validation family applies only in reference mode?",
+          "options": [
+            "Fidelity — agreement with the signed reference figures",
+            "Arithmetic",
+            "Identity",
+            "Policy"
+          ],
+          "correctIndex": 0,
+          "explanation": "A computed book is validated on its own terms and never compared with another entity's signed valuation."
+        },
+        {
+          "question": "How are the prior-year restatement and the current-year movement posted?",
+          "options": [
+            "As one combined entry to the statement of financial performance",
+            "Both to accumulated surplus",
+            "They are not posted; only the closing allowance is reported",
+            "Separately: the restatement to accumulated surplus, the current-year movement to the statement of financial performance"
+          ],
+          "correctIndex": 3,
+          "explanation": "Collapsing the two into one entry would misstate both, so the journals keep them apart."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-07-reporting-and-issue",
+      "moduleNumber": 7,
+      "title": "The statutory report, issue and template versions",
+      "subtitle": "From a validated run to an issued rendition that can be re-rendered byte for byte",
+      "badge": "Reporting",
+      "duration": "14 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Each run produces a statutory report as HTML and, where a PDF backend is available, PDF. Optional appendices add the engine's own validation record (Appendix C) and the policy alignment (Appendix D). Preparing a report and releasing it are separated: the run records who prepared it, and only a reviewer who did not prepare it may issue it. Issuing records the release — rendition, template version and the report's SHA-256 — and cannot be withdrawn; it signs and sends nothing. Report templates are versioned: each has an id, a version and a SHA-256 over its file set, every run records the rendition it was issued with, and a later release never changes an issued report by itself. Moving a run to a newer template is a controlled upgrade: preview the differences, pass the reference-case regression for that exact version, then a reviewer — never the run's preparer — accepts it, which adds a new rendition that is issued separately.",
+      "keyPoints": [
+        "Statutory Reports tabs: Report, Review & issue, Template, Disclosures and mSCOA.",
+        "A run with no recorded preparer (made outside the portal) is not issued at all, because segregation cannot be shown.",
+        "Issuing records rendition, template and SHA-256; it cannot be withdrawn, and a later rendition is issued separately.",
+        "Preview reports sections added, removed or changed, disclosures added or removed, figures that would move and incompatible customisations.",
+        "The regression gate requires the reference valuation to reproduce its golden rendering byte for byte, and an illustrative Standard example to reproduce to the cent.",
+        "Acceptance is refused until a regression for that exact version, hash and engine has passed.",
+        "Optional “Introduction note” and “Conclusion note” are customisation slots of the current compute template."
+      ],
+      "operationalProcedures": [
+        "1. Preparer: run the pipeline with “Render PDF” ticked and the appendices the engagement needs.",
+        "2. Reviewer: open Statutory Reports, choose the run, and read “Preparation” on the “Review & issue” tab.",
+        "3. Reviewer: confirm the validation status, then press “Issue rendition <n>”, read the confirmation and press “Issue the report”.",
+        "4. For a template upgrade: “Preview the upgrade”, then “Run the reference-case regression”, then “Accept <version>” once it has passed.",
+        "5. Download the issued report with “HTML” or “PDF”."
+      ],
+      "takeaways": [
+        "Nobody issues, or accepts an upgrade for, a run they prepared.",
+        "An issued rendition is permanent; corrections are new renditions, not edits.",
+        "A newer template never silently changes an issued report."
+      ],
+      "guides": [
+        "download-the-report",
+        "issue-a-report",
+        "upgrade-a-template"
+      ],
+      "quiz": [
+        {
+          "question": "A preparer who was later given the reviewer role tries to issue a run they prepared. What happens?",
+          "options": [
+            "It is allowed because their current role is reviewer",
+            "It is refused: the recorded preparer of a run can never issue it, whatever their role now",
+            "It is allowed if an administrator approves",
+            "It is allowed but flagged in the audit trail"
+          ],
+          "correctIndex": 1,
+          "explanation": "Segregation is checked against the run's recorded preparer, not only the current role."
+        },
+        {
+          "question": "What does issuing a report do?",
+          "options": [
+            "Records the release — rendition, template and SHA-256 — permanently; it signs and sends nothing",
+            "Emails the report to the auditor",
+            "Applies a digital signature on behalf of the actuary",
+            "Locks the run so it can be edited only by an administrator"
+          ],
+          "correctIndex": 0,
+          "explanation": "Issuing is a recorded release that cannot be withdrawn; it is not a signature or a delivery."
+        },
+        {
+          "question": "When can a template upgrade be accepted?",
+          "options": [
+            "As soon as the preview has been opened",
+            "Whenever an administrator approves it",
+            "Automatically when the engine is updated",
+            "Only after the reference-case regression for that exact version, hash and engine has passed, and by a reviewer who did not prepare the run"
+          ],
+          "correctIndex": 3,
+          "explanation": "Acceptance is gated on a passed regression and on segregation of duties; it adds a new rendition."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-08-disclosures-and-mscoa",
+      "moduleNumber": 8,
+      "title": "Disclosure coverage and mSCOA",
+      "subtitle": "What the report covers of the revised Standard, and how journal lines map to the chart",
+      "badge": "Reporting",
+      "duration": "11 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "The engine states, for eleven impairment disclosure items of the revised GRAP 104, whether its output produces the item, partly produces it, or the information was not supplied — naming the inputs it came from, where it appears and what is missing. This is a coverage statement about the engine's output, not a compliance opinion: the entity's financial statements carry the disclosures and its auditors judge them. For example, the loss-allowance reconciliation is at most partial because the engine receives no write-off, derecognition or new-asset movements. For municipalities, the engine maps its journal lines (impairment loss and gain, loss allowance, accumulated surplus, write-off) to mSCOA segments through a configurable mapping. The shipped mapping leaves every value empty and marked “to be confirmed against the mSCOA 7.1 chart”, because no code was verified; the validator refuses a malformed mapping, a value still to be confirmed, and a confirmed value without its chart version, confirmer and date.",
+      "keyPoints": [
+        "Coverage verdicts: produced, partly produced, or information not supplied.",
+        "Coverage is about the engine's output, never a compliance opinion.",
+        "mSCOA chart version by municipal year: 2025/26 → 6.9, 2026/27 → 7.1; a year with no verified chart says so.",
+        "mSCOA applies to municipalities and municipal entities; a public entity's book says it is not on mSCOA.",
+        "Every shipped mapping value is empty and “to be confirmed”; a confirmed value is the confirmer's recorded statement.",
+        "Only an administrator supplies the deployment's own mapping; it is validated first, audited, and carried by runs from then on."
+      ],
+      "operationalProcedures": [
+        "1. Open Statutory Reports → “Disclosures” and read “Reporting framework” and “Disclosure coverage”.",
+        "2. For each partly produced item, note what input is missing and who can supply it.",
+        "3. Open the “mSCOA” tab and read how many segment values are confirmed and how many are to be confirmed.",
+        "4. Administrator: after the municipality's finance team confirms each value against the chart, use “Supply this deployment's mapping”.",
+        "5. Read “This run's journal lines” with their segments, debit and credit."
+      ],
+      "takeaways": [
+        "Never treat a “to be confirmed” mSCOA value as a code.",
+        "The municipality's finance team confirms mapping values; the product supplies none."
+      ],
+      "guides": [
+        "disclosures-and-mscoa"
+      ],
+      "quiz": [
+        {
+          "question": "What does the disclosure coverage statement represent?",
+          "options": [
+            "An audit opinion on the financial statements",
+            "Whether the engine's output produces, partly produces, or lacks the information for each impairment disclosure item",
+            "A certificate of GRAP compliance",
+            "The list of disclosures the auditor has accepted"
+          ],
+          "correctIndex": 1,
+          "explanation": "It is a coverage statement about the engine's output, not a compliance opinion."
+        },
+        {
+          "question": "Why does every shipped mSCOA mapping value read “to be confirmed”?",
+          "options": [
+            "Because the mapping is generated randomly",
+            "Because mSCOA does not apply to municipalities",
+            "Because no code was verified against the chart, so none is supplied",
+            "Because only reviewers may see the codes"
+          ],
+          "correctIndex": 2,
+          "explanation": "The product does not invent codes; the finance team must confirm each against the mSCOA 7.1 chart."
+        },
+        {
+          "question": "Which role can supply the deployment's own mSCOA mapping?",
+          "options": [
+            "Administrator",
+            "Preparer",
+            "Reviewer / approver",
+            "Viewer / auditor"
+          ],
+          "correctIndex": 0,
+          "explanation": "Changing the mSCOA mapping requires the settings permission, which only the administrator holds; the change is validated and audited."
+        }
+      ]
+    },
+    {
+      "id": "gaecm-09-roles-and-controls",
+      "moduleNumber": 9,
+      "title": "Roles, MFA, the audit trail and the municipality's data",
+      "subtitle": "Segregation of duties, dual control, and data that always belongs to the client",
+      "badge": "Controls",
+      "duration": "16 min",
+      "video": null,
+      "poster": null,
+      "screenshots": [],
+      "overview": "Every account holds exactly one of four roles, and the permission matrix is enforced on the server for every protected action. The roles are arranged so that no one account both produces a figure and releases it, or both grants access and uses it: preparers run valuations and upload data; reviewers issue reports and accept template upgrades; viewers and auditors read and export the audit trail; administrators manage access, settings, data, backups and incidents. Multi-factor authentication (an authenticator app plus recovery codes) is required by default for administrators and reviewers. The audit trail is append-only and SHA-256-chained, so a break is detectable and can be named. The municipality's data stays the municipality's: complete exports in open formats with a SHA-256 manifest, quarterly delivery packages, an exit package under dual control, verified backups with restore drills, and an incident register for POPIA notices. The product deletes nothing on exit; people carry out destruction and record each step.",
+      "keyPoints": [
+        "No role holds both run-a-valuation and issue-a-report, or manage-access and run-a-valuation.",
+        "An administrator cannot change their own role or status, or reset their own password or MFA; another administrator must.",
+        "A changed role or status ends that user's sessions at once; every refusal is written to the audit trail.",
+        "MFA is required by default for administrators and reviewers; a session that must enrol reaches only its own account until it has.",
+        "“Verify the chain” checks the whole audit trail and names the event where a chain is broken.",
+        "Exit packages and real restores need two administrators: the one who asks cannot approve.",
+        "A restore moves runs, uploads and configuration aside rather than deleting them; accounts and the audit trail are never replaced.",
+        "Retention left empty means keep everything; the incident register treats POPIA's “immediately” as the standard and 72 hours as the outer limit."
+      ],
+      "operationalProcedures": [
+        "1. Everyone: under Controls → “My account”, change the issued password and set up an authenticator, and store the recovery codes.",
+        "2. Administrator: issue accounts under Controls → “Access”, give the temporary password by a separate channel, and set the “MFA policy”.",
+        "3. Reviewer or auditor: under “Audit trail”, press “Verify the chain” before relying on the trail; auditors export it as CSV or JSON.",
+        "4. Administrator: under “Data”, run exports and quarterly packages; under “Backups”, back up and run a “Restore drill”.",
+        "5. Administrator: record any security incident under “Incidents” at once, and the notice and hand-off as they happen."
+      ],
+      "takeaways": [
+        "Whoever prepares a valuation never releases it.",
+        "Dual control means two different administrators — asking and approving are never the same person.",
+        "The product never destroys the municipality's data by itself."
+      ],
+      "guides": [
+        "manage-access",
+        "secure-your-account",
+        "audit-trail",
+        "data-exports-and-exit",
+        "backups-and-restores",
+        "record-an-incident"
+      ],
+      "quiz": [
+        {
+          "question": "Which pairing does the permission matrix forbid any single role from holding?",
+          "options": [
+            "Reading runs and reading reports",
+            "Changing one's own password and reading reports",
+            "Running a valuation and issuing a report",
+            "Reading the audit trail and exporting it"
+          ],
+          "correctIndex": 2,
+          "explanation": "Segregation of duties: who prepares a valuation does not issue it."
+        },
+        {
+          "question": "An administrator requests an exit package. Who may approve it?",
+          "options": [
+            "The same administrator after a waiting period",
+            "A second, different administrator",
+            "Any reviewer",
+            "The preparer of the latest run"
+          ],
+          "correctIndex": 1,
+          "explanation": "Exits and restores are under dual control: the one who asks cannot approve."
+        },
+        {
+          "question": "What does a real restore do to the data currently in service?",
+          "options": [
+            "Deletes it and replaces it from the backup",
+            "Replaces the accounts and audit trail too",
+            "Merges the backup into it record by record",
+            "Moves runs, uploads and configuration aside rather than deleting them, and never replaces accounts or the audit trail"
+          ],
+          "correctIndex": 3,
+          "explanation": "A restore keeps what was in service by moving it aside; accounts and the audit trail are never replaced."
+        }
+      ]
+    }
+  ]
+}

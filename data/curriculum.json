@@ -5,7 +5,7 @@
     "tagline": "Campaign Communications Command Centre Operations & Digital Governance",
     "badge": "Official Command Academy",
     "hero_title": "Master Sovereign Campaign Operations",
-    "hero_description": "The official qualification and operations curriculum for the African National Congress (ANC) Campaign Communications Command Centre. Engineered by CEDEC Africa for national communicators, desk officers, researchers, and field leadership.",
+    "hero_description": "The training curriculum for the people who operate ANC CC Ops, the Campaign Communications Command Centre built by CEDEC Africa: national communicators, war room and rapid-response staff, desk operators, provincial and regional DCIPs, investigators and administrators.",
     "brand": {
       "primary": "#007a3d",
       "primary_dark": "#004d26",
@@ -29,8 +29,8 @@
     {
       "id": "lesson-01-system-overview",
       "moduleNumber": 1,
-      "title": "System Architecture, Clearance Tiers & Command Desks",
-      "subtitle": "National Command, Provincial nodes, and the 6 operational roles",
+      "title": "System Overview: Desks, Roles & the Sign-Off Gate",
+      "subtitle": "One web console, its desks, the roles accounts carry, and which modules a deployment switches on",
       "badge": "Core Architecture",
       "duration": "14 min",
       "video": "ancops-intro.mp4",
@@ -38,53 +38,60 @@
       "screenshots": [
         "02-shell-header.png"
       ],
-      "overview": "The ANC Campaign Communications Command Centre is an integrated digital command platform engineered by CEDEC Africa. It fuses strategic campaign coordination, 2-hour rapid response rebuttal, sovereign voter engagement, and media monitoring into one unified, auditable environment.",
+      "overview": "ANC CC Ops is one web application for running a campaign's communications, built by CEDEC Africa. Its core desks are Daily Ops & Review (the Weekly Campaign Order, the day's decision, the review queue and the message bank), the 2-Hour Rapid Rebuttal, the WeVote Chatbot desk with the Social Media Army, the 07:00 Morning Intel and Administration. Facebook ads, Investigations, Wards, Manifestos, DCIP and the WhatsApp Cloud API bot are additional modules that each deployment switches on or off. Accounts are issued by an administrator, each carries one or more roles, and actions that need authority are signed off by a person in a role they hold.",
       "keyPoints": [
-        "Strict division of labor: six discrete operator roles with least-privilege enforcement",
-        "National Director, Ops Officer, Rapid-Response Lead, Fact-Checker/Researcher, Communicator/Spokesperson, Field Coordinator",
-        "Every action requires a cryptographically validated, single-use sign-off record",
-        "Built on sovereign South African infrastructure hosted under cedec.io and binteca.io"
+        "Roles defined in the code: National Communications Director, Elections Committee Operations Lead, Head of Media Relations Desk, SG / TG Authorised Representative, Rapid-Response Lead, Fact-Check Officer, Spokesperson, Investigations Coordinator, Investigator, WhatsApp Desk Operator, Campaign Manager, War Room Coordinator, Provincial DCIP and Regional DCIP, plus the admin and super_admin roles",
+        "A Provincial or Regional DCIP account is scoped to an area (a province or region); other accounts act nationally",
+        "The sign-off gate records who signed, in which role, which action on which subject, and three certifications; each sign-off is used once, for one action",
+        "Each module has a feature flag. The core desks are on by default; Facebook ads is off by default, and Investigations, Wards, Manifestos, DCIP and the WhatsApp Cloud API bot are on by default but can be switched off. A switched-off desk has no tab and its API answers 404",
+        "The ☰ menu also opens the Media Asset Bank Vault and the User Guide & SOP Manual"
       ],
       "operationalProcedures": [
-        "1. Understand the hierarchy: National Command sets strategy and lines; Provincial/Regional nodes execute localized messaging.",
-        "2. Observe role restrictions: Communicators cannot sign dispatches; researchers verify facts but do not publish.",
-        "3. Verify channel availability: Check desk status indicators before initiating cross-platform broadcasts."
+        "1. Sign in with the email address on your account; the header chip shows your name, roles and, for a DCIP, your area.",
+        "2. Move between desks with the tab buttons under the header or the Desks section of the ☰ menu. Only the desks switched on for this deployment are listed.",
+        "3. Before acting, check which of your roles the action needs: the gate's 'Signing as' list offers only roles your account holds, and the approval ladder limits who may sign each class of content.",
+        "4. If a desk you expect is missing, ask the administrator whether that module is switched on for this deployment."
       ],
       "takeaways": [
-        "Never share credentials or bypass the sign-off gate.",
-        "All operations are permanently logged to an immutable audit record.",
-        "The command centre guarantees operational continuity even when external platforms fail."
+        "Never share your sign-in or sign off on someone else's behalf: every sign-off is recorded against the person who made it, in the role they chose.",
+        "Not every action goes through the gate: a Counter Active Playbook dispatch, a DCIP hub dispatch and a one-to-one WhatsApp reply, among others, are recorded in the audit trail without a sign-off.",
+        "Which desks you see depends on the deployment's feature flags, not only on your roles."
       ],
       "quiz": [
         {
-          "question": "Which of the following is NOT one of the six primary operational roles in ANC CC Ops?",
+          "question": "Which of the following is NOT a role defined in ANC CC Ops?",
           "options": [
-            "Ops Officer",
+            "War Room Coordinator",
             "Rapid-Response Lead",
-            "Chief Platform Hacker",
-            "Fact-Checker / Researcher"
+            "Chief Digital Strategist",
+            "Fact-Check Officer"
           ],
           "correctIndex": 2,
-          "explanation": "The six official roles are National Director, Ops Officer, Rapid-Response Lead, Fact-Checker/Researcher, Communicator/Spokesperson, and Field Coordinator."
+          "explanation": "War Room Coordinator, Rapid-Response Lead and Fact-Check Officer are in the role list in src/auth/accounts.ts. There is no Chief Digital Strategist role."
         },
         {
-          "question": "Why does the command centre enforce strict role segregation?",
+          "question": "When you sign off an action, which roles does the 'Signing as' list offer you?",
           "options": [
-            "To slow down response times",
-            "To ensure POPIA compliance, legal liability protection, and single-use accountability",
-            "Because the database cannot handle multiple logins",
-            "To restrict provincial teams from seeing campaign manifestos"
+            "Every role defined in the system",
+            "Only the roles your own account holds",
+            "Only the role that owns the desk you are on",
+            "Only the National Communications Director role"
           ],
           "correctIndex": 1,
-          "explanation": "Strict role segregation guarantees that no single operator can draft, certify, and unilaterally dispatch communications without multi-party verification and compliance clearance."
+          "explanation": "The gate lists only the roles your account holds (it does not offer the admin role), and the server refuses a sign-off in a role you do not hold."
         }
+      ],
+      "guides": [
+        "sign-in-and-manage-your-account",
+        "sign-off-through-the-gate",
+        "use-the-media-asset-bank-vault"
       ]
     },
     {
       "id": "lesson-02-auth-security",
       "moduleNumber": 2,
-      "title": "Perimeter Security, Authentication & First-Run Setup",
-      "subtitle": "Edge perimeter gate unlock, credentials, and session management",
+      "title": "Access, Sign-In & Account Security",
+      "subtitle": "The UAT access gate, email sign-in, passkeys, sessions and password rules",
       "badge": "Access & Security",
       "duration": "10 min",
       "video": "ancops-uat-login-walkthrough.webm",
@@ -93,42 +100,70 @@
         "01-login-screen.png",
         "02-shell-header.png"
       ],
-      "overview": "Access to ANC CC Ops is safeguarded by an estate-level perimeter security gate (Rule #31) followed by role-authenticated session credentials. This lesson walks through unlocking the edge gate, initial credential authentication, and security hygiene.",
+      "overview": "On UAT an access gate sits in front of the sign-in page, and its key is handed over by the operator. Behind it, you sign in with the email address on your account and your password, or with a passkey you have enrolled. There is no self-registration and no password reset on the sign-in page: accounts are issued by the administrator.",
       "keyPoints": [
-        "Estate perimeter gate password protects pre-production and staging environments",
-        "Authentication uses email and high-entropy passwords with secure HttpOnly cookie tokens",
-        "First-run password rotation is mandatory for all newly issued operator accounts",
-        "Immediate session termination occurs if an account is deactivated in Administration"
+        "Sign-in takes an email address; usernames are refused with a message asking for the email address",
+        "Passkeys (WebAuthn: Touch ID, Windows Hello or a security key) can be enrolled from the ☰ menu under 'Passkeys / Biometrics'",
+        "Ten failed attempts from one address lock that address out for fifteen minutes",
+        "A session is an HttpOnly, SameSite=Lax cookie (Secure in production mode) lasting twelve hours and refreshed while you use it",
+        "Passwords are at least 12 characters and stored only as scrypt hashes"
       ],
       "operationalProcedures": [
-        "1. Connect to the platform URL and authenticate past the edge security gate if prompted.",
-        "2. Enter your assigned email address and initial password.",
-        "3. On first login in production, navigate to your profile and set a new personal password.",
-        "4. Familiarize yourself with the shell header: polls countdown, active campaign line, and role pill."
+        "1. Open the command centre address. On UAT, enter the access gate key you were given.",
+        "2. On the 'Sign in' page, type your email address and password and click 'Sign in', or click 'Sign in with a Passkey' if you have enrolled one.",
+        "3. If you are asked to change your password, open the ☰ menu and choose 'Change password'. Under the UAT access lock the issued password is final and cannot be changed.",
+        "4. Check the header chip: your name, your roles and, for a DCIP, your area.",
+        "5. When you finish, open the ☰ menu and choose 'Sign out'."
       ],
       "takeaways": [
-        "Session cookies are strictly scoped to the domain with SameSite=Lax and Secure flags.",
-        "Admin accounts can revoke active operator sessions immediately upon security suspicion."
+        "Lost your password? Ask the administrator; there is no reset on the sign-in page.",
+        "Outside the UAT access lock, an administrator can reset a password or deactivate an account, and either ends that account's sessions.",
+        "Sign-ins, refused sign-ins and password changes are written to the access log with the address they came from."
       ],
       "quiz": [
         {
-          "question": "What is the primary purpose of the edge perimeter gate?",
+          "question": "What do you type in the sign-in form's identifier field?",
           "options": [
-            "To collect user email addresses for marketing",
-            "To prevent unauthorized indexing, scanning, and public exposure of operational environments",
-            "To slow down the internet connection",
-            "To replace username and password sign-in"
+            "Your username",
+            "The email address on your account",
+            "Your staff number",
+            "Your mobile number"
           ],
           "correctIndex": 1,
-          "explanation": "The edge perimeter gate ensures the operational command surface is shielded from external port scanners, crawlers, and unauthorized network reconnaissance."
+          "explanation": "Sign-in is email-only; a username is refused with a message asking for the email address."
+        },
+        {
+          "question": "What happens after ten failed sign-in attempts from one address?",
+          "options": [
+            "The account is deleted",
+            "That address is locked out for fifteen minutes",
+            "The administrator must reset the password",
+            "Nothing; attempts are unlimited"
+          ],
+          "correctIndex": 1,
+          "explanation": "The limiter in src/auth/limiter.ts locks an address for fifteen minutes after ten failures."
+        },
+        {
+          "question": "How long does a session last?",
+          "options": [
+            "Until the browser is closed",
+            "Twelve hours, refreshed while you use it",
+            "Seven days",
+            "Thirty minutes"
+          ],
+          "correctIndex": 1,
+          "explanation": "Sessions are twelve hours long and refreshed on use (src/auth/session.ts); signing out ends them sooner."
         }
+      ],
+      "guides": [
+        "sign-in-and-manage-your-account"
       ]
     },
     {
       "id": "lesson-03-signoff-gate",
       "moduleNumber": 3,
-      "title": "The 3-Way Certification Sign-Off Gate & Legal Compliance",
-      "subtitle": "The consumable sign-off record, certifications, and one-time execution",
+      "title": "The Sign-Off Gate: Three Certifications, One Use",
+      "subtitle": "What the gate records, the approval ladder, and the actions that do not pass through it",
       "badge": "Governance",
       "duration": "12 min",
       "video": null,
@@ -136,44 +171,72 @@
       "screenshots": [
         "15-signoff-gate-modal.png"
       ],
-      "overview": "Anything that opens a case, logs a situation, approves a draft, signs a deliverable, or sends a broadcast MUST pass through the sign-off gate. The gate is not a simple confirmation dialog\u2014it generates an immutable database certification consumed exactly once.",
+      "overview": "Actions that need authority, such as logging or closing a rebuttal situation, signing or dispatching a stage, approving a draft or a message-bank line, issuing the Weekly Campaign Order, signing a localisation, approving an issue brief, sending a broadcast or posting instruction, opening or closing an investigation and creating a paid campaign, pass through the 'Executive Confirmation & Human Sign-Off' window. The server records the sign-off and the action consumes it exactly once. Not every action passes through the gate: Counter Active Playbook dispatches and DCIP desk dispatches do not, and neither do one-to-one WhatsApp replies.",
       "keyPoints": [
-        "The gate writes WHO, as WHICH ROLE, WHAT action, and the 3 mandatory certifications",
-        "Certification 1: Factual accuracy verified against primary evidence",
-        "Certification 2: Strategic alignment with the National Campaign line",
-        "Certification 3: Compliance with the IEC Electoral Code of Conduct & POPIA",
-        "A sign-off record cannot be reused, presented by someone else, or altered"
+        "The record holds who signed, the role they signed as, the action, the subject and the three certifications",
+        "Certification 1, Truth Matrix & Factual Grounding: the content is verified against the Message Bank and public records",
+        "Certification 2, IEC Electoral Code Adherence: compliance with the Electoral Act, with no defamatory or false statements",
+        "Certification 3, POPIA Data Privacy: recipient lists operate under verified opt-in consent",
+        "A sign-off cannot be reused, used by another person, or presented for a different subject or action",
+        "The approval ladder sets who may sign each content class: routine (any sign-off role), localised (Provincial or Regional DCIP within their area, or national), rapid response, major campaign creative, and PA/PEB and paid national (SG / TG Authorised Representative)"
       ],
       "operationalProcedures": [
-        "1. Prepare deliverable or broadcast draft in the relevant operational desk.",
-        "2. Trigger 'Submit to Sign-Off Gate'.",
-        "3. Select your active authorized role from the dropdown.",
-        "4. Review and tick each of the three mandatory legal certifications.",
-        "5. Confirm sign-off to execute the dispatch and lock the audit record."
+        "1. Click the action button on the desk (for example '✅ Approve', '✍️ Sign off' or '⚡ Log it and start the clock').",
+        "2. Read the 'ACTION TO BE SIGNED OFF' summary.",
+        "3. Tick all three certifications; none is pre-ticked.",
+        "4. In 'Signing as', choose the role you are acting in.",
+        "5. Click '✅ Authorise & Execute Action', or 'Cancel / Review Draft' to go back without signing."
       ],
       "takeaways": [
-        "Actions without a valid sign-off are blocked at the application API layer.",
-        "Signing false information creates individual legal liability under the Electoral Act."
+        "A gated action without a valid, unused sign-off is refused by the server.",
+        "If you cannot honestly tick a certification, do not sign: return to the draft.",
+        "Counter Active Playbook and DCIP dispatches are not signed off. The review items and posting instructions a playbook creates arrive as drafts that still need approval through the gate."
       ],
       "quiz": [
         {
-          "question": "What happens to a sign-off record once the action is executed?",
+          "question": "What happens to a sign-off once the action it authorised has been carried out?",
           "options": [
-            "It can be reused for the next 24 hours",
-            "It is permanently consumed and can never be reused or transferred",
-            "It is deleted from the database to save space",
-            "It is emailed to all political opponents"
+            "It stays valid for 24 hours",
+            "It is consumed and cannot be used again",
+            "It transfers to the next person in the queue",
+            "It is deleted from the record"
           ],
           "correctIndex": 1,
-          "explanation": "A sign-off record is consumed exactly once by the system, ensuring complete, tamper-proof accountability."
+          "explanation": "consumeSignoff in src/signoff.ts marks the sign-off consumed; presenting it again is refused as already used."
+        },
+        {
+          "question": "Which of these is one of the three certifications in the gate?",
+          "options": [
+            "Budget approval by the Treasurer",
+            "POPIA Data Privacy",
+            "Brand colour compliance",
+            "Legal counsel review"
+          ],
+          "correctIndex": 1,
+          "explanation": "The three are Truth Matrix & Factual Grounding, IEC Electoral Code Adherence and POPIA Data Privacy."
+        },
+        {
+          "question": "Which of these actions does NOT pass through the sign-off gate?",
+          "options": [
+            "Logging a rebuttal situation",
+            "Approving a message-bank line",
+            "Dispatching a pack to a provincial hub on the DCIP desk",
+            "Sending a WhatsApp broadcast"
+          ],
+          "correctIndex": 2,
+          "explanation": "The DCIP desk's dispatch routes record the dispatch without a sign-off; the other three require one."
         }
+      ],
+      "guides": [
+        "sign-off-through-the-gate",
+        "submit-and-decide-a-draft-in-the-review-queue"
       ]
     },
     {
       "id": "lesson-04-daily-ops",
       "moduleNumber": 4,
-      "title": "Daily Ops & Review Desk: Campaign Command & Schedule",
-      "subtitle": "24-hour campaign schedule, Message Bank search & real-time draft review",
+      "title": "Daily Ops & Review Desk: Campaign Command, Schedule & Message Bank",
+      "subtitle": "Weekly Campaign Order, the 08:00 decision, the night assessment, the review queue and the message bank",
       "badge": "Operations",
       "duration": "18 min",
       "video": "ancops-ops.mp4",
@@ -185,42 +248,76 @@
         "06-desk-ops-review.png",
         "07-desk-ops-bank.png"
       ],
-      "overview": "Daily Ops is the heartbeat of campaign communications. It orchestrates the daily narrative across television, radio, print, digital, and grassroots networks, synchronizing scheduled broadcasts with real-time editorial approval.",
+      "overview": "The Daily Ops & Review Desk is where the campaign is commanded. Its Campaign command panel holds the Weekly Campaign Order, the day's 08:00 decision and night assessment, provincial and regional localisation, issue briefs, the content factory and the Counter Active Playbook. Beside it sit the day's schedule, the review queue where drafts are approved or rejected, the message bank of approved lines and the press list.",
       "keyPoints": [
-        "Campaign Schedule: 24-hour chronological timeline of planned dispatches and media moments",
-        "Message Bank: centralized archive of approved talking points, press lines, and Q&A guides",
-        "Review Queue: incoming draft statements reviewed by editorial officers before gate dispatch",
-        "Search & Reuse: instant retrieval of verified historical statements to ensure message consistency"
+        "Campaign command tabs: Today, Weekly order, Localisation, Issue briefs, Content factory and ⚡ Counter Active Playbook",
+        "The Weekly Campaign Order has thirteen elements; it is drafted by the National Communications Director, War Room Coordinator, Campaign Manager or Elections Committee Operations Lead, and issued through the gate by the National Communications Director or the SG / TG Authorised Representative",
+        "Only the War Room Coordinator or the National Communications Director records the 08:00 decision and the night assessment",
+        "Review queue items are pending, approved or rejected; message-bank lines are draft, approved or retired, and editing an approved line returns it to draft",
+        "The message bank is searchable by text, tags and keywords, and filterable by issue and audience"
       ],
       "operationalProcedures": [
-        "1. Start the morning by reviewing the 24-hour Campaign Schedule and the 07:00 Order of the Day.",
-        "2. When drafting communications, search the Message Bank for approved national lines.",
-        "3. Submit novel lines to the Review Desk for editorial assessment and senior approval.",
-        "4. Monitor scheduled dispatch statuses: Draft, In Review, Approved, Dispatched, or Refused."
+        "1. Check the Weekly order tab for this week's issued order; without one, the day runs within the general playbook.",
+        "2. Review the day's Schedule and add items with '+ Add to schedule'.",
+        "3. At 08:00 the War Room Coordinator or National Communications Director records the decision: the day's Counter Active proposition, what must be rebutted, what should be ignored and why, what must be localised and who carries the message.",
+        "4. Under 'Morning · Deploy', draft the morning's products; each goes to the review queue, and approved products make up the daily pack.",
+        "5. Search the message bank before writing new lines; submit new text to the review queue and decide it through the gate.",
+        "6. In the evening, record the night assessment: what moved, what underperformed, what narrative is rising, what must change tomorrow."
       ],
       "takeaways": [
-        "Never draft ungrounded communications when approved lines exist in the Message Bank.",
-        "All departures from the national campaign line must be formally approved."
+        "Speak from approved message-bank lines where they exist; a new line is approved through the gate before it is used.",
+        "An issued order is not edited: draft and issue a replacement.",
+        "Only roles on an item's approval class can approve it."
       ],
       "quiz": [
         {
-          "question": "What is the primary function of the Message Bank?",
+          "question": "What is the message bank for?",
           "options": [
-            "To store WhatsApp chat backups",
-            "To provide a centralized repository of approved talking points and historical press lines",
-            "To process financial donations",
-            "To design print billboards"
+            "Storing WhatsApp chat backups",
+            "Holding the approved lines the desks speak from",
+            "Processing donations",
+            "Designing print billboards"
           ],
           "correctIndex": 1,
-          "explanation": "The Message Bank maintains the authoritative, approved corporate memory of talking points and official statements."
+          "explanation": "The message bank holds lines with draft, approved or retired status; approved lines are what drafting and the WhatsApp desk use."
+        },
+        {
+          "question": "Who records the 08:00 decision on the Daily Ops desk?",
+          "options": [
+            "Any signed-in user",
+            "The Campaign Manager only",
+            "The War Room Coordinator or the National Communications Director",
+            "The administrator"
+          ],
+          "correctIndex": 2,
+          "explanation": "DAY_DECIDERS in content/ops-desk.js and src/campaign/routes.ts name only these two roles."
+        },
+        {
+          "question": "What happens when you edit the text of an approved message-bank line?",
+          "options": [
+            "The change is published immediately",
+            "The line returns to draft and must be approved again",
+            "The line is deleted",
+            "Nothing; approved lines cannot be edited"
+          ],
+          "correctIndex": 1,
+          "explanation": "Changing the title or text of an approved line sets it back to draft (src/bank/routes.ts)."
         }
+      ],
+      "guides": [
+        "draft-and-issue-the-weekly-campaign-order",
+        "run-the-day-decide-assess-deploy",
+        "localise-the-order-and-write-issue-briefs",
+        "submit-and-decide-a-draft-in-the-review-queue",
+        "keep-the-message-bank-and-press-list",
+        "log-interventions-in-the-content-factory"
       ]
     },
     {
       "id": "lesson-05-rapid-rebuttal",
       "moduleNumber": 5,
-      "title": "2-Hour Rapid Rebuttal Engine: 5-Stage Escalation Clock",
-      "subtitle": "Crisis logging, 120-minute SLA countdown & Counter-Active Playbook",
+      "title": "2-Hour Rapid Rebuttal: The Five-Stage Clock",
+      "subtitle": "Logging a situation, the five stage marks, dispatch, and the Counter Active Playbook",
       "badge": "Crisis Management",
       "duration": "16 min",
       "video": "ancops-rapid.mp4",
@@ -232,44 +329,74 @@
         "23-desk-ops-offensive-playbook-attack-lines-and-directives.png",
         "24-desk-ops-offensive-playbook-spokesperson-pack.png"
       ],
-      "overview": "When hostile media narratives, leaked audio, or viral disinformation emerge, the 2-Hour Rapid Rebuttal Engine activates. A strict 120-minute countdown governs five sequential deliverables from fact ingestion to spokesperson deployment.",
+      "overview": "When a hostile claim breaks, a situation is logged on the 2-Hour Rapid Rebuttal desk through the sign-off gate, and a 120-minute clock starts. Five stage deliverables fall due at fixed marks after logging, each owned by a role, each drafted, edited and signed off before it can be dispatched on its own channels. Separately, the Counter Active Playbook on the Daily Ops desk turns a breaking story into attack lines, cross-desk directives and a spokesperson pack.",
       "keyPoints": [
-        "Stage 1 (0-15m): Ingestion, viral trajectory analysis, and fact-checking",
-        "Stage 2 (15-30m): Holding statement publication across active channels",
-        "Stage 3 (30-60m): Strategic analysis & Counter-Active Playbook generation",
-        "Stage 4 (60-90m): Comprehensive Spokesperson Pack & broadcast talking points",
-        "Stage 5 (90-120m): Multi-channel dispatch, media briefing, and field coordination"
+        "Stage 1, Fact check, due at +15 minutes: Fact-Check Officer; nothing leaves the desk",
+        "Stage 2, Holding statement, due at +30 minutes: National Communications Director; press wire (email) and X",
+        "Stage 3, Spokesperson media pack, due at +60 minutes: Spokesperson; press wire",
+        "Stage 4, Digital & grassroots cascade, due at +90 minutes: Rapid-Response Lead; X, plus Facebook and WhatsApp where those modules are switched on",
+        "Stage 5, Visual rebuttal card, due at +118 minutes: Rapid-Response Lead; same channels as stage 4",
+        "Five minutes before a stage's mark, and again when it is missed, the stage owner's role, the Rapid-Response Lead and the person who logged the situation are notified"
       ],
       "operationalProcedures": [
-        "1. Click 'Log Breaking Situation', enter the claim, source URL/media, and severity level.",
-        "2. The 120-minute SLA countdown timer initiates immediately.",
-        "3. Ingest primary evidence and assign verification tasks to researchers.",
-        "4. Generate and sign off the holding statement within 30 minutes.",
-        "5. Produce the Counter-Active Playbook with targeted attack lines and spokesperson directives."
+        "1. Click '+ Log a situation', fill in the title, the claim as made, where it was seen, the link, what is true, and the severity, then '⚡ Log it and start the clock' and sign off through the gate.",
+        "2. Add facts and attach material under 'Update the facts / attach material'.",
+        "3. Open each stage, draft it with '🤖 Draft from the facts' where drafting is configured or write it yourself, save, and sign it off through the gate.",
+        "4. Dispatch a signed stage on one of its channels and sign the dispatch; read the result: sent, refused or failed.",
+        "5. Use the briefing pack, the contrast card and the Markdown pack for the spokesperson, then close the situation through the gate.",
+        "6. For a Counter Active Playbook, open the '⚡ Counter Active Playbook' tab on the Daily Ops desk, generate it from a URL, topic or notes, and dispatch its directives. These dispatches do not pass through the sign-off gate; the review items and posting instructions they create still need approval."
       ],
       "takeaways": [
-        "The 2-hour SLA is absolute. Breaching SLA triggers automated escalation alerts.",
-        "A holding line must be released before the full rebuttal is finalized to seize the narrative vacuum."
+        "The clock is a set of marks with alerts, not an automatic action: a missed mark is reported, and the stage still needs a person to finish it.",
+        "Release the holding statement by its +30 mark; the Morning Intel shows the seven-day average time from logging to holding-statement sign-off.",
+        "A playbook's 'rebuttal' directive creates a situation directly, without the logging sign-off."
       ],
       "quiz": [
         {
-          "question": "What is the maximum time allocated for releasing the initial holding statement?",
+          "question": "When is the holding statement due?",
           "options": [
-            "15 minutes",
-            "30 minutes",
-            "2 hours",
-            "24 hours"
+            "15 minutes after the situation is logged",
+            "30 minutes after the situation is logged",
+            "2 hours after the situation is logged",
+            "24 hours after the situation is logged"
           ],
           "correctIndex": 1,
-          "explanation": "Stage 2 mandates that a verified holding statement must be cleared through the gate within 30 minutes of incident logging."
+          "explanation": "In src/rebuttal/stages.ts the holding statement (stage 2) is due 30 minutes after logging."
+        },
+        {
+          "question": "Which role owns the stage 1 fact check?",
+          "options": [
+            "Spokesperson",
+            "Fact-Check Officer",
+            "Campaign Manager",
+            "WhatsApp Desk Operator"
+          ],
+          "correctIndex": 1,
+          "explanation": "Stage 1 is owned by the Fact-Check Officer, and its deliverable has no dispatch channels."
+        },
+        {
+          "question": "Which statement about Counter Active Playbook dispatches is correct?",
+          "options": [
+            "They are signed off through the gate like every other action",
+            "They do not pass through the sign-off gate; the drafts they create still need approval",
+            "They publish directly to X and Facebook",
+            "They can only be sent by the administrator"
+          ],
+          "correctIndex": 1,
+          "explanation": "dispatchPlaybook in src/ops/playbook-engine.ts consumes no sign-off; review items and posting instructions it creates arrive as drafts."
         }
+      ],
+      "guides": [
+        "log-a-situation-and-work-the-five-stages",
+        "dispatch-brief-and-close-a-situation",
+        "generate-a-counter-active-playbook"
       ]
     },
     {
       "id": "lesson-06-wevote-chatbot",
       "moduleNumber": 6,
-      "title": "WeVote Sovereign Web Chatbot & Social Media Army Network",
-      "subtitle": "Browser-based sovereign voter engagement and grassroots mobilization",
+      "title": "WeVote Chatbot Desk & the Social Media Army",
+      "subtitle": "The public web chatbot, the test bot, citizen messages, broadcasts and volunteer posting instructions",
       "badge": "Voter Engagement",
       "duration": "15 min",
       "video": "ancops-whatsapp.mp4",
@@ -279,42 +406,71 @@
         "10-desk-whatsapp-army.png",
         "19-desk-whatsapp-testbot.png"
       ],
-      "overview": "Due to Meta's aggressive commerce policy bans on political automation, CEDEC Africa engineered the WeVote Sovereign Web Chatbot. Hosted independently on sovereign servers, it delivers a rich, conversational interface without third-party app store bans.",
+      "overview": "The WeVote chatbot is a public, browser-based chat that needs no account: a citizen picks a local area and asks about candidates, the local manifesto or volunteering. It runs in the browser rather than through the WhatsApp Cloud API. The WeVote Chatbot desk opens it, and also carries the WhatsApp Cloud API tools (test bot, waiting queue, conversations and broadcasts, which are part of the whatsapp_bot module and must be enabled for the deployment) and the Social Media Army's distribution lists and posting instructions.",
       "keyPoints": [
-        "Hosted at https://chat.wevoteanc.cedec.io (and https://chat.wevoteanc.org.za)",
-        "Full browser access on mobile, tablet, and desktop without WhatsApp API fees or ban risks",
-        "Localised semantic RAG: answers grounded in all 52 municipal manifestos and ward candidate rosters",
-        "Social Media Army: task coordination for volunteer digital canvassers with trackable amplification links"
+        "The public chatbot answers manifesto questions from retrieved manifesto excerpts and finds ward candidates from the candidate records",
+        "The Test Bot (RAG Simulator) shows the grounding citations behind an answer and reaches no citizen",
+        "Contacts carry a consent state: opted in, opted out or unknown. Replying STOP (or one of the other stop words) opts a contact out",
+        "Broadcasts are at most 140 words, go only to opted-in contacts, and are sent through the gate",
+        "Social Media Army: lists of opted-in contacts by area and role, posting instructions (with PI references) sent through the gate, and posted links reported back and recorded"
       ],
       "operationalProcedures": [
-        "1. Direct voters to the sovereign chatbot URL via QR codes, SMS, and campaign flyers.",
-        "2. Verify voter input handling: ward identification, candidate bios, and local service delivery commitments.",
-        "3. Use the Social Media Army desk to assign approved digital tasks to volunteer cadres.",
-        "4. Monitor volunteer task completion and content share counts in real time."
+        "1. Click '🚀 Open Live Chatbot' to open the public chatbot, or '📢 View Campaign Advert' for the advert page.",
+        "2. Test answers in '🤖 Test Bot (RAG Simulator)' and read the '📚 Grounding Citations'.",
+        "3. Work '⏳ Waiting for a person' and '💬 Conversation' for messages the bank could not answer; an opted-out contact cannot be messaged.",
+        "4. Draft a broadcast in '📣 Broadcasts' and send it to opted-in contacts through the gate.",
+        "5. In '👥 Lists' build a list, then in '📲 Posting instructions' write one and send it to the list through the gate; record links reported back."
       ],
       "takeaways": [
-        "Sovereign hosting protects campaign communications from foreign platform censorship.",
-        "All volunteer mobilization links strictly prohibit deceptive engagement or coordinated astroturfing."
+        "One-to-one replies to a contact are recorded in the thread and audit trail but do not pass through the sign-off gate; broadcasts and posting instructions do.",
+        "Outside 24 hours since a contact last wrote, only an approved WhatsApp template can carry a message.",
+        "If the Test Bot, Waiting, Conversation or Broadcasts tabs show an error, the WhatsApp Cloud API module is switched off for this deployment."
       ],
       "quiz": [
         {
-          "question": "Why did CEDEC Africa build the WeVote sovereign web chatbot instead of relying solely on the WhatsApp Cloud API?",
+          "question": "Who receives a WhatsApp broadcast sent from the desk?",
           "options": [
-            "Because WhatsApp is too difficult to code",
-            "To eliminate Meta platform bans, political messaging restrictions, and commercial API fees",
-            "Because South Africans do not have smartphones",
-            "To avoid translating content into indigenous languages"
+            "Every contact who has ever written in",
+            "Only contacts whose consent state is opted in",
+            "Every volunteer on every list",
+            "Only contacts in Gauteng"
           ],
           "correctIndex": 1,
-          "explanation": "Meta strictly prohibits political campaigning and automated bots on WhatsApp Business; sovereign web hosting eliminates this vulnerability."
+          "explanation": "The broadcast route counts and targets only contacts with consent_state 'opted_in'."
+        },
+        {
+          "question": "What does the Test Bot (RAG Simulator) do?",
+          "options": [
+            "Sends a message to a random citizen",
+            "Shows how the bot would answer for a chosen municipality, with its citations, without messaging anyone",
+            "Publishes a post to Facebook",
+            "Resets the manifesto database"
+          ],
+          "correctIndex": 1,
+          "explanation": "Test answers appear with their grounding citations and reach no citizen."
+        },
+        {
+          "question": "What happens when a contact replies STOP?",
+          "options": [
+            "Nothing; the desk decides",
+            "The contact is opted out and is not messaged",
+            "The contact is deleted",
+            "The contact is added to a volunteer list"
+          ],
+          "correctIndex": 1,
+          "explanation": "STOP and the other stop words in src/whatsapp/matcher.ts set the contact to opted out; the reply route refuses opted-out contacts."
         }
+      ],
+      "guides": [
+        "use-the-wevote-chatbot-desk",
+        "run-the-social-media-army"
       ]
     },
     {
       "id": "lesson-07-morning-intel",
       "moduleNumber": 7,
-      "title": "07:00 Morning Intel Desk: Sentiment & Telemetry Analytics",
-      "subtitle": "Cross-platform analytics, SLA health, narrative impact, and 14-day trends",
+      "title": "07:00 Morning Intel: Desk Figures & Fourteen-Day Activity",
+      "subtitle": "Figures computed from the desks' own records, with 'no data' where nothing was recorded",
       "badge": "Intelligence",
       "duration": "12 min",
       "video": "ancops-telemetry.mp4",
@@ -322,42 +478,68 @@
       "screenshots": [
         "11-desk-morning-intel.png"
       ],
-      "overview": "Every morning at 07:00, leadership receives an objective situational report computed directly from system records. It tracks response times, narrative penetration, channel dispatches, and public sentiment trends.",
+      "overview": "The 07:00 Morning Intel desk shows the state of the campaign's desks from what they recorded: rebuttal situations and stage timing, dispatches by channel, WhatsApp traffic and consent, investigation evidence and the review queue. It is computed when the desk is opened and refreshes every 30 seconds while it is open; it is read before the morning briefing rather than delivered.",
       "keyPoints": [
-        "Computed metrics: open situations, average holding statement minutes, SLA adherence rates",
-        "Channel performance: dispatches sent, refused, and delivery rates across digital and press channels",
-        "14-day rolling telemetry chart visualizing campaign operational tempo",
-        "'Fetch channel metrics' live integration with X, Facebook Page Insights, and web traffic"
+        "Figures: Situations open (and how many are past the two-hour SLA), Holding statement average, Stages on time, Dispatched in 24 h (with refused and failed), WhatsApp in 24 h, Opted-in contacts, Evidence tone over 7 days, and the Review queue",
+        "A 'Fourteen days' chart of situations logged, dispatches sent, WhatsApp messages in and evidence items",
+        "'Dispatch by channel, 7 days', 'What channels reported' and 'Investigations' panels",
+        "'↻ Fetch channel metrics' (for administrators, not shown on UAT) asks each connected channel what it reports for what was sent"
       ],
       "operationalProcedures": [
-        "1. Access the 07:00 Morning Intel desk prior to daily strategy briefings.",
-        "2. Review SLA compliance metrics from the preceding 24 hours.",
-        "3. Check for any situations currently marked 'Past SLA' and request root-cause analyses.",
-        "4. Use trend charts to determine resource allocation between rebuttal and positive narrative desks."
+        "1. Open '07:00 Morning Intel' before the morning briefing.",
+        "2. Check Situations open and how many are past the SLA, and the holding-statement average against the 30-minute mark.",
+        "3. Check dispatches by channel for refusals and failures, and the review queue for items waiting.",
+        "4. Use the fourteen-day chart to see the tempo of situations, dispatches, WhatsApp traffic and evidence."
       ],
       "takeaways": [
-        "If no data was recorded for a channel, the panel displays 'no data'\u2014never simulated or faked numbers.",
-        "Morning intel grounds daily campaign decisions in hard data rather than subjective impressions."
+        "A panel with nothing recorded behind it reads 'no data'; the desk does not estimate.",
+        "On UAT, channels without settings simulate their sends and reach figures, so UAT numbers are not evidence of real reach.",
+        "Evidence tone is the mean tone of investigation evidence, from −1 hostile to +1 favourable."
       ],
       "quiz": [
         {
-          "question": "What is the primary objective of the 07:00 Morning Intel report?",
+          "question": "What does a Morning Intel panel show when nothing behind it was recorded?",
           "options": [
-            "To entertain campaign staff with social media memes",
-            "To provide an objective, data-backed operational assessment of SLA compliance and narrative impact",
-            "To replace the national election results",
-            "To assign disciplinary penalties to field workers"
+            "An estimate based on last week",
+            "'no data'",
+            "A zero copied from yesterday",
+            "A sample figure"
           ],
           "correctIndex": 1,
-          "explanation": "07:00 Morning Intel provides leadership with verified, empirical operational telemetry to guide daily strategic decisions."
+          "explanation": "The telemetry desk shows 'no data' for missing figures and never estimates."
+        },
+        {
+          "question": "Where do the Morning Intel figures come from?",
+          "options": [
+            "A report emailed by a third party at 07:00",
+            "The desks' own records (situations, dispatches, WhatsApp messages, evidence, review items)",
+            "Manual entry by the administrator each morning",
+            "Opinion polls"
+          ],
+          "correctIndex": 1,
+          "explanation": "src/telemetry/routes.ts computes every figure from the application's own tables when the desk asks."
+        },
+        {
+          "question": "How often does the desk refresh while it is open?",
+          "options": [
+            "Every 30 seconds",
+            "Once a day at 07:00",
+            "Every hour",
+            "Only when you reload the page"
+          ],
+          "correctIndex": 0,
+          "explanation": "content/telemetry-desk.js polls every 30 seconds while the desk is open."
         }
+      ],
+      "guides": [
+        "read-the-morning-intel"
       ]
     },
     {
       "id": "lesson-08-facebook-campaigns",
       "moduleNumber": 8,
-      "title": "Facebook Campaign Manager & Micro-Targeting",
-      "subtitle": "Demographic segmenting, budget allocation, compliance gates & feature flags",
+      "title": "Facebook Campaign Manager: Drafting Paid Campaigns",
+      "subtitle": "An optional module: draft, ask Meta for the estimate, create paused after sign-off",
       "badge": "Digital Advertising",
       "duration": "14 min",
       "video": "ancops-fbads.mp4",
@@ -365,43 +547,70 @@
       "screenshots": [
         "12-desk-facebook-ads.png"
       ],
-      "overview": "The Facebook Campaign Manager allows campaign strategists to configure precision social outreach campaigns. It provides ward-level geographic targeting, demographic budgeting, and mandatory compliance routing.",
+      "overview": "The Facebook Campaign Manager is an additional module that is switched off by default (ANCOPS_FEATURE_FBADS). It must be enabled for the deployment before its tab appears; while it is off, its tab is absent and its API answers 404. When enabled, it drafts a paid campaign, stores Meta's reach estimate, and after sign-off creates the campaign paused in Ads Manager under the issues, elections and politics special ad category. A person switches it on in Ads Manager.",
       "keyPoints": [
-        "Precision targeting: configure age, gender, language, municipality, and ward boundaries",
-        "Budget governance: define daily and lifetime caps with automatic pacing controls",
-        "Feature Flag Architecture: dormant by default in Tranche 1 (ANCOPS_FEATURE_FBADS=0)",
-        "Full compliance verification before Meta Marketing API payload dispatch"
+        "Off by default; the desk must be enabled for the deployment",
+        "Draft fields: name, objective, days, provinces (none means all of South Africa), age range, gender, daily budget in rand, ad text, headline and link",
+        "'📈 Ask Meta for the estimate' needs the Marketing API connected; without it the desk shows no number in its place",
+        "'Create in Ads Manager (paused)' passes through the sign-off gate",
+        "While the module is off, the Facebook Page channel is also not offered on rebuttal stages"
       ],
       "operationalProcedures": [
-        "1. Configure ad creative, headline, primary copy, and call-to-action link.",
-        "2. Define audience parameters based on municipal demographic priorities.",
-        "3. Set budget limits and duration schedule.",
-        "4. Route through the 3-Way Sign-off Gate for legal and compliance certification."
+        "1. Confirm with the administrator that the module is enabled and the ad account connected for this deployment.",
+        "2. Under 'New campaign', fill in the fields and click 'Save draft'.",
+        "3. Click '📈 Ask Meta for the estimate' and read Meta's estimate as stored.",
+        "4. Click 'Create in Ads Manager (paused)' and sign off through the gate.",
+        "5. Download the '🖨️ Pack' or '⬇ JSON' record; a person switches the campaign on in Ads Manager."
       ],
       "takeaways": [
-        "In Tranche 1 deployments, this module is preserved in codebase but dormant until commercial activation.",
-        "All political advertising must comply with IEC campaign spending disclosures."
+        "The desk never switches a campaign on; it is always created paused.",
+        "Ward links from the Wards desk only switch to this desk; targeting is set by province, age and gender here."
       ],
       "quiz": [
         {
-          "question": "How is the Facebook Campaign Manager controlled in the platform codebase?",
+          "question": "How is the Facebook Campaign Manager controlled?",
           "options": [
-            "It is deleted from production",
-            "It is managed via feature flag ANCOPS_FEATURE_FBADS which safely returns 404 when disabled",
-            "It runs automatically without authorization",
-            "It requires a Facebook login on the server"
+            "It is always on",
+            "By the ANCOPS_FEATURE_FBADS flag, off by default; while off its API answers 404 and its tab is absent",
+            "By a Facebook login on the server",
+            "It is removed from the code"
           ],
           "correctIndex": 1,
-          "explanation": "The feature flag ANCOPS_FEATURE_FBADS preserves the code while safely restricting execution in Tranche 1."
+          "explanation": "src/features.ts sets fbads' default to off; requireFeature answers 404 while it is disabled."
+        },
+        {
+          "question": "In what state does the desk create a campaign in Ads Manager?",
+          "options": [
+            "Active and spending",
+            "Paused, to be switched on by a person",
+            "Scheduled for midnight",
+            "Deleted after creation"
+          ],
+          "correctIndex": 1,
+          "explanation": "The campaign is created PAUSED after sign-off (src/fbads/routes.ts)."
+        },
+        {
+          "question": "What must happen before 'Create in Ads Manager (paused)' runs?",
+          "options": [
+            "Nothing",
+            "A sign-off through the gate",
+            "A payment by card",
+            "An email to Meta"
+          ],
+          "correctIndex": 1,
+          "explanation": "Creation consumes a 'fb_campaign' / 'create' sign-off."
         }
+      ],
+      "guides": [
+        "draft-a-facebook-campaign"
       ]
     },
     {
       "id": "lesson-09-osint-investigations",
       "moduleNumber": 9,
-      "title": "OSINT & Media Forensics: Narrative Provenance & Verification",
-      "subtitle": "Dossier creation, provenance hashes, deepfake detection & evidence preservation",
-      "badge": "Forensics & OSINT",
+      "title": "Investigations Desk: Cases, Open-Source Search & Photo Tracing",
+      "subtitle": "An optional module: purpose and lawful basis first, then searches, evidence and reports",
+      "badge": "Investigations",
       "duration": "17 min",
       "video": "ancops-osint.mp4",
       "poster": "ancops-osint.jpg",
@@ -409,85 +618,139 @@
         "13-desk-osint-cases.png",
         "14-desk-osint-search.png"
       ],
-      "overview": "The Investigations Desk provides military-grade open source intelligence (OSINT) and digital media forensics. It enables researchers to trace viral smear campaigns back to their source, verify video authenticities, and preserve court-ready evidence.",
+      "overview": "The Investigations Desk is an additional module (ANCOPS_FEATURE_OSINT). It is on by default but must be enabled for the deployment; when it is switched off, its tab is absent and its API answers 404. A case is opened through the sign-off gate with a stated purpose and a POPIA section 11 lawful basis. The desk then checks the configured open sources, keeps a versioned report, and lets you attach search results and traced photos as evidence.",
       "keyPoints": [
-        "Case Dossiers: structured evidence containers with strict POPIA Section 11 lawful basis recording",
-        "Media Forensics: SHA-256 media hashing, reverse image lookup, audio spectral analysis",
-        "Narrative Timeline: reconstructing who published what, at what exact second, across platforms",
-        "Feature Flag Architecture: dormant by default in Tranche 1 (ANCOPS_FEATURE_OSINT=0)"
+        "Opening a case requires a purpose and a lawful basis; the server refuses a case without both",
+        "Subject types: narrative or story, leak, event, organisation, or a person in a public role",
+        "Media Search across the configured sources; results are attached to a case through the gate",
+        "Reverse Photo Forensics: a photo is hashed (SHA-256) and searched against reverse-image providers where configured, within an open case",
+        "Each case keeps a report, evidence, uploads, checks and an audit trail; a source whose provider is not configured is listed as not searched"
       ],
       "operationalProcedures": [
-        "1. Open a new investigative dossier and state the specific POPIA lawful purpose.",
-        "2. Upload contested media (video clip, audio note, forged letterhead).",
-        "3. Compute forensic hash and query integrated search indexes for earliest known occurrence.",
-        "4. Compile forensic findings into an evidence brief for the Rapid Rebuttal desk."
+        "1. Click '➕ Open Investigation', describe the subject and question, choose sources and dates, state the purpose and choose the lawful basis, then open it and sign off through the gate.",
+        "2. In '🗂️ Case Files', read the report, evidence and checks; check again, keep monitoring or stop monitoring.",
+        "3. In '🔎 Media Search', search the sources and attach selected results to the case through the gate.",
+        "4. In '🖼️ Reverse Photo Forensics', choose the open case and drop a photo; attach the matches.",
+        "5. Close the case through the gate and download the report."
       ],
       "takeaways": [
-        "No investigation may record special personal information (race, religion, health, sexual orientation).",
-        "Evidence preserved in dossiers is immutable and timestamped for regulatory submission."
+        "The desk's own notice says it uses open sources only, accesses no account, contacts no one and never seeks special personal information; work within that.",
+        "Findings feed the Rapid Rebuttal desk: log the situation there with the facts the case established."
       ],
       "quiz": [
         {
-          "question": "What is required BEFORE an OSINT case dossier can be opened?",
+          "question": "What must be recorded before an investigation can be opened?",
           "options": [
-            "Approval from the state president",
-            "A recorded lawful basis under POPIA Section 11 and a strictly public-role subject definition",
-            "A payment of R5,000",
-            "A court order"
+            "A court order",
+            "A purpose and a POPIA section 11 lawful basis, then a sign-off",
+            "A payment",
+            "Approval from the WhatsApp Desk Operator"
           ],
           "correctIndex": 1,
-          "explanation": "POPIA Section 11 requires a documented lawful basis before collecting public intelligence data."
+          "explanation": "src/osint/routes.ts refuses a case without purpose and lawful basis, and opening consumes a sign-off."
+        },
+        {
+          "question": "If the Investigations module is switched off for a deployment, what happens?",
+          "options": [
+            "Cases are deleted",
+            "The tab is absent and its API answers 404",
+            "It runs in the background anyway",
+            "It becomes read-only"
+          ],
+          "correctIndex": 1,
+          "explanation": "requireFeature('osint') answers 404 and the tab is removed while the flag is off."
+        },
+        {
+          "question": "What does the desk do with a photo dropped into Reverse Photo Forensics?",
+          "options": [
+            "Posts it to X",
+            "Hashes it and searches it against the configured reverse-image providers within an open case",
+            "Edits it into a campaign graphic",
+            "Sends it to the press list"
+          ],
+          "correctIndex": 1,
+          "explanation": "The image is hashed (SHA-256) and searched; matches can be attached to the case."
         }
+      ],
+      "guides": [
+        "open-and-run-an-investigation"
       ]
     },
     {
       "id": "lesson-10-dcip-command",
       "moduleNumber": 10,
-      "title": "Digital Campaign Intelligence Platform (DCIP) Fusion",
-      "subtitle": "National & Provincial executive command, field quotas & voter turnout",
-      "badge": "Executive Command",
+      "title": "DCIP Digital Communications Desk",
+      "subtitle": "An optional module: messaging packs, provincial hubs, government deliveries and the standalone dashboard",
+      "badge": "Provincial Communications",
       "duration": "15 min",
       "video": "ancops-dcip.mp4",
       "poster": "ancops-dcip.jpg",
       "screenshots": [
         "02-shell-header.png"
       ],
-      "overview": "The Digital Campaign Intelligence Platform (DCIP) is the executive fusion console for the National Officials and Provincial Executive Committees. It aggregates field canvassing reports, voter contact quotas, and real-time election day turnout projections.",
+      "overview": "The DCIP Digital Communications desk is an additional module (ANCOPS_FEATURE_DCIP). It is on by default but must be enabled for the deployment; when off, its tab, its standalone dashboard and its API answer not found. The desk carries the active key-messaging pack and its suggested posts, the nine provincial hubs, a queue of government delivery submissions, a roster of communicators and agency guidance. A standalone DCIP dashboard drafts new packs and takes government submissions.",
       "keyPoints": [
-        "National Executive Dashboard: unified overview of all 9 provinces and 52 districts",
-        "Field Canvassing Quotas: tracking progress against door-to-door voter contact targets",
-        "Provincial Roll-up: comparing regional delivery speeds and voter sentiment shifts",
-        "Election Day Operations: real-time voting station incident tracking and turnout modeling"
+        "Sections: 📦 Active Key-Messaging Pack, 🇿🇦 9 Provincial Hubs, 🏛️ Govt Deliveries Queue, 👥 Top Communicators Roster, 🤝 Agency & Listening",
+        "'🚀 Dispatch Pack to <province>' records the pack as dispatched to that hub",
+        "'✓ Verify' marks a government delivery submission as verified",
+        "The standalone dashboard drafts a messaging pack and accepts government delivery submissions",
+        "DCIP desk actions, including dispatches, do not pass through the sign-off gate"
       ],
       "operationalProcedures": [
-        "1. Access the DCIP console using authorized executive credentials.",
-        "2. Inspect provincial progress bars against targeted voter contacts.",
-        "3. Drill down into lagging districts to identify communication bottlenecks.",
-        "4. Coordinate targeted rapid response dispatches directly to regional field coordinators."
+        "1. Confirm the DCIP module is enabled for this deployment.",
+        "2. Read the active pack and copy suggested posts with '📋 Copy'.",
+        "3. Dispatch the pack to each provincial hub from '🇿🇦 9 Provincial Hubs'.",
+        "4. Check government delivery submissions and click '✓ Verify' once checked.",
+        "5. Open the standalone dashboard to draft a new weekly pack or submit a government delivery."
       ],
       "takeaways": [
-        "DCIP connects high-level national strategy with granular on-the-ground operational reality.",
-        "Field reports must be validated against provincial coordinator sign-offs."
+        "Because DCIP dispatches are not signed off, check a pack before dispatching it.",
+        "The Provincial DCIP and Regional DCIP roles also sign localised content within their own area on the Daily Ops desk."
       ],
       "quiz": [
         {
-          "question": "What role does the DCIP module serve in the campaign ecosystem?",
+          "question": "Which of these is a section of the DCIP desk?",
           "options": [
-            "It designs campaign t-shirts",
-            "It acts as the executive intelligence fusion center linking national strategy with field operational telemetry",
-            "It manages bank loans",
-            "It replaces the IEC election counting system"
+            "Ad budget pacing",
+            "9 Provincial Hubs",
+            "Voting station turnout model",
+            "Payroll"
           ],
           "correctIndex": 1,
-          "explanation": "DCIP unifies all intelligence streams\u2014canvassing, media sentiment, and voter contact metrics\u2014into one executive console."
+          "explanation": "content/dcip-desk.js has the pack, the 9 Provincial Hubs, the government deliveries queue, the communicators roster and agency & listening."
+        },
+        {
+          "question": "Does dispatching a pack to a provincial hub pass through the sign-off gate?",
+          "options": [
+            "Yes, with three certifications",
+            "No; the dispatch is recorded without a sign-off",
+            "Only on weekends",
+            "Only for the Gauteng hub"
+          ],
+          "correctIndex": 1,
+          "explanation": "src/dcip/routes.ts records the hub dispatch without consuming a sign-off."
+        },
+        {
+          "question": "What happens on a deployment where the DCIP module is switched off?",
+          "options": [
+            "The desk becomes read-only",
+            "The tab, the standalone dashboard and the API answer not found",
+            "DCIP data is deleted",
+            "Only administrators can see it"
+          ],
+          "correctIndex": 1,
+          "explanation": "server.ts returns 404 for /dcip and /api/dcip while the flag is off, and the tab is removed."
         }
+      ],
+      "guides": [
+        "use-the-dcip-communications-desk"
       ]
     },
     {
       "id": "lesson-11-electoral-wards",
       "moduleNumber": 11,
-      "title": "Electoral Wards, GIS Mapping & Candidate Rosters",
-      "subtitle": "4,468 wards, 213 municipalities, 8,836 certified IEC candidates",
+      "title": "Wards, the Map & Candidate Records",
+      "subtitle": "An optional module: 2,838 wards, 8,836 candidate records, ward dossiers",
       "badge": "Electoral GIS",
       "duration": "14 min",
       "video": null,
@@ -496,42 +759,68 @@
         "17-desk-wards-map.png",
         "18-desk-wards-inspector.png"
       ],
-      "overview": "South African local government elections are fought ward by ward. ANC CC Ops incorporates the complete geospatial boundaries of all 4,468 electoral wards across 213 local and metropolitan municipalities, integrated with 8,836 certified IEC candidate profiles.",
+      "overview": "The Wards & Geolocation desk is an additional module (ANCOPS_FEATURE_WARDS). It is on by default but must be enabled for the deployment. Its seed data holds 2,838 wards with their 2021 and 2024 results and 8,836 ANC candidate records (4,416 ward and 4,420 PR), all marked certified and locked. Wards are classed by ANC profile and shown on a map as points coloured by that class.",
       "keyPoints": [
-        "Complete national coverage: all 9 provinces, 52 districts/metros, 213 local municipalities, 4,468 wards",
-        "Certified Candidate Rosters: 8,836 verified ANC candidates with bios, photos, and contact protocols",
-        "GIS Mapping Layer: visual choropleth maps displaying historical margins and target priorities",
-        "Grounding Database: powers the candidate lookup feature in the sovereign WeVote chatbot"
+        "Ward tiers as the filter chips show them: '🟢 Safe' (Safe ANC, 643), '🟡 Strong' (Strong ANC, 1,435) and '🔴 Weak Battlegrounds' (Weak ANC, 760)",
+        "Views: '🗺️ Map', '📋 Wards' and '👥 Candidates (8,836)'; filter by tier, province, or search by IEC code, candidate name, ward or town",
+        "'Inspect' opens the WARD DOSSIER: vote shares, registered voters, candidates and the covering manifesto",
+        "The dossier buttons '🎯 Focus in Weekly Campaign Order', '📢 Mobilize WhatsApp Army List' and '📣 Micro-Target in Facebook Ads' only switch to that desk and show a note of the ward; they fill in nothing",
+        "Only Admin or Super Admin can edit a candidate record, and each change is written to the audit log"
       ],
       "operationalProcedures": [
-        "1. Open the Electoral Wards Inspector to search by municipality name or ward number.",
-        "2. View the certified candidate profile, contact details, and historical victory margin.",
-        "3. Verify ward boundaries against Municipal Demarcation Board (MDB) legal definitions.",
-        "4. Use ward candidate details to tailor localized press statements and rebuttal packs."
+        "1. Open '🗺️ Wards & Map (2,838)' and filter by tier chip, province or search.",
+        "2. Click 'Inspect' on a ward to read its dossier and candidates.",
+        "3. To act on a ward elsewhere, use a dossier button, then fill in the form on the desk it opens yourself.",
+        "4. Ask an administrator for any candidate record correction."
       ],
       "takeaways": [
-        "Candidate rosters are immutable once certified by the IEC.",
-        "The chatbot relies directly on this data to provide instant voter answers to 'Who is my candidate?'."
+        "The public chatbot's ward candidate lookup reads the same candidate records.",
+        "Tier labels classify the ANC's position in a ward; they are not a forecast."
       ],
       "quiz": [
         {
-          "question": "How many certified ANC candidates are indexed in the CC Ops platform database?",
+          "question": "How many wards does the Wards desk's data hold?",
           "options": [
-            "500 candidates",
-            "2,500 candidates",
-            "8,836 candidates",
-            "50,000 candidates"
+            "843",
+            "2,838",
+            "4,468",
+            "8,836"
+          ],
+          "correctIndex": 1,
+          "explanation": "seed/wards.json holds 2,838 wards; 8,836 is the number of candidate records."
+        },
+        {
+          "question": "What does '📣 Micro-Target in Facebook Ads' in a ward dossier do?",
+          "options": [
+            "Creates and launches an ad for that ward",
+            "Switches to the Facebook desk and shows a note of the ward; you fill in the form yourself",
+            "Emails the ward councillor",
+            "Deletes the ward from the map"
+          ],
+          "correctIndex": 1,
+          "explanation": "ANCOPS_TARGET_WARD in content/wards-desk.js only switches desk and shows a toast."
+        },
+        {
+          "question": "Which label does the UI use for wards in the Weak ANC class?",
+          "options": [
+            "🟢 Safe",
+            "🟡 Strong",
+            "🔴 Weak Battlegrounds",
+            "⚪ Unknown"
           ],
           "correctIndex": 2,
-          "explanation": "The database contains all 8,836 officially registered and certified candidates covering all wards and PR lists."
+          "explanation": "The filter chip for Weak ANC wards reads '🔴 Weak Battlegrounds'."
         }
+      ],
+      "guides": [
+        "explore-wards-candidates-and-manifestos"
       ]
     },
     {
       "id": "lesson-12-manifestos-rag",
       "moduleNumber": 12,
-      "title": "Localised Manifestos & Semantic RAG Grounding",
-      "subtitle": "52 municipal manifestos, 850+ indexed semantic chunks & vector search",
+      "title": "Localised Manifestos & Grounded Answers",
+      "subtitle": "An optional module: 52 municipal manifestos, 850 excerpts, retrieval with citations",
       "badge": "Policy & RAG",
       "duration": "13 min",
       "video": null,
@@ -539,42 +828,69 @@
       "screenshots": [
         "20-desk-manifestos.png"
       ],
-      "overview": "Voters care about water in Hammanskraal, electricity in Soweto, and roads in Central Karoo. ANC CC Ops breaks the national manifesto into 52 localized municipal manifestos indexed into 850+ semantic chunks to ground AI responses with zero hallucinations.",
+      "overview": "The Localised Manifestos desk is an additional module (ANCOPS_FEATURE_MANIFESTOS). It is on by default but must be enabled for the deployment. Its data holds 52 localised municipal manifestos across seven provinces, split into 850 excerpts. When the chatbot or the test bot answers a manifesto question, it retrieves matching excerpts by full-text search and either asks the configured drafting model to answer only from them, or, without a model, summarises the top excerpts directly. The citations are shown.",
       "keyPoints": [
-        "52 localized municipal manifestos covering every district and metropolitan municipality in SA",
-        "850+ semantic text chunks indexed with high-dimensional vector embeddings",
-        "Zero-hallucination policy grounding: the WeVote chatbot answers voter policy questions exclusively from this corpus",
-        "Offline manifesto browser for desk officers and communicators"
+        "52 manifestos across seven provinces and 850 excerpts in the seed data",
+        "Retrieval is PostgreSQL full-text search over the excerpts, narrowed to the citizen's municipality or province where known",
+        "The drafting model is instructed to answer only from the retrieved excerpts; without a model, the answer is built from the excerpts themselves",
+        "Filter the catalogue by province, locality type or search; 'Inspect Dossier' and '⬇️ Doc' open or download a manifesto",
+        "'🤖 Test in WhatsApp Bot Simulator' uses the test bot, which is part of the WhatsApp Cloud API module"
       ],
       "operationalProcedures": [
-        "1. Browse the Localised Manifestos catalog by province and district.",
-        "2. Inspect specific commitments (housing, water, sanitation, local economic development).",
-        "3. Test query embeddings in the RAG simulator to see which paragraphs ground the answer.",
-        "4. Quote exact manifesto paragraph commitments in official press releases."
+        "1. Open '📘 Manifestos (52 Municipal)' and filter by province, locality type or search.",
+        "2. Click 'Inspect Dossier' to read a municipality's commitments, or '⬇️ Doc' to download it.",
+        "3. Test questions against it in the test bot and read the grounding citations.",
+        "4. Quote the manifesto's own words in statements, and check a model's answer against its citations."
       ],
       "takeaways": [
-        "Never let an AI model answer voter policy questions without semantic RAG grounding.",
-        "Localized commitments take precedence over generic national bullet points."
+        "Instructions reduce but do not remove a model's errors: check answers against the cited excerpts.",
+        "Localised commitments are the source for local lines; national lines come from the message bank."
       ],
       "quiz": [
         {
-          "question": "What prevents the WeVote chatbot from hallucinating promises the ANC did not make?",
+          "question": "What grounds the chatbot's manifesto answers?",
           "options": [
-            "A human types every single reply",
-            "Semantic RAG vector grounding that constrains generation to 850+ indexed municipal manifesto chunks",
-            "Disabling the internet connection",
-            "Using a 1990s chatbot algorithm"
+            "A person types every reply",
+            "Manifesto excerpts retrieved by full-text search, which the model is told to answer from and which are shown as citations",
+            "A list of national slogans",
+            "Answers copied from news sites"
           ],
           "correctIndex": 1,
-          "explanation": "Semantic Retrieval-Augmented Generation (RAG) grounds all model answers in the verified, published text of the 52 municipal manifestos."
+          "explanation": "src/campaign/manifesto-rag.ts retrieves excerpts and instructs the model to answer only from them; the citations are returned."
+        },
+        {
+          "question": "How many localised manifestos does the desk hold?",
+          "options": [
+            "9",
+            "52",
+            "213",
+            "850"
+          ],
+          "correctIndex": 1,
+          "explanation": "seed/manifestos.json holds 52 manifestos and 850 excerpts."
+        },
+        {
+          "question": "What happens to a manifesto question when no drafting model is configured?",
+          "options": [
+            "The chatbot stops working",
+            "The answer is built directly from the top retrieved excerpts",
+            "The question is emailed to the administrator",
+            "A random answer is chosen"
+          ],
+          "correctIndex": 1,
+          "explanation": "Without a model, answerManifestoQuery falls back to a summary made from the retrieved excerpts."
         }
+      ],
+      "guides": [
+        "explore-wards-candidates-and-manifestos",
+        "use-the-wevote-chatbot-desk"
       ]
     },
     {
       "id": "lesson-13-adapter-infrastructure",
       "moduleNumber": 13,
-      "title": "External Adapter Infrastructure & Failure Tolerances",
-      "subtitle": "Channel adapters, status pills, and graceful 'not configured' degradation",
+      "title": "Channels, Drafting & What Happens When a Setting Is Missing",
+      "subtitle": "Channel adapters, status pills, refused and failed dispatches, and UAT simulation",
       "badge": "System Reliability",
       "duration": "11 min",
       "video": null,
@@ -582,42 +898,70 @@
       "screenshots": [
         "11-desk-morning-intel.png"
       ],
-      "overview": "Every connection to external services (Meta Graph API, X API, Postmark mail, search providers) is built as an isolated adapter. If an external credential is missing or revoked, the platform degrades gracefully without failing.",
+      "overview": "Each outbound channel is a separate adapter: the press wire (email through the shared mail relay), X (Twitter), the Facebook Page and WhatsApp Business. Drafting uses a configured model, and the Investigations desk uses configured search providers. Every dispatch attempt is recorded: sent, refused (the channel has no settings) or failed (the provider's error). On UAT, or where simulation is switched on, a channel without settings simulates its send instead, and nothing is published.",
       "keyPoints": [
-        "Adapter Pattern: isolated interfaces for social platforms, email relays, and search providers",
-        "Status Pills: every desk explicitly shows which external adapters are ready or disconnected",
-        "Refusal Logging: if a channel is missing keys, dispatches are recorded as 'refused' with the missing setting named",
-        "Zero Silent Failures: operators are never left wondering if an API call succeeded"
+        "Status pills on the Rapid Rebuttal desk show each channel and drafting as 'ready' or 'not configured'",
+        "A channel button without settings reads '(unavailable)' and is disabled",
+        "A dispatch is recorded as sent (with the provider's id), refused (with the missing setting named) or failed (with the provider's error)",
+        "The Facebook Page channel is offered on a rebuttal stage only when the Facebook ads module is switched on, and WhatsApp only when the WhatsApp Cloud API module is",
+        "Without a drafting model, stages and drafts are written by hand and '🤖 Draft from the facts' is disabled"
       ],
       "operationalProcedures": [
-        "1. Observe the desk status pills: Green (Ready), Grey (Not Configured), Red (Service Unavailable).",
-        "2. When attempting dispatch through an unconfigured channel, review the explicit error message.",
-        "3. Contact platform administrators to update environment variables in /etc/jcds/env/.",
-        "4. Never attempt manual API hacks or hardcode tokens into application code."
+        "1. Read the status pills before you start a dispatch.",
+        "2. If a channel shows 'not configured', use another channel the stage allows, or ask the administrator to connect it.",
+        "3. After each dispatch, read the dispatch line: sent, refused or failed, and why.",
+        "4. Never put tokens or keys into a draft, a note or a chat; the administrator adds channel settings to the deployment's environment."
       ],
       "takeaways": [
-        "Connecting a channel is purely an environment configuration change; no code changes required.",
-        "Missing credentials will never crash the command centre server."
+        "Connecting a channel is a configuration change by the administrator, not a code change.",
+        "A refused or failed dispatch published nothing on that channel; it does not stop the rest of the desk.",
+        "On UAT, a 'sent' from a channel without settings is a simulation."
       ],
       "quiz": [
         {
-          "question": "What happens when an operator attempts to dispatch to a channel that has no API key configured?",
+          "question": "What happens when a dispatch is attempted on a channel that has no settings, outside UAT?",
           "options": [
-            "The server crashes and deletes the database",
-            "The dispatch is cleanly recorded as 'refused' with the exact missing setting named, leaving the desk intact",
-            "The system pretends it was sent and gives a fake success",
-            "An error email is sent to the public"
+            "The server crashes",
+            "The dispatch is recorded as refused, naming the missing setting",
+            "The system reports a fake success",
+            "The message is sent from a personal account"
           ],
           "correctIndex": 1,
-          "explanation": "Per estate standards, the platform refuses cleanly and logs the missing setting without crashing or falsifying delivery."
+          "explanation": "dispatch() in src/channels/registry.ts records a refusal row when the adapter is unconfigured."
+        },
+        {
+          "question": "On UAT, what does a channel without settings do when a stage is dispatched?",
+          "options": [
+            "It publishes for real",
+            "It simulates the send; nothing is published",
+            "It deletes the stage",
+            "It emails the administrator"
+          ],
+          "correctIndex": 1,
+          "explanation": "isUatOrSimulated() in src/channels/types.ts makes unconfigured adapters return a simulated result on UAT."
+        },
+        {
+          "question": "When is the WhatsApp channel offered on a rebuttal stage?",
+          "options": [
+            "Always",
+            "Only when the WhatsApp Cloud API module is switched on",
+            "Only on stage 1",
+            "Never"
+          ],
+          "correctIndex": 1,
+          "explanation": "activeChannels() in src/rebuttal/stages.ts drops WhatsApp while the whatsapp_bot flag is off."
         }
+      ],
+      "guides": [
+        "dispatch-brief-and-close-a-situation",
+        "read-the-morning-intel"
       ]
     },
     {
       "id": "lesson-14-popia-legal",
       "moduleNumber": 14,
-      "title": "POPIA Compliance, Electoral Code of Conduct & Audit Chains",
-      "subtitle": "Lawful basis, privacy safeguards, audit logs & legal defensibility",
+      "title": "POPIA, Consent & the Audit Record",
+      "subtitle": "Consent states, opt-out, the gate's certifications, lawful basis and what is recorded",
       "badge": "Legal & Ethics",
       "duration": "14 min",
       "video": null,
@@ -625,42 +969,70 @@
       "screenshots": [
         "15-signoff-gate-modal.png"
       ],
-      "overview": "Campaigning operates under the rule of law. ANC CC Ops strictly enforces the Protection of Personal Information Act (POPIA) and the Independent Electoral Commission (IEC) Electoral Code of Conduct at every software layer.",
+      "overview": "The command centre records consent for every WhatsApp contact, sends broadcasts and posting instructions only to opted-in contacts, and refuses to message a contact who has opted out. The gate's POPIA certification asks the signer to confirm that recipient lists operate under opt-in consent, and investigations record a POPIA section 11 lawful basis before they start. Actions are written to audit trails: sign-ins and administrative changes to the access log with the address they came from, and desk actions to each subject's audit trail.",
       "keyPoints": [
-        "POPIA Section 11 lawful basis must be established before storing voter contact records",
-        "Strict prohibition against collecting or storing special personal information (health, ethnicity, religion)",
-        "Opt-in consent and immediate one-click opt-out for all voter communications",
-        "Immutable, timestamped audit chains admissible in Electoral Court dispute proceedings"
+        "Consent states are opted in, opted out and unknown; a consent change asks how consent was established and records the answer",
+        "STOP and the other stop words opt a contact out before any reply is sent",
+        "Broadcasts go only to opted-in contacts; replies to opted-out contacts are refused",
+        "Investigations require a purpose and a POPIA section 11 lawful basis, and a person is a subject only in their public role",
+        "The access log records sign-ins, refusals and administrative changes with the source address; desk audit trails record who did what and when"
       ],
       "operationalProcedures": [
-        "1. Ensure all voter phone numbers collected in the field have documented opt-in consent.",
-        "2. When a voter requests to be removed, immediately process the opt-out in the database.",
-        "3. Never draft attack lines containing unverified personal allegations or hate speech.",
-        "4. Always verify that dispatches are certified under the Electoral Code before submission."
+        "1. Message only contacts who have written to the official number, and broadcast only to those opted in.",
+        "2. When a contact asks to stop, make sure they are set to opted out; a STOP reply does this automatically.",
+        "3. When you change a contact's consent by hand, record how consent was established.",
+        "4. Tick the gate's IEC and POPIA certifications only when they are true for what you are signing."
       ],
       "takeaways": [
-        "Compliance is not optional: breaches risk multimillion-rand fines and party disqualification.",
-        "Every user sign-in, sign-off, dispatch, and refusal is permanently logged with IP and timestamp."
+        "Consent and lawful basis are recorded so that each decision can be shown later.",
+        "Not every action is signed off, but desk actions are recorded in the audit trail."
       ],
       "quiz": [
         {
-          "question": "Which of the following data types is STRICTLY FORBIDDEN from being collected or stored in ANC CC Ops?",
+          "question": "Which contacts receive a WhatsApp broadcast?",
           "options": [
-            "Voter ward number",
-            "Special personal information (race, religion, health, criminal records)",
-            "Candidate contact phone number",
-            "Public media statements"
+            "All contacts",
+            "Only opted-in contacts",
+            "Contacts with unknown consent",
+            "Opted-out contacts, to confirm their choice"
           ],
           "correctIndex": 1,
-          "explanation": "POPIA strictly restricts special personal information; ANC CC Ops prompts and validation logic forbid storing it."
+          "explanation": "The broadcast route targets only consent_state 'opted_in'."
+        },
+        {
+          "question": "What does the access log record for a sign-in?",
+          "options": [
+            "Nothing",
+            "The outcome, the account and the address it came from",
+            "The password typed",
+            "A screenshot of the browser"
+          ],
+          "correctIndex": 1,
+          "explanation": "estateAudit in src/auth/accounts.ts writes event, outcome, subject, actor and source address."
+        },
+        {
+          "question": "What must an investigation record before it starts?",
+          "options": [
+            "The subject's religion",
+            "A purpose and a POPIA section 11 lawful basis",
+            "The subject's home address",
+            "Nothing"
+          ],
+          "correctIndex": 1,
+          "explanation": "The Investigations desk refuses a case without purpose and lawful basis."
         }
+      ],
+      "guides": [
+        "use-the-wevote-chatbot-desk",
+        "open-and-run-an-investigation",
+        "sign-off-through-the-gate"
       ]
     },
     {
       "id": "lesson-15-administration",
       "moduleNumber": 15,
-      "title": "Platform Administration, User Provisioning & Campaign Countdown",
-      "subtitle": "User provisioning, area scopes, phase transitions, and security logs",
+      "title": "Administration: Accounts, Campaign Settings & Regions",
+      "subtitle": "Issuing accounts with roles and areas, the campaign calendar, regions and the access log",
       "badge": "Administration",
       "duration": "15 min",
       "video": null,
@@ -668,35 +1040,63 @@
       "screenshots": [
         "16-admin-console.png"
       ],
-      "overview": "The Administration console gives platform administrators complete governance over user accounts, regional area assignments, campaign timeline countdowns, and security access logs.",
+      "overview": "The Administration desk is open to accounts holding the admin role, from the ☰ menu under Account. Its tabs are Accounts, Campaign settings, Regions, Access log and AI & Background Engine. Accounts are issued here and nowhere else; under the UAT access lock an administrator can still issue accounts but cannot reset passwords or deactivate accounts.",
       "keyPoints": [
-        "Account Provisioning: issue username, name, email, roles, and geographical area",
-        "Area Scopes: National command or restricted Provincial/Regional access (DCIP)",
-        "Campaign Phase Control: transition from Manifesto Launch to Voter Registration to GOTV (Get Out The Vote)",
-        "Countdown Timer: header countdown to election day and special voting deadlines"
+        "Issue an account with a username (display handle), full name, email (used to sign in), one or more roles, and an area: National, or a province or region for a Provincial or Regional DCIP",
+        "An initial password is at least 12 characters, and is shown once; 'Must change it on first sign-in' is offered when the access lock is off",
+        "Campaign settings: campaign name, organisation, campaign line, polls date (the header countdown), election day and special vote days",
+        "Campaign phases are date ranges (five by default); the phase in effect follows today's date, and the administrator edits the list",
+        "Regions can be added, renamed, retired once empty, have municipalities moved between them, or be imported from CSV"
       ],
       "operationalProcedures": [
-        "1. Access the Administration menu (Admin accounts only).",
-        "2. Provision new operator accounts, selecting the precise role and province/municipality scope.",
-        "3. Update campaign settings: polling date, campaign line, and active phase.",
-        "4. Review the security Access Log daily for unauthorized login attempts or abnormal activity."
+        "1. Open the ☰ menu and choose 'Administration'.",
+        "2. In 'Accounts', issue an account with the right roles and area, and hand the email and password to the person privately.",
+        "3. Use 'Roles / area' to change an account; outside the access lock, use 'Reset password', 'Deactivate' or 'Reactivate' as needed.",
+        "4. In 'Campaign settings', keep the dates, the campaign line and the phases correct.",
+        "5. In 'Access log', review sign-ins, refusals and administrative changes regularly."
       ],
       "takeaways": [
-        "Deactivating an account instantly terminates all active sessions across all devices.",
-        "Campaign phase transitions automatically update talking points across all desks."
+        "Deactivating an account or resetting its password ends that account's sessions immediately.",
+        "Phases change with the calendar; editing the phases changes which one is shown on the desks.",
+        "An administrator cannot remove their own admin role or deactivate themselves."
       ],
       "quiz": [
         {
-          "question": "What happens when an administrator deactivates an operator account?",
+          "question": "What happens when an administrator deactivates an account (outside the UAT access lock)?",
           "options": [
-            "Nothing happens until tomorrow morning",
-            "All active sessions are instantly terminated and access is immediately revoked across all desks",
-            "The operator is sent a warning letter",
-            "The account is given to someone else"
+            "Nothing until the next day",
+            "The account's sessions end immediately and it can no longer sign in",
+            "The account is given to someone else",
+            "The person receives a warning letter"
           ],
           "correctIndex": 1,
-          "explanation": "Account deactivation immediately destroys valid session tokens, locking the operator out instantly."
+          "explanation": "src/admin/routes.ts revokes the account's sessions on deactivation, and inactive accounts are refused at session lookup."
+        },
+        {
+          "question": "What decides which campaign phase is in effect?",
+          "options": [
+            "A button the administrator presses to advance the phase",
+            "Today's date against the phases' date ranges",
+            "The number of situations logged",
+            "The Weekly Campaign Order"
+          ],
+          "correctIndex": 1,
+          "explanation": "primaryPhase() in src/campaign/calendar.ts picks the phase whose dates include today."
+        },
+        {
+          "question": "Under the UAT access lock, which administrative action is refused?",
+          "options": [
+            "Issuing a new account",
+            "Changing an account's roles",
+            "Resetting a password",
+            "Reading the access log"
+          ],
+          "correctIndex": 2,
+          "explanation": "Under the lock, password resets and deactivations are refused; issuing accounts is still allowed."
         }
+      ],
+      "guides": [
+        "administer-accounts-settings-and-regions"
       ]
     }
   ]
