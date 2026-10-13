@@ -179,7 +179,7 @@ export function renderGuidesUI(systems, academy) {
       </div>
     </div>
     <nav>
-      <a href="/">Curriculum</a>
+      <a href="/">All Courses</a>
       <a href="/guides" class="on">How-to Guides</a>
     </nav>
   </header>

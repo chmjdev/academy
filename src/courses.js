@@ -5,6 +5,7 @@ import path from "node:path";
 // system has data/courses/<system>.json (shape in data/courses/SCHEMA.md).
 
 export const ANCOPS_COURSE_ID = "ancops";
+export const ACADEMY_NAME = "Govtech Academy";
 
 export function validateCourse(c, file) {
   const errors = [];

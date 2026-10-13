@@ -1,4 +1,4 @@
-# Plan — ANC CC Ops Academy
+# Plan — Govtech Academy
 
 Roadmap and operational evolution for the digital training academy.
 
@@ -10,7 +10,7 @@ Roadmap and operational evolution for the digital training academy.
 
 ## How-to guide library (2026-10-12)
 - Step-by-step guides for every Govtech system at `/guides` (see `status.md`).
-- Next: screenshots per guide; a refresh pass whenever a system's UI labels change; a branding decision on whether the multi-system library stays under the ANC CC Ops Academy name.
+- Next: screenshots per guide; a refresh pass whenever a system's UI labels change.
 
 ## Phase 2: Live Desk Simulation
 - Simulated scenario drill engine where students practice logging breaking situations and running 2-hour SLA response countdowns.

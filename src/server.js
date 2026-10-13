@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadGuides, guidesIndex, guidesCount, renderGuidesUI, scriptJSON, SYSTEM_ORDER } from "./guides.js";
-import { loadCourses, findLesson, coursesIndex, ANCOPS_COURSE_ID } from "./courses.js";
+import { loadCourses, findLesson, coursesIndex, ANCOPS_COURSE_ID, ACADEMY_NAME } from "./courses.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, "..");
@@ -148,6 +148,7 @@ export function createApp() {
       return res.end(JSON.stringify({
         status: "ok",
         service: "academy",
+        academy: ACADEMY_NAME,
         domain: "academy.cedec.io",
         timestamp: new Date().toISOString(),
         lessonsCount: curriculum.lessons.length,
@@ -196,7 +197,7 @@ export function createApp() {
     // How-to guides UI (client-side routing below /guides)
     if (pathname === "/guides" || pathname.startsWith("/guides/")) {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      return res.end(renderGuidesUI(guideSystems, curriculum.academy));
+      return res.end(renderGuidesUI(guideSystems, { name: ACADEMY_NAME }));
     }
 
     // API: Curriculum
@@ -375,19 +376,25 @@ export function createApp() {
     // Brand Icons
     if (pathname === "/favicon.svg" || pathname === "/favicon.ico") {
       res.writeHead(200, { "content-type": "image/svg+xml" });
-      return res.end(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><clipPath id="r"><rect x="3" y="3" width="58" height="58" rx="13"/></clipPath></defs><g clip-path="url(#r)"><rect x="3" y="3" width="58" height="19.33" fill="#060d0a"/><rect x="3" y="22.33" width="58" height="19.33" fill="#007a3d"/><rect x="3" y="41.66" width="58" height="19.34" fill="#ffc72c"/></g><rect x="3" y="3" width="58" height="58" rx="13" fill="none" stroke="#ffc72c" stroke-opacity="0.8" stroke-width="2.5"/><circle cx="32" cy="32" r="10" fill="#0b1f2a" stroke="#ffc72c" stroke-width="1.5"/><text x="32" y="36" font-family="system-ui, sans-serif" font-weight="900" font-size="11" fill="#ffc72c" text-anchor="middle">CC</text></svg>`);
+      return res.end(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><clipPath id="r"><rect x="3" y="3" width="58" height="58" rx="13"/></clipPath></defs><g clip-path="url(#r)"><rect x="3" y="3" width="58" height="19.33" fill="#060d0a"/><rect x="3" y="22.33" width="58" height="19.33" fill="#007a3d"/><rect x="3" y="41.66" width="58" height="19.34" fill="#ffc72c"/></g><rect x="3" y="3" width="58" height="58" rx="13" fill="none" stroke="#ffc72c" stroke-opacity="0.8" stroke-width="2.5"/><circle cx="32" cy="32" r="10" fill="#0b1f2a" stroke="#ffc72c" stroke-width="1.5"/><text x="32" y="36" font-family="system-ui, sans-serif" font-weight="900" font-size="11" fill="#ffc72c" text-anchor="middle">GA</text></svg>`);
     }
 
     // Course catalogue
-    if (pathname === "/courses") {
+    if (pathname === "/" || pathname === "/courses") {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      return res.end(renderCoursesUI(courses, curriculum.academy));
+      return res.end(renderCoursesUI(courses));
     }
 
-    // Render Web UI: "/" is the ANC CC Ops course; /course/<id> any course
+    // Links from before the catalogue became the home page
+    if (pathname.startsWith("/lesson/")) {
+      res.writeHead(301, { location: `/course/${ANCOPS_COURSE_ID}` });
+      return res.end();
+    }
+
+    // Render Web UI: /course/<id>
     const courseMatch = pathname.match(/^\/course\/([^/]+)\/?$/);
-    if (pathname === "/" || pathname.startsWith("/lesson/") || courseMatch) {
-      const course = courseMatch ? courses.find(c => c.id === decodeURIComponent(courseMatch[1])) : courses[0];
+    if (courseMatch) {
+      const course = courses.find(c => c.id === decodeURIComponent(courseMatch[1]));
       if (!course) {
         res.writeHead(404, { "content-type": "text/plain" });
         return res.end("Course not found");
@@ -410,9 +417,9 @@ function escapeHtml(s) {
 }
 
 // Course catalogue page
-function renderCoursesUI(list, academy) {
+function renderCoursesUI(list) {
   const cards = list.map(c => `
-      <a class="card" href="${c.id === ANCOPS_COURSE_ID ? "/" : `/course/${encodeURIComponent(c.id)}`}">
+      <a class="card" href="/course/${encodeURIComponent(c.id)}">
         <h3>${escapeHtml(c.name)}</h3>
         <p class="tag">${escapeHtml(c.tagline)}</p>
         <p class="clamp">${escapeHtml(c.summary)}</p>
@@ -423,7 +430,7 @@ function renderCoursesUI(list, academy) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>All Courses · ${escapeHtml(academy.name)}</title>
+  <title>${ACADEMY_NAME} · Courses and How-to Guides</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     :root { --green: #007a3d; --gold: #ffc72c; --bg: #060d0a; --card: #14241d; --border: #213d31; --text: #f8fafc; --muted: #94a3b8; --dim: #64748b; }
@@ -454,8 +461,8 @@ function renderCoursesUI(list, academy) {
 </head>
 <body>
   <header>
-    <div class="brand"><img src="/favicon.svg" alt=""><div><h1>All Courses</h1><p>${escapeHtml(academy.name)}</p></div></div>
-    <nav><a href="/">ANC CC Ops Course</a><a href="/courses" class="on">All Courses</a><a href="/guides">How-to Guides</a></nav>
+    <div class="brand"><img src="/favicon.svg" alt=""><div><h1>${ACADEMY_NAME}</h1><p>Courses and how-to guides for every Govtech system</p></div></div>
+    <nav><a href="/" class="on">All Courses</a><a href="/guides">How-to Guides</a></nav>
   </header>
   <main>
     <h2>Courses for every Govtech system</h2>
@@ -478,7 +485,7 @@ function renderAcademyUI(data, seats, opts = {}) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>${escapeHtml(c.name)} · ${escapeHtml(c.tagline)}</title>
+  <title>${escapeHtml(c.name)} · ${ACADEMY_NAME}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     :root {
@@ -1163,15 +1170,15 @@ function renderAcademyUI(data, seats, opts = {}) {
           <rect y="42.66" width="64" height="21.34" fill="#ffc72c"/>
         </g>
         <circle cx="32" cy="32" r="11" fill="#0b1f2a" stroke="#ffc72c" stroke-width="1.5"/>
-        <text x="32" y="36" font-family="system-ui" font-weight="900" font-size="10" fill="#ffc72c" text-anchor="middle">CC</text>
+        <text x="32" y="36" font-family="system-ui" font-weight="900" font-size="10" fill="#ffc72c" text-anchor="middle">GA</text>
       </svg>
       <div class="brand-titles">
-        <h1>${escapeHtml(c.name)} <span class="pill">CEDEC AFRICA</span></h1>
-        <p>${escapeHtml(c.tagline)}</p>
+        <h1>${ACADEMY_NAME} <span class="pill">CEDEC AFRICA</span></h1>
+        <p>${escapeHtml(c.name)} — ${escapeHtml(c.tagline)}</p>
       </div>
     </div>
     <div class="header-links">
-      <a href="/courses">All Courses (${opts.coursesCount || 1})</a>
+      <a href="/">All Courses (${opts.coursesCount || 1})</a>
       <a href="/guides">How-to Guides</a>
       ${isAncops ? `<a href="https://ancops.cedec.io" target="_blank" rel="noopener">ANC CC Ops Portal ↗</a>
       <a href="https://chat.wevoteanc.cedec.io" target="_blank" rel="noopener">WeVote Chatbot ↗</a>
@@ -1618,7 +1625,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const server = http.createServer(app);
 
   server.listen(PORT, HOST, () => {
-    console.log(`[academy] ANC CC Ops Academy listening on http://${HOST}:${PORT}`);
+    console.log(`[academy] ${ACADEMY_NAME} listening on http://${HOST}:${PORT}`);
     console.log(`[academy] Canonical prod domain: https://academy.cedec.io`);
     console.log(`[academy] Loaded ${curriculum.lessons.length} curriculum modules`);
     console.log(`[academy] Loaded ${courses.length} courses and ${guidesCount(guideSystems)} how-to guides across ${guideSystems.length} systems`);

@@ -40,7 +40,7 @@ ensure_env() {
 NODE_ENV=development
 PORT=3155
 ACADEMY_HOST=127.0.0.1
-ACADEMY_TITLE="ANC CC Ops Academy"
+ACADEMY_TITLE="Govtech Academy"
 EOF
     chmod 600 .env
   fi

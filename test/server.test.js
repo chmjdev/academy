@@ -12,7 +12,7 @@ const COURSES_DIR = new URL("../data/courses/", import.meta.url).pathname;
 const CURRICULUM = JSON.parse(fs.readFileSync(new URL("../data/curriculum.json", import.meta.url), "utf8"));
 const courseFiles = () => fs.readdirSync(COURSES_DIR).filter(f => f.endsWith(".json"));
 
-test("ANC CC Ops Academy server test suite", async (t) => {
+test("Govtech Academy server test suite", async (t) => {
   const app = createApp();
   const server = http.createServer(app);
 
@@ -40,7 +40,7 @@ test("ANC CC Ops Academy server test suite", async (t) => {
     const res = await fetch(`${base}/api/curriculum`);
     assert.equal(res.status, 200);
     const body = await res.json();
-    assert.equal(body.academy.name, "ANC CC Ops Academy");
+    assert.equal(body.academy.name, "ANC CC Ops Course");
     assert.equal(body.lessons.length, 15);
   });
 
@@ -111,14 +111,28 @@ test("ANC CC Ops Academy server test suite", async (t) => {
     assert.ok(buf.byteLength > 1000);
   });
 
-  await t.test("GET / serves HTML portal with ANC and CEDEC branding", async () => {
+  await t.test("GET / is the Govtech Academy course catalogue", async () => {
     const res = await fetch(`${base}/`);
     assert.equal(res.status, 200);
     assert.match(res.headers.get("content-type") || "", /text\/html/);
     const html = await res.text();
-    assert.ok(html.includes("ANC CC Ops Academy"));
+    assert.ok(html.includes("<h1>Govtech Academy</h1>"));
+    assert.ok(html.includes('href="/course/ancops"'));
+    assert.ok(!html.includes("ANC CC Ops Academy"));
+  });
+
+  await t.test("GET /course/ancops serves the ANC course under the Govtech Academy brand", async () => {
+    const html = await (await fetch(`${base}/course/ancops`)).text();
+    assert.ok(html.includes("Govtech Academy"));
+    assert.ok(html.includes("ANC CC Ops Course"));
     assert.ok(html.includes("CEDEC AFRICA"));
     assert.ok(html.includes("10 Sponsored Student Seats"));
+  });
+
+  await t.test("old /lesson/ links redirect to the ANC course", async () => {
+    const res = await fetch(`${base}/lesson/lesson-01-system-overview`, { redirect: "manual" });
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get("location"), "/course/ancops");
   });
 
   await t.test("GET /api/guides lists every Govtech system's how-to guides", async () => {
@@ -163,10 +177,10 @@ test("ANC CC Ops Academy server test suite", async (t) => {
   await t.test("every course page renders, and its quizzes grade through /api/quiz", async () => {
     const { courses } = await (await fetch(`${base}/api/courses`)).json();
     for (const c of courses) {
-      const page = c.id === "ancops" ? "/" : `/course/${c.id}`;
+      const page = `/course/${c.id}`;
       const res = await fetch(`${base}${page}`);
       assert.equal(res.status, 200, page);
-      assert.ok((await res.text()).includes('href="/courses"'), page);
+      assert.ok((await res.text()).includes('<a href="/">All Courses'), page);
       const full = await (await fetch(`${base}/api/courses/${c.id}`)).json();
       const lesson = full.lessons.find(l => (l.quiz || []).length);
       if (!lesson) continue;

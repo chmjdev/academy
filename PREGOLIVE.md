@@ -1,4 +1,4 @@
-# PREGOLIVE — ANC CC Ops Academy
+# PREGOLIVE — Govtech Academy
 
 Production is `https://academy.cedec.io` hosted exclusively on the **ANC CC Ops Production server, `102.201.48.82` (ancopsprod)**.
 Service Port: `3155`.

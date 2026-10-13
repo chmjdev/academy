@@ -1,4 +1,4 @@
-# Status — ANC CC Ops Academy
+# Status — Govtech Academy
 
 Living record of verified architecture, live capabilities, and deployment state for `academy.cedec.io`.
 
@@ -50,3 +50,10 @@ Changed in this checkout, not deployed. Nothing below has been checked against `
   - opsystem: "✓ SEAL VERIFIED" is unconditional; a fresh device opens as the built-in super-user profile; AI AUTO-FILL defaults; KEEP ACTIVE records nothing; REACTIVATE keeps the original 48-hour clock; CONTAIN & LOCK has no confirmation and the core still accepts evidence.
   - opsystemcore: the page-fetch guard does not cover the 172.16–172.31 range.
 
+
+## Renamed to Govtech Academy (2026-10-13)
+
+- The site is **Govtech Academy**, and `/healthz` reports `"academy": "Govtech Academy"`.
+- The ANC material is now the **ANC CC Ops Course**, one of the ten courses.
+- `/` and `/courses` are the course catalogue. The ANC course is at `/course/ancops`, and old `/lesson/...` links answer 301 to it.
+- The crest reads "GA". The domain, port, service name and colours are unchanged.

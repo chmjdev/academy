@@ -2,7 +2,7 @@
   "name": "academy",
   "version": "1.0.0",
   "private": true,
-  "description": "ANC CC Ops Academy — Official Digital Learning & Command Platform by CEDEC Africa on academy.cedec.io",
+  "description": "Govtech Academy — courses and how-to guides for every Govtech system, by CEDEC Africa on academy.cedec.io",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"
