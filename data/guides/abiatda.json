@@ -3,14 +3,15 @@
   "name": "AI Internal Audit & Data Analytics",
   "fullName": "AI Internal Audit & Data Analytics Platform",
   "category": "Internal audit",
-  "summary": "A web platform for municipal and public-sector internal audit: analytics over whole transaction populations, findings documented with the 5 Cs, the full engagement workflow from plan to closure, remediation tracking, evidence vouching, an assistant that only proposes steps you confirm, and a hash-chained audit trail. Used by internal auditors, audit managers, the Chief Audit Executive, process owners, executives, the Audit Committee and IT administrators.",
+  "summary": "A web platform for municipal internal audit under the MFMA and the IIA Global Internal Audit Standards (2024): a Standards & Legislation library that loads and pins evaluation criteria, the twelve-stage workflow from the annual cycle to Audit Committee reporting and the quality programme, an independence and competency register, analytics over whole transaction populations, findings with cited criteria and MFMA s32 classification, the engagement workflow from planning to closure, Auditor-General findings and follow-up, periodic reports, controls over AI-assisted content, an assistant that only proposes steps you confirm, and a hash-chained audit trail. Used by internal auditors, audit managers, the Head of Internal Audit, process owners, executives, the Municipal Manager, the Audit Committee and IT administrators.",
   "audience": [
     "Staff / Senior Auditor",
     "Audit Manager / Director",
-    "Chief Audit Executive",
+    "Head of Internal Audit (CAE)",
     "Process Owner / Auditee",
     "Executive Management",
-    "Audit Committee / Board",
+    "Municipal Manager (accounting officer)",
+    "Audit Committee",
     "IT & System Administrator"
   ],
   "surfaces": [
@@ -21,17 +22,23 @@
     "Exports and downloads (Excel, CSV, PDF, Word, PowerPoint)",
     "Security & Operations administration pages"
   ],
-  "gettingAccess": "An IT & System Administrator issues your account on Users & Roles. You receive a temporary password, shown once to the administrator (or to the approver, for auditor, audit manager, Chief Audit Executive, IT administrator and super-user accounts, which need a second person's approval). You sign in with your email address and choose your own password at the first sign-in; a temporary password stops working after 72 hours. The Chief Audit Executive, audit managers and IT administrators must set up two-factor sign-in in a customer installation. In the demonstration instance the sign-in page lists one synthetic account per role with a Use button; the demonstration data is synthetic and is not a record of any municipality.",
+  "gettingAccess": "An IT & System Administrator issues your account on Users & Roles. You receive a temporary password, shown once to the administrator (or to the approver, for auditor, audit manager, Head of Internal Audit, IT administrator and super-user accounts, which need a second person's approval). You sign in with your email address and choose your own password at the first sign-in; a temporary password stops working after 72 hours. The Head of Internal Audit, audit managers and IT administrators must set up two-factor sign-in in a customer installation. The Audit Committee chair is designated by the Head of Internal Audit or the IT administrator (Make chair). Auditors need a signed independence declaration for the financial year before they can be assigned to an engagement team. In the demonstration instance the sign-in page lists one synthetic account per role with a Use button; the demonstration data is synthetic and is not a record of any municipality.",
   "sources": [
+    "CHANGELOG.md",
     "README.md",
-    "docs/USER_GUIDE.md",
     "demo-access.json",
-    "src/app/nav.ts",
-    "src/router.tsx",
-    "shared/workflow.ts",
+    "docs/USER_GUIDE.md",
+    "docs/assistant/ASSISTANT.md",
+    "docs/lifecycle/STANDARDS-INTEGRATION.md",
     "docs/lifecycle/WORKFLOW.md",
     "docs/offline/OFFLINE-CONTRACT.md",
-    "docs/assistant/ASSISTANT.md"
+    "docs/security/PERMISSION-MATRIX.md",
+    "server/rbac.ts",
+    "shared/library.ts",
+    "shared/permissions.ts",
+    "shared/workflow.ts",
+    "src/app/nav.ts",
+    "src/router.tsx"
   ],
   "guides": [
     {
@@ -52,49 +59,422 @@
         "On later sign-ins, enter the current 6-digit code after your password. Each code works once.",
         "To turn two-factor sign-in on yourself, or to issue new recovery codes, open the account menu (top right) and choose Two-factor sign-in, then Set up two-factor sign-in or New recovery codes.",
         "To change your password, open the account menu and choose Change password.",
-        "For training material, open Help & Training (in the menu and the account menu): it lists the guide written for your role and the one for every user, with Word document for a printable copy.",
+        "For training material, open Help & Training (in the menu and the account menu): it lists the guide written for your role and the one for every user, with Word document for a printable copy, and states what the assistant sends and the position on training on client data (AI and your data).",
         "To end your session, open the account menu and choose Sign out."
       ],
-      "result": "You land on your home page (the Executive Dashboard, or My work for process owners), and the navigation shows only the pages your role can use.",
+      "result": "You land on your home page (My work for process owners; the Executive Dashboard for the audit team, executives, the Municipal Manager and the Audit Committee; the Audit Trail for an IT administrator), and the navigation shows only the pages your role can use.",
       "troubleshooting": [
-        { "problem": "The account is locked after several attempts.", "fix": "After 5 failed passwords or 5 wrong codes the account is locked for 15 minutes. Wait and try again." },
-        { "problem": "Lost your phone with the authenticator app.", "fix": "Sign in with one of your recovery codes, then issue new ones on Two-factor sign-in. Without a recovery code, ask another IT administrator to reset your two-factor sign-in on Security & Ops → Access & two-factor." },
-        { "problem": "Change password is not offered.", "fix": "Shared demonstration accounts and the UAT environment keep their issued credentials, so password changes are switched off there." },
-        { "problem": "Your temporary password no longer works.", "fix": "Temporary passwords expire after 72 hours. Ask your IT administrator to reset it." }
+        {
+          "problem": "The account is locked after several attempts.",
+          "fix": "After 5 failed passwords or 5 wrong codes the account is locked for 15 minutes. Wait and try again."
+        },
+        {
+          "problem": "Lost your phone with the authenticator app.",
+          "fix": "Sign in with one of your recovery codes, then issue new ones on Two-factor sign-in. Without a recovery code, ask another IT administrator to reset your two-factor sign-in on Security & Ops → Access & two-factor."
+        },
+        {
+          "problem": "Change password is not offered.",
+          "fix": "Shared demonstration accounts and the UAT environment keep their issued credentials, so password changes are switched off there."
+        },
+        {
+          "problem": "Your temporary password no longer works.",
+          "fix": "Temporary passwords expire after 72 hours. Ask your IT administrator to reset it."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/components/Login.tsx", "src/templates/AppTemplate.tsx", "src/security/AccountSecurityPage.tsx", "src/pages/HelpPage.tsx", "README.md"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/components/Login.tsx",
+        "src/templates/AppTemplate.tsx",
+        "src/security/AccountSecurityPage.tsx",
+        "src/pages/HelpPage.tsx",
+        "README.md",
+        "server/routes/auth.ts",
+        "src/pages/HelpPage.tsx"
+      ]
     },
     {
       "id": "monitor-dashboards",
       "title": "Monitor findings and remediation from the dashboards",
       "goal": "You can see severity, remediation status, analytics anomalies, overdue actions and residual risk, and open the records behind each figure.",
-      "role": "Audit Manager / Director, Chief Audit Executive, Executive Management, Audit Committee / Board (each sees only their own scope)",
+      "role": "Audit Manager / Director, Head of Internal Audit (CAE), Executive Management, Municipal Manager, Audit Committee (each sees only their own scope)",
       "level": "Basic",
-      "before": ["You are signed in."],
+      "before": [
+        "You are signed in."
+      ],
       "steps": [
         "Open Dashboard (the Executive Dashboard). The tiles summarise the records analysed, the payments analysed, the open cases with the money at stake, and the last analytics run.",
         "Under Autonomous Audit Anomalies & Red Flags, select an item to open its case, or the N flagged badge to list the cases not yet reviewed.",
-        "Under Audit Finding Severity, select Critical, High, Medium or Low / Advisory to open the Findings register filtered to that severity.",
+        "Under Audit Finding Severity, select Critical, High, Medium or Low / Advisory to open the Findings register filtered to that significance rating.",
         "Under Audit Findings Tracking, select Implemented, Outstanding or Overdue to open the actions with that status.",
-        "Executives: open Executive view for overdue remediation by department, the risks still rated high after controls and progress against the approved plan.",
-        "Audit Committee: open Committee view for the significant findings of the reporting period, overdue actions, residual risk by month (Show table lists the numbers), control effectiveness and the issued reports.",
+        "Executives, the Municipal Manager and the Head of Internal Audit: open Executive view for overdue remediation by department, the risks still rated high after controls and progress against the plan in force.",
+        "Audit Committee: open Committee view for the significant findings of the reporting period, the findings classified under MFMA s32 with totals by category (Unauthorised, irregular, fruitless and wasteful expenditure), overdue actions, residual risk by month (Show table lists the numbers), control effectiveness, the issued reports and the Accepted risks escalated.",
         "Check the status line under the page title: Live · as of … means the data is current; As of … · updates delayed or Cached as of … means it is not. Choose Refresh to read it again.",
-        "Open My work at any time for everything awaiting you, and the bell in the header (Notifications) for your inbox and overdue reminders."
+        "Open My work at any time for everything awaiting you (for example Awaiting your approval, Awaiting your acceptance, Overrides awaiting your decision, Quarterly reports to note), and the bell in the header (Notifications) for your inbox and overdue reminders."
       ],
       "result": "Every count you select opens a list with exactly that number of rows, filtered in the address so you can bookmark or share it; the recipient sees only what their own role permits.",
       "troubleshooting": [
-        { "problem": "The page says Cached as of …", "fix": "The page is not connected (for example you are offline). Reconnect and choose Refresh." },
-        { "problem": "A page you expect is missing from the menu.", "fix": "You only see the pages your role can use. On a narrow screen open Menu (top left); on a computer look under More." }
+        {
+          "problem": "The page says Cached as of …",
+          "fix": "The page is not connected (for example you are offline). Reconnect and choose Refresh."
+        },
+        {
+          "problem": "A page you expect is missing from the menu.",
+          "fix": "You only see the pages your role can use. On a narrow screen open Menu (top left); on a computer look under More."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/app/nav.ts", "src/modules/ExecutiveAuditDashboard.tsx", "src/pages/ExecutivePage.tsx", "src/pages/CommitteePage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/app/nav.ts",
+        "src/modules/ExecutiveAuditDashboard.tsx",
+        "src/pages/ExecutivePage.tsx",
+        "src/pages/CommitteePage.tsx",
+        "src/pages/MyWorkPage.tsx",
+        "server/lifecycle/routes-oversight.ts"
+      ]
+    },
+    {
+      "id": "browse-library-criteria",
+      "title": "Browse the Standards & Legislation library and check the criteria for an audit area",
+      "goal": "You know which standards, legislation and Topical Requirements apply to an audit area on a given date, and how each workflow stage draws on them.",
+      "role": "Staff / Senior Auditor, Audit Manager / Director, Head of Internal Audit (CAE), Audit Committee",
+      "level": "Basic",
+      "before": [
+        "You are signed in with a role that can read the library (the audit team or the Audit Committee)."
+      ],
+      "steps": [
+        "Open Standards & legislation (under Governance). The tabs are Standards, Legislation, Frameworks and guidance, Topical Requirements, Workflow stages and Review.",
+        "On Standards, read the Global Internal Audit Standards (2024) grouped by domain and principle. Only numbers and titles are shown (\"Number and title only\"); where a title uses the Standards' terms the municipal term is used: Audit Committee for the board, Municipal Manager for senior management, Head of Internal Audit for the chief audit executive.",
+        "On Legislation (or Frameworks and guidance), search by Name, citation or provision, filter by Audit area and Status (In force, Not yet in operation, Superseded). Each record shows its citation, Provisions, audit areas, effective dates and when the citation was last verified (Not verified until someone checks it).",
+        "Under Criteria for an audit area on a date, choose the Audit area and a date in On (empty: today). The card lists what engagement planning loads (In force on …) and what is Not applied, with the reason.",
+        "On Topical Requirements, read each IIA Topical Requirement with its status and effective date: mandatory for assurance engagements once in effect, recommended for advisory engagements and before the effective date.",
+        "On Workflow stages, read each of the twelve stages in its band (Once a year: set up the function; For every audit engagement; Every quarter and every year: oversight), with its Standards, Legislation and guidance, South African trigger and Gate."
+      ],
+      "result": "You can see, for any area and date, the criteria an engagement would load, and which law or standard sits behind each stage.",
+      "troubleshooting": [
+        {
+          "problem": "An Act you expected is listed as Not applied.",
+          "fix": "It is not in operation on that date (for example the Public Procurement Act 28 of 2024 while it is not in operation), was superseded before it, or is not yet in force. King IV applies only to financial years before King V."
+        },
+        {
+          "problem": "The text of a Standard is missing.",
+          "fix": "The IIA owns the text. It is shown only if the Head of Internal Audit enters it under the organisation's own licence from the IIA."
+        },
+        {
+          "problem": "Standards & legislation is not in the menu.",
+          "fix": "Process owners, executives, the Municipal Manager and IT administrators have no library access."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/LibraryPage.tsx",
+        "shared/library.ts",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "maintain-library-review-owners",
+      "title": "Maintain the library, record reviews and assign owners",
+      "goal": "Every library record has a named owner, is reviewed at least yearly, and every change is kept as a new version.",
+      "role": "Head of Internal Audit (CAE)",
+      "level": "Advanced",
+      "before": [
+        "Only the Head of Internal Audit (the CAE role) changes the library."
+      ],
+      "steps": [
+        "Open Standards & legislation and choose Review. Owners lists who owns how many records; records with No owner are flagged.",
+        "Under Owner for every record without one, choose a person and choose Assign owner.",
+        "Read the Review queue: records whose review is overdue (Review overdue) or that have No owner. Choose Mark reviewed on a record once you have checked it; the next review falls a year later.",
+        "To change an instrument, open Legislation or Frameworks and guidance and choose Edit. Give a Reason for the change when the citation, provisions or status change, and tick I checked the citation against the source today to set the last verified date. Each save is a new version beside the earlier ones.",
+        "To add a municipal by-law, council policy or delegation, choose Add local instrument on Legislation: Short name, Effective from, Citation, Provisions (one per line), Audit areas, Status, then Add instrument. It applies from its effective date to the audit areas you tick.",
+        "To retire an instrument, choose Mark superseded: give the Last day it applies, optionally Replaced by, and a Reason. Engagements planned before that date keep it as a criterion.",
+        "To edit a Topical Requirement's status or effective date, choose Edit on the Topical Requirements tab and Save as a new version (a reason is required when the status or effective date changes).",
+        "Only under your organisation's own IIA licence: on Standards choose Text on a standard, tick The client holds a licence from the IIA for this text, enter the text and a Reason for the change, and choose Save text.",
+        "Read Items to confirm: the open points the municipality must answer before the libraries are final. They are recorded, not guessed."
+      ],
+      "result": "The review queue shrinks to records that genuinely need attention, and every edit is versioned and in the audit trail.",
+      "troubleshooting": [
+        {
+          "problem": "Edit, Mark superseded or Assign owner is not shown.",
+          "fix": "Only the Head of Internal Audit maintains the library; other roles read it."
+        },
+        {
+          "problem": "Engagements already planned did not pick up your edit.",
+          "fix": "Criteria are pinned when planning is approved; a later library edit does not change them (the engagement shows \"a newer version exists\")."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/LibraryPage.tsx",
+        "shared/library.ts",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
+    },
+    {
+      "id": "plan-and-charter",
+      "title": "Draft the charter and the risk-based audit plan and take them to the Audit Committee chair",
+      "goal": "A new charter or plan version is approved by the Audit Committee chair and waits for the Municipal Manager's acceptance.",
+      "role": "Head of Internal Audit (CAE) (drafts and submits); Audit Committee chair (approves or returns)",
+      "level": "Advanced",
+      "before": [
+        "For the plan: risks in the register, auditable units in the audit universe, and stage 3 (audit universe and risk assessment) of the plan's first year signed off on Workflow stages."
+      ],
+      "steps": [
+        "Open Plan & charter. The tabs are Audit plan, Coverage, Charter, Audit universe, Assurance map and Workflow settings.",
+        "To change the version in force, choose Amend (new version) and give a reason. The version in force stays in force until the amendment is approved and accepted.",
+        "Edit the draft. For a charter choose Edit draft and write the Title, Charter text and Change summary, and optionally Effective from and Review due (empty: 12 months after acceptance, a product default). For a plan choose Add item (title, department, financial year, quarter, planned hours, risk rating, auditable unit, Estimated cost (rand), MFMA s165(2)(b) areas covered and Audit areas (library)), and set the version's Budget. The plan needs at least one item for its first year.",
+        "Check Coverage before you submit (see the coverage guide). A draft plan shows what changed against the plan in force.",
+        "Choose Submit to the Audit Committee.",
+        "Audit Committee chair: open Plan & charter (or My work → Awaiting your approval) and choose Approve plan or Approve charter, or Return plan / Return charter with a note for the Head of Internal Audit.",
+        "The approved version shows Approved, not yet in force and waits for the Municipal Manager (see Accept the charter or plan)."
+      ],
+      "result": "The version is approved by the chair and listed under Awaiting your acceptance for the Municipal Manager; the version in force is unchanged until then.",
+      "troubleshooting": [
+        {
+          "problem": "Amend is refused.",
+          "fix": "Another version is in draft, submitted or awaiting acceptance. Finish, return or accept that one first."
+        },
+        {
+          "problem": "Submit to the Audit Committee is greyed out for the plan.",
+          "fix": "Stage 3 of the plan's first year must be signed off by the Head of Internal Audit on Workflow stages, and the plan needs an item for its first year. You can Request override under the step."
+        },
+        {
+          "problem": "An Audit Committee member is refused when approving.",
+          "fix": "Only the Audit Committee chair records the Committee's decision. The Head of Internal Audit or the IT administrator designates the chair with Make chair on Users & Roles."
+        },
+        {
+          "problem": "A super user cannot approve.",
+          "fix": "Being a super user lets you configure settings within your own role's domain; it gives no approval rights."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "src/pages/GovernancePage.tsx",
+        "docs/lifecycle/WORKFLOW.md",
+        "server/lifecycle/routes-oversight.ts"
+      ]
+    },
+    {
+      "id": "accept-charter-or-plan",
+      "title": "Accept the charter or the audit plan as Municipal Manager",
+      "goal": "An approved charter or plan version comes into force, and the version it replaces becomes superseded in the same step.",
+      "role": "Municipal Manager (accounting officer)",
+      "level": "Basic",
+      "before": [
+        "The Audit Committee chair has approved the version."
+      ],
+      "steps": [
+        "Open My work. Under Awaiting your acceptance you see each plan or charter version \"Approved by the Audit Committee; in force once you accept it.\"",
+        "Open the item, or open Plan & charter and the Audit plan or Charter tab. The version shows Approved, not yet in force and the badge Not in force yet.",
+        "Read the version and, for a plan, what changed against the plan in force, its budget and hours.",
+        "Choose Accept plan or Accept charter. Add a note if you wish (it is optional) and confirm."
+      ],
+      "result": "The version is shown \"in force\" with your acceptance and note (Municipal Manager's note); the earlier version is Superseded. Engagements start only from the plan in force.",
+      "troubleshooting": [
+        {
+          "problem": "There is no button to decline.",
+          "fix": "The Municipal Manager cannot decline in this release; raise concerns with the Audit Committee chair and the Head of Internal Audit outside the system."
+        },
+        {
+          "problem": "Accept is refused.",
+          "fix": "Segregation of duties: the person who prepared or approved the version cannot accept it."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "src/pages/GovernancePage.tsx",
+        "server/lifecycle/routes-oversight.ts",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
+    },
+    {
+      "id": "plan-coverage-and-assurance-map",
+      "title": "Read the plan coverage view, the audit universe and the assurance map",
+      "goal": "You can show that the plan covers the seven MFMA s165(2)(b) areas and the high and critical risks, and who else provides assurance.",
+      "role": "Head of Internal Audit (CAE), audit team, Audit Committee, executives and the Municipal Manager (read); super users maintain the universe and the assurance map",
+      "level": "Intermediate",
+      "before": [
+        "A plan version exists, and plan items carry their s165(2)(b) areas."
+      ],
+      "steps": [
+        "Open Plan & charter and choose Coverage. Choose the Plan version (in force, or the version awaiting approval or acceptance) and a Financial year, or Whole plan.",
+        "Under The seven s165(2)(b) areas, read which areas have a planned item; an area marked Gap shows \"No planned item covers this area.\"",
+        "Under High and critical risks, read which are Not covered. A risk counts as covered when an item names it or audits its auditable unit; residual rating is used where assessed, otherwise inherent.",
+        "Under Items with no s165(2)(b) area, tag those items on the draft version so the check can count them.",
+        "Open Audit universe: each unit shows its highest likelihood × impact risk score and its links (s165(2)(b), IDP, SDBIP, Auditor-General findings, Assurance). Super users choose Add unit or Edit to record the IDP reference, SDBIP reference, Prior Auditor-General findings and risks of the unit.",
+        "Open Assurance map: each provider shows its Line (Three Lines Model), the Audit areas covered, Auditable units covered and the Reliance placed with its basis. Read Areas no provider covers. Super users choose Add provider or Edit."
+      ],
+      "result": "You can name every coverage gap before the plan is submitted, and the universe and map are ready for the stage 3 sign-off.",
+      "troubleshooting": [
+        {
+          "problem": "An item you know covers an area is not counted.",
+          "fix": "Tag the item with its MFMA s165(2)(b) areas covered in the item dialog on the draft version."
+        },
+        {
+          "problem": "Add unit or Add provider is not shown.",
+          "fix": "Only super users within the audit function change the universe and the assurance map."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/GovernancePage.tsx",
+        "shared/library.ts"
+      ]
+    },
+    {
+      "id": "annual-cycle-sign-offs",
+      "title": "Complete the annual cycle (stages 1 to 4) on Workflow stages",
+      "goal": "The financial year's annual cycle is complete, so the year's engagements may start fieldwork.",
+      "role": "Head of Internal Audit (CAE) (sign-offs); the audit team, the Municipal Manager and the Audit Committee can read the page",
+      "level": "Advanced",
+      "before": [
+        "A charter in force, every internal audit staff member declared for the year, the universe and assurance map reviewed."
+      ],
+      "steps": [
+        "Open Workflow stages (under Governance) and choose the Financial year at the top. Overview shows the twelve stages in three bands with the count of the year's engagements in each phase.",
+        "Choose Annual cycle. A banner says whether the year's annual cycle is complete. Each stage card shows its state, What is missing and its sign-off.",
+        "Stage 1 (Mandate and charter) is computed: a charter approved by the chair and accepted by the Municipal Manager, in force and not past its review date.",
+        "Stage 2 (Ethics and independence): once every register member has an acknowledged declaration for the year, choose Sign off the declarations, add a Note (optional) and Sign off.",
+        "Stage 3 (Audit universe and risk assessment): after stages 1 and 2, choose Sign off the risk assessment, enter the Date of the review and Sign off. A count of the units, risks, links and assurance providers reviewed is kept with the sign-off.",
+        "Stage 4 (Strategy and annual plan) is computed: a plan version whose first year is this year, approved and accepted. A plan for the year can be submitted only after stage 3.",
+        "For a year that has ended before the system held its charter or plan, choose Record the charter from documents or Record the plan from documents and give the Reference (meeting date, minutes reference or document)."
+      ],
+      "result": "The banner reads that the annual cycle is complete; Start fieldwork no longer lists a missing stage for engagements planned to start in that year.",
+      "troubleshooting": [
+        {
+          "problem": "Sign off the declarations is greyed out.",
+          "fix": "A register member has no declaration for the year or it is not acknowledged. Declarations for the coming year can be signed from 1 April (three months before it starts, a product default)."
+        },
+        {
+          "problem": "A stage is shown locked.",
+          "fix": "Each stage locks the next. Complete the earlier stage first, or request an override for the stage 2 or 3 sign-off."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/StagesPage.tsx",
+        "server/lifecycle/routes-stages.ts",
+        "shared/library.ts",
+        "shared/workflow.ts"
+      ]
+    },
+    {
+      "id": "annual-declaration-and-cpd",
+      "title": "Sign your annual independence declaration, log CPD and disclose an impairment",
+      "goal": "You have a declaration for the financial year, so you can be assigned to engagement teams, and your CPD and qualifications are on record.",
+      "role": "Staff / Senior Auditor, Audit Manager / Director, Head of Internal Audit (CAE)",
+      "level": "Basic",
+      "before": [
+        "The financial year runs July to June. Declarations for the coming year open three months before it (1 April, a product default)."
+      ],
+      "steps": [
+        "Open Independence & competency (under Governance). My register entry shows your declaration, CPD, qualifications, prior roles, impairments and conflict checks.",
+        "Choose Sign this year's declaration (or Sign again). Choose the Financial year, confirm the Code of conduct, untick any objectivity statement you cannot confirm and explain it under Interests disclosed, confirm the Confidentiality undertaking, and choose Sign the declaration.",
+        "Choose Log CPD and enter the Date, Hours (quarter hours, up to 80), Activity and Provider, then Log. The year's total is shown against the target: 40 hours by default (a product default; set under Plan & charter → Workflow settings).",
+        "Under Qualifications choose Add and enter the Qualification, Awarding body and Year obtained.",
+        "If something impairs your objectivity, choose Disclose under Impairments to objectivity: choose what It concerns (A department, An audit area or An engagement), Which, and the Nature of the impairment, then Disclose."
+      ],
+      "result": "Your declaration shows as declared, then acknowledged once the Head of Internal Audit acknowledges it (the Audit Committee chair acknowledges the Head of Internal Audit's own).",
+      "troubleshooting": [
+        {
+          "problem": "You cannot be added to an engagement team.",
+          "fix": "Without a declaration for the current financial year, or with an open impairment concerning that work, assignment is refused."
+        },
+        {
+          "problem": "Your declaration shows as not acknowledged after you signed again.",
+          "fix": "Signing again replaces it as a new version, which is acknowledged again."
+        },
+        {
+          "problem": "Who can read your entry?",
+          "fix": "Only you and the Head of Internal Audit read the details; the Audit Committee chair sees counts and names only."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/IndependencePage.tsx",
+        "shared/workflow.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "run-independence-register",
+      "title": "Run the independence register and confirm an assignment after a warning",
+      "goal": "Every declaration is acknowledged, impairments are resolved, prior roles are recorded, and assignments that need judgement carry a reason.",
+      "role": "Head of Internal Audit (CAE); the Audit Committee chair reads the summary",
+      "level": "Advanced",
+      "before": [
+        "Staff have signed their declarations."
+      ],
+      "steps": [
+        "Open Independence & competency and choose Register. Each auditor shows badges for the declaration (missing, declared, acknowledged), CPD this year against the target, last year's shortfall and open impairments.",
+        "Choose Open on an auditor. Choose Acknowledge on their declaration.",
+        "To resolve an impairment, choose Resolve and write the Resolution (safeguard or reassignment).",
+        "To record a prior role in the municipality, choose Record under Prior roles in the municipality: the Role, what was Managed (a department or an audit area) and the dates, then Record.",
+        "When you add someone to a team and the screen shows Independence warning (Standards 2.1, 2.2) because a prior role in the department or area ended within 12 months of the planned start, write the Reason the assignment is acceptable and confirm. The reason is kept with the engagement and shown under Team independence.",
+        "Audit Committee chair: open Independence & competency → Summary for counts and names (Declaration missing, CPD shortfall, Open impairments), and acknowledge the Head of Internal Audit's declaration under Declarations of the Head of Internal Audit."
+      ],
+      "result": "The register shows every member declared and acknowledged, which lets you sign off stage 2 of the annual cycle.",
+      "troubleshooting": [
+        {
+          "problem": "You cannot acknowledge your own declaration or resolve your own impairment.",
+          "fix": "Nobody acknowledges their own; the Audit Committee chair acknowledges the Head of Internal Audit's declaration."
+        },
+        {
+          "problem": "A manager cannot get past the independence warning.",
+          "fix": "Only the Head of Internal Audit can confirm the assignment, with a recorded reason."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/IndependencePage.tsx",
+        "src/components/lifecycle/AssignmentWarning.tsx",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
+    },
+    {
+      "id": "record-conflict-check",
+      "title": "Record your conflict check on an engagement",
+      "goal": "Your conflict check is on record, which every team member (the manager included) needs before fieldwork starts.",
+      "role": "Every member of the engagement team, the audit manager included",
+      "level": "Basic",
+      "before": [
+        "You are assigned to the engagement."
+      ],
+      "steps": [
+        "Open Engagements, choose the engagement and stay on Overview. Find Team independence.",
+        "Choose Record my conflict check.",
+        "Read the question on personal, family, financial or prior working relationships with the department, its officials or its suppliers. Under Your answer choose No conflict or I declare a conflict.",
+        "If you declare a conflict, write the Details. Choose Record.",
+        "To change it later, choose Correct my conflict check."
+      ],
+      "result": "Team independence shows No conflict or Conflict declared beside your name. A declared conflict opens an impairment and notifies the Head of Internal Audit and the manager.",
+      "troubleshooting": [
+        {
+          "problem": "Start fieldwork is still blocked after your check.",
+          "fix": "Every team member must record a check, and no impairment concerning the engagement may be open. The Head of Internal Audit resolves impairments."
+        },
+        {
+          "problem": "Colleagues can see your conflict details.",
+          "fix": "They cannot: other team members see that a conflict was declared, not its details."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/EngagementWorkspacePage.tsx",
+        "shared/workflow.ts"
+      ]
     },
     {
       "id": "review-analytics-cases",
       "title": "Review analytics anomalies and cases",
       "goal": "You have examined the cases the analytics rules raised over the whole population and know which records triggered each rule.",
-      "role": "Staff / Senior Auditor, Audit Manager / Director, Chief Audit Executive",
+      "role": "Staff / Senior Auditor, Audit Manager / Director, Head of Internal Audit (CAE)",
       "level": "Intermediate",
-      "before": ["Populations are loaded (see Data Ingestion)."],
+      "before": [
+        "Populations are loaded (see Data Ingestion)."
+      ],
       "steps": [
         "Open one of the analytics modules: Procurement & SCM, Disbursements & AP, Payroll & HR or General Ledger.",
         "Read the populations, the rules that ran with their parameters, and how many records each rule evaluated.",
@@ -106,16 +486,27 @@
       ],
       "result": "Each case shows its explanation, records and evidence. A case is a candidate for review, never a finding by itself.",
       "troubleshooting": [
-        { "problem": "You want to mark a case as confirmed, cleared or escalated directly.", "fix": "Setting a case's status directly is not available in this release. Link it to a draft finding instead." },
-        { "problem": "Thresholds such as the procurement or overtime limits look wrong for your municipality.", "fix": "They are configurable rule parameters chosen for the demonstration, not statutory values; confirm them against your own policies." }
+        {
+          "problem": "You want to mark a case as confirmed, cleared or escalated directly.",
+          "fix": "Setting a case's status directly is not available in this release. Link it to a draft finding instead."
+        },
+        {
+          "problem": "Thresholds such as the procurement or overtime limits look wrong for your municipality.",
+          "fix": "They are configurable rule parameters chosen for the demonstration, not statutory values; confirm them against your own policies."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/app/nav.ts", "src/pages/CasesPage.tsx", "src/pages/CaseDetailPage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/app/nav.ts",
+        "src/pages/CasesPage.tsx",
+        "src/pages/CaseDetailPage.tsx"
+      ]
     },
     {
       "id": "import-population-file",
       "title": "Import a population file (CSV or Excel)",
       "goal": "A population from the financial system (vendors, purchase orders, payments, employees, payroll lines or journal lines) is stored as a validated dataset and analysed.",
-      "role": "Staff / Senior Auditor, Audit Manager / Director (the Chief Audit Executive can read imports)",
+      "role": "Staff / Senior Auditor, Audit Manager / Director (the Head of Internal Audit (CAE) can read imports)",
       "level": "Intermediate",
       "before": [
         "You are assigned to the engagement the import is filed under.",
@@ -132,19 +523,36 @@
       ],
       "result": "The dataset appears under Imported datasets; each stored row records the file and row it came from, and the candidate cases wait for internal audit to review.",
       "troubleshooting": [
-        { "problem": "The file was not accepted.", "fix": "Save it as .xlsx or CSV without macros or a password. Formulas are not calculated and links to other files are not followed." },
-        { "problem": "Commit is greyed out.", "fix": "The mapping changed since validation (validate again), rejected rows have not been confirmed as excluded, or a new dataset has no name." },
-        { "problem": "Imports says there is no engagement to import into.", "fix": "Imports are filed under an engagement you are assigned to. Ask your audit manager to add you to the team." }
+        {
+          "problem": "The file was not accepted.",
+          "fix": "Save it as .xlsx or CSV without macros or a password. Formulas are not calculated and links to other files are not followed."
+        },
+        {
+          "problem": "Commit is greyed out.",
+          "fix": "The mapping changed since validation (validate again), rejected rows have not been confirmed as excluded, or a new dataset has no name."
+        },
+        {
+          "problem": "Imports says there is no engagement to import into.",
+          "fix": "Imports are filed under an engagement you are assigned to. Ask your audit manager to add you to the team."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "docs/FILE-FORMATS.md", "src/files/ImportsPage.tsx", "src/files/ImportBatchPage.tsx", "src/files/DatasetPage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "docs/FILE-FORMATS.md",
+        "src/files/ImportsPage.tsx",
+        "src/files/ImportBatchPage.tsx",
+        "src/files/DatasetPage.tsx"
+      ]
     },
     {
       "id": "vouch-invoices",
       "title": "Upload invoices and vouch them to payments",
       "goal": "Supporting documents are stored as evidence, their invoice fields extracted and matched to payments, and every item that is not a clean match is decided.",
-      "role": "Staff / Senior Auditor, Audit Manager / Director (the Chief Audit Executive can read)",
+      "role": "Staff / Senior Auditor, Audit Manager / Director (the Head of Internal Audit (CAE) can read)",
       "level": "Intermediate",
-      "before": ["An engagement you work on, and payments loaded or imported."],
+      "before": [
+        "An engagement you work on, and payments loaded or imported."
+      ],
       "steps": [
         "Open Evidence & Vouching. Under Upload evidence choose the engagement and, in Match against, the loaded payments or an imported payments dataset.",
         "Choose the file (PDF, Excel, CSV, Word, PowerPoint or a JPEG, PNG or TIFF image) and choose Upload and extract.",
@@ -156,10 +564,25 @@
       ],
       "result": "Each decision is recorded; a matched payment's analytics case is linked and lists the document back.",
       "troubleshooting": [
-        { "problem": "No fields were read from a scanned invoice or image.", "fix": "Text recognition (OCR) of scans and images is not available in this release; images and PowerPoint files are stored only." },
-        { "problem": "The upload card is not shown.", "fix": "Only auditors and audit managers on an engagement can upload; the Chief Audit Executive has read access." }
+        {
+          "problem": "No fields were read from a scanned invoice or image.",
+          "fix": "Text recognition (OCR) of scans and images is not available in this release; images and PowerPoint files are stored only."
+        },
+        {
+          "problem": "The upload card is not shown.",
+          "fix": "Only auditors and audit managers on an engagement can upload; the Head of Internal Audit (CAE) has read access."
+        },
+        {
+          "problem": "An evidence file shows AI-assisted.",
+          "fix": "Someone declared AI use on it. Invoice extraction itself is rule-based, not AI. A named auditor must record the AI-content review before the working paper or finding it supports can move on."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/files/VouchingPage.tsx", "src/files/DocumentPage.tsx", "src/reports/ExceptionActions.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/files/VouchingPage.tsx",
+        "src/files/DocumentPage.tsx",
+        "src/reports/ExceptionActions.tsx"
+      ]
     },
     {
       "id": "draw-sample",
@@ -167,91 +590,176 @@
       "goal": "A repeatable, seeded sample of payments is drawn for a test and each sampled payment is shown as vouched, exception, awaiting review or without evidence.",
       "role": "Staff / Senior Auditor (during fieldwork)",
       "level": "Intermediate",
-      "before": ["The engagement is in fieldwork and has a programme with tests."],
+      "before": [
+        "The engagement is in fieldwork and has a programme with tests."
+      ],
       "steps": [
         "Open Samples for tests from Evidence & Vouching (or from the engagement's workspace) and choose the Engagement.",
         "Under Draw a sample for a test choose the Test (procedure), optionally the Working paper, the Population and the Method (simple random, systematic, or monetary unit).",
         "Enter the Sample size. Optionally enter a Seed, Only this vendor, an amount band (From R / To R) or payment dates.",
         "Choose Draw the sample. The sample records the population's SHA-256 fingerprint and the seed, so the same inputs give the same sample.",
         "Choose Upload evidence and upload the invoices in Evidence & Vouching for the same engagement and population.",
-        "Return to the sample: each payment shows Vouched, Exception, Awaiting review or No evidence yet."
+        "Return to the sample: each payment shows Vouched, Exception, Awaiting review or No evidence yet.",
+        "On the working paper that documents the test, choose the sample under Sample drawn in the platform (sample basis Statistical sample) so its size, population and selection fill in."
       ],
       "result": "The sample page lists its population, method, seed, who drew it and each payment's vouching status.",
       "troubleshooting": [
-        { "problem": "The draw form is not shown.", "fix": "Only someone on the engagement team who may perform tests can draw a sample." }
+        {
+          "problem": "The draw form is not shown.",
+          "fix": "Only someone on the engagement team who may perform tests can draw a sample."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/reports/SamplesPages.tsx"]
-    },
-    {
-      "id": "plan-and-charter",
-      "title": "Draft and approve the charter and the risk-based audit plan",
-      "goal": "A new version of the internal audit charter or audit plan is approved by the Audit Committee and in force.",
-      "role": "Chief Audit Executive (drafts); Audit Committee / Board (approves)",
-      "level": "Advanced",
-      "before": ["For the plan: risks in the register and auditable units in the audit universe."],
-      "steps": [
-        "Open Plan & charter.",
-        "To change an approved charter or plan, choose Amend (new version) and give a reason. The approved version stays in force until the amendment is approved.",
-        "Edit the draft. For a charter write the title, Charter text and Change summary; for a plan add items, including at least one for the first year. A draft plan shows what changed against the approved one.",
-        "Choose Submit to the Audit Committee.",
-        "Audit Committee member: open Plan & charter and choose Approve plan or Approve charter, or Return plan / Return charter with a note for the Chief Audit Executive.",
-        "Once the plan is approved, choose Start engagement on an approved plan item that has no engagement yet.",
-        "Review the Audit universe (auditable units with their highest risk score) and Workflow settings (notification letter lead time, reporting period and default due dates)."
-      ],
-      "result": "The approved version is marked in force and the previous approved version is superseded in the same step.",
-      "troubleshooting": [
-        { "problem": "Amend is refused.", "fix": "Another version is already in draft or submitted. Finish or return that one first." },
-        { "problem": "A super user cannot approve.", "fix": "Being a super user lets you configure settings within your own role's domain; it gives no approval rights." }
-      ],
-      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/GovernancePage.tsx", "docs/lifecycle/WORKFLOW.md"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/reports/SamplesPages.tsx",
+        "src/pages/engagement/WorkTabs.tsx"
+      ]
     },
     {
       "id": "engagement-planning-fieldwork",
-      "title": "Plan an engagement and carry out fieldwork",
-      "goal": "An engagement is planned, approved, started and its fieldwork submitted for review.",
-      "role": "Staff / Senior Auditor (engagement team); Audit Manager / Director (approves)",
+      "title": "Plan an engagement and start fieldwork",
+      "goal": "The engagement's planning is approved, its criteria pinned, and fieldwork started once every gate is met.",
+      "role": "Staff / Senior Auditor (engagement team); Audit Manager / Director of the engagement or the Head of Internal Audit (approves and starts fieldwork)",
       "level": "Advanced",
-      "before": ["The engagement exists (New engagement on Engagements, or Start engagement from the plan) and a team is assigned."],
+      "before": [
+        "The engagement exists (New engagement on Engagements, or Start engagement from the plan in force) and a team is assigned; every member has a declaration for the year."
+      ],
       "steps": [
-        "Open Engagements and choose the engagement. The workspace shows the phase, what blocks the next step, and the tabs Overview, Risks & controls, Programme, Working papers, Evidence, Requests, Findings, Review notes, QA, Report and Follow-up.",
+        "Open Engagements and choose the engagement. The workspace shows the phase, what blocks the next step, and the tabs Overview, Planning criteria, Risks & controls, Programme, Working papers, Evidence, Requests, Findings, Review notes, QA, Report and Follow-up.",
         "Write the objectives and scope, choose the risks and controls in scope on Risks & controls, and build the Programme with at least one procedure linked to a risk in scope.",
-        "On Overview, record the notification letter (Record the notification letter) and the entrance meeting (Record the entrance meeting).",
-        "Team: choose Submit planning for approval. Manager: choose Approve planning.",
-        "Manager: choose Start fieldwork once the letter was recorded at least the configured lead time before (14 days by default).",
-        "During fieldwork record each test's result and describe any exceptions, document the work with New working paper and mark each paper as prepared (Mark as prepared), attach evidence on Evidence, and send information requests to the auditee on Requests.",
-        "Raise exceptions as draft findings with New finding on the Findings tab, and record control evaluations on Risks & controls → Evaluations.",
-        "When every test has a result and every working paper is prepared, choose Submit fieldwork for review."
+        "On Planning criteria confirm the audit areas and engagement type, the evaluation criteria and an answer for every Topical Requirement (see the criteria and Topical Requirement guides).",
+        "On Overview, record the notification letter (Record the notification letter) and the entrance meeting (Record the entrance meeting). Every team member records a conflict check under Team independence.",
+        "Team: choose Submit planning for approval. Manager: choose Approve planning; this pins the criteria, standards and Topical Requirement answers.",
+        "Manager: choose Start fieldwork. It needs the letter recorded at least the configured lead time before (14 days by default), the entrance meeting, approved planning, every conflict check, no open impairment, and the complete annual cycle (stages 1 to 4) of the financial year of the planned start."
       ],
-      "result": "The engagement moves to review; the audit trail records every step with who did it and when.",
+      "result": "The engagement moves to fieldwork; the audit trail records every step with who did it and when.",
       "troubleshooting": [
-        { "problem": "A step is greyed out.", "fix": "The reasons are shown beside it, for example \"Record the entrance meeting with the auditee.\" Complete them first." },
-        { "problem": "Approved planning was voided.", "fix": "Changing the objectives, scope, risks, controls or programme after approval voids it. Submit the planning again." }
+        {
+          "problem": "A step is greyed out.",
+          "fix": "The reasons are shown beside it, for example \"Record the entrance meeting with the auditee.\" Complete them, or choose Request override where it is offered."
+        },
+        {
+          "problem": "Approved planning was voided.",
+          "fix": "Changing the objectives, scope, risks, controls, programme, criteria or Topical Requirement answers after approval voids it. Submit the planning again."
+        },
+        {
+          "problem": "Start fieldwork names a missing stage.",
+          "fix": "The annual cycle of that financial year is not complete. The Head of Internal Audit completes it on Workflow stages."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/EngagementWorkspacePage.tsx", "src/pages/engagement/WorkTabs.tsx", "src/pages/EngagementsPage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "src/pages/EngagementWorkspacePage.tsx",
+        "src/pages/engagement/PlanningTab.tsx",
+        "src/pages/EngagementsPage.tsx"
+      ]
     },
     {
-      "id": "review-qa-issue-report",
-      "title": "Review working papers, sign quality assurance and issue the final report",
-      "goal": "The engagement passes review and quality assurance, and the Chief Audit Executive issues the final report.",
-      "role": "Audit Manager / Director (review, QA checklist, draft report approval); Chief Audit Executive (QA sign-off, issue, close)",
-      "level": "Advanced",
-      "before": ["Fieldwork has been submitted for review."],
+      "id": "choose-engagement-criteria",
+      "title": "Choose and deselect an engagement's evaluation criteria",
+      "goal": "The engagement has its audit areas, its type and the evaluation criteria it will be judged against (Standard 13.4).",
+      "role": "Engagement team, while the engagement is in planning",
+      "level": "Intermediate",
+      "before": [
+        "The engagement is in planning."
+      ],
       "steps": [
-        "Manager: on Working papers choose Start review on each paper, then Request changes (with a note) or Approve working paper. Preparers answer notes on Review notes with Answer note; the reviewer chooses Clear note or Reopen note.",
-        "Manager: when every paper is approved at its current version, every note cleared, every finding approved and no request open, choose Complete review (or Return to fieldwork with a reason).",
-        "Manager: on QA answer the eight checklist questions and choose Complete checklist.",
-        "Chief Audit Executive, or another manager who neither completed the checklist nor prepared any working paper: choose Sign quality assurance, or Return to review with a reason.",
-        "On Report write the report and its executive summary. A manager who did not write it chooses Approve draft report.",
-        "Make sure management has responded to every finding and record the exit meeting on Overview (Record the exit meeting).",
-        "Chief Audit Executive: choose Approve and issue final report. The findings become final, the report is kept as it was at that moment and a frozen report version is stored with it.",
-        "In follow-up, once every action is verified or closed, the Chief Audit Executive chooses Close engagement (or records a risk acceptance with a reason for what remains open)."
+        "In the engagement workspace open Planning criteria.",
+        "Under Areas and type choose Edit. Choose the Engagement type (assurance is the default, or advisory) and tick the Audit areas (the criteria load from these). Choose Save.",
+        "Under Criteria read the instruments that loaded automatically (Auto) for the areas, in force on the planned start, with status, effective date and version.",
+        "To remove one, choose Deselect and write Why it is not a criterion of this engagement. Choose Restore to bring it back.",
+        "To add another instrument in force, choose Add from register, pick the Instrument and optionally Why it applies, then Add.",
+        "Read the standards mapped to stages 5 to 10 listed below the criteria, and Standard 13: Plan engagements shown for reference (numbers and titles only).",
+        "Check Before planning can be submitted for anything still missing."
       ],
-      "result": "Open the issued report prints the report as issued; the engagement moves to follow-up and finally to closed.",
+      "result": "After Approve planning the card reads Pinned when planning was approved; a later library edit is marked \"a newer version exists\" without changing the engagement.",
       "troubleshooting": [
-        { "problem": "A working paper's approval disappeared.", "fix": "An approval belongs to the version approved; any later edit voids it. Review the paper again." },
-        { "problem": "Approve draft report is needed again.", "fix": "Editing the report or adding a finding after approval needs the draft approved again." }
+        {
+          "problem": "No instrument loads for the areas.",
+          "fix": "Nothing in force on the planned start is mapped to them. Add one from the register; the Head of Internal Audit can add a local by-law on Standards & legislation."
+        },
+        {
+          "problem": "The card says Changed since planning was approved.",
+          "fix": "The criteria are read live again and are pinned anew when planning is next approved."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "docs/lifecycle/WORKFLOW.md", "src/pages/EngagementWorkspacePage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/engagement/PlanningTab.tsx",
+        "shared/workflow.ts",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
+    },
+    {
+      "id": "answer-topical-requirements",
+      "title": "Answer the Topical Requirements and approve an exclusion",
+      "goal": "Every Topical Requirement is answered, applicable checklists are in the programme, and exclusions from mandatory ones are approved by the supervisor.",
+      "role": "Engagement team (answers); the engagement's Audit Manager / Director or the Head of Internal Audit, never the person who answered (approves exclusions)",
+      "level": "Intermediate",
+      "before": [
+        "The engagement is in planning, with its audit areas and type set."
+      ],
+      "steps": [
+        "Open Planning criteria and scroll to Topical Requirements. Each shows its status, effective date and whether it is Mandatory or recommended for this engagement.",
+        "Choose Answer (or Change answer). Read the Triggers and the suggestion from the audit areas, then under Does it apply to this engagement? choose Applies or Does not apply.",
+        "If it does not apply and it is mandatory with matching triggers, write Why it does not apply; that answer needs the supervisor's approval.",
+        "If it applies, set each checklist item under In this engagement to Include or Exclude; an excluded item needs Why it is excluded. Choose Save answer. Included items load into the programme as procedures linked to every risk in scope.",
+        "Supervisor: open the requirement showing Exclusion awaits approval and choose Approve exclusion."
+      ],
+      "result": "Each requirement shows who answered it and when, and Exclusion approved where applicable; Approve planning is no longer blocked by it.",
+      "troubleshooting": [
+        {
+          "problem": "You want to exclude an item already in the programme.",
+          "fix": "Exclude it when you answer; once loaded, a procedure stays in the programme."
+        },
+        {
+          "problem": "Approve exclusion is not offered to you.",
+          "fix": "You answered it. Segregation of duties: someone else (the engagement's manager or the Head of Internal Audit) approves it."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/engagement/PlanningTab.tsx",
+        "shared/library.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "working-paper-sample-basis",
+      "title": "Document a working paper with its sample basis and Standards and mark it prepared",
+      "goal": "A working paper documents a programme step with evidence, its sample basis and the standards it evidences, and is marked prepared.",
+      "role": "Staff / Senior Auditor on the engagement team",
+      "level": "Intermediate",
+      "before": [
+        "The engagement is in fieldwork."
+      ],
+      "steps": [
+        "Open the engagement's Working papers tab and choose New working paper (or Edit on a draft).",
+        "Enter the Title, choose the Programme step (procedure) documented and write the Summary of the work and conclusion.",
+        "Under Sample basis, choose How the items tested were chosen: Statistical sample, Judgemental sample, Full population or Not sampled. For a statistical sample you may choose a Sample drawn in the platform; otherwise enter Items tested, Population and the Selection basis (or Why the working paper is not sampled).",
+        "Tick the Standards this working paper evidences; 14.1, 14.2 and 14.6 are suggested first.",
+        "If you used AI outside the platform, tick I used AI outside the platform to prepare this content and say How AI was used.",
+        "Save, then choose Attach evidence on the paper and add at least one file.",
+        "Answer any open review notes, then choose Mark as prepared."
+      ],
+      "result": "The paper shows as prepared with its sample basis, standards evidenced and evidence; the person who marked it is its preparer.",
+      "troubleshooting": [
+        {
+          "problem": "Mark as prepared is greyed out.",
+          "fix": "It needs the title and summary, the programme step, at least one evidence file, the sample basis and every open review note answered; an AI-assisted paper or evidence also needs a named auditor's AI-content review."
+        },
+        {
+          "problem": "The approval of a paper was voided.",
+          "fix": "An approval applies to one content version; a new evidence file or a changed sample basis voids it."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/engagement/WorkTabs.tsx",
+        "shared/fieldwork.ts",
+        "shared/workflow.ts"
+      ]
     },
     {
       "id": "draft-and-approve-finding",
@@ -259,22 +767,74 @@
       "goal": "A finding is written with criteria, condition, cause, consequence and recommendation, approved and sent to the process owners for a management response.",
       "role": "Staff / Senior Auditor (prepares); Audit Manager / Director who did not prepare it (approves)",
       "level": "Intermediate",
-      "before": ["You are on the engagement team."],
+      "before": [
+        "You are on the engagement team."
+      ],
       "steps": [
         "In the engagement workspace open the Findings tab and choose New finding (or draft one from a case or a vouching exception).",
-        "Fill in the Title, Severity, Criteria, Condition, Cause, Consequence, Recommendation and Value affected (R), and link the Risks, Tests that found it and Controls found deficient.",
+        "Fill in the Title and Significance rating, tick at least one of the Criteria cited (from the engagement's criteria), and write the Criteria (in words), Condition, Root cause, Effect, Recommendation and Value affected (R). Link the Tests that found it, Risks and Controls found deficient.",
+        "Where it applies, set the MFMA s32 classification (see the s32 guide).",
         "Choose Submit for review.",
         "Manager: open the finding and choose Approve finding, or Return for changes with a note the preparer sees on the draft.",
         "After approval the process owners of the department are notified and the response falls due after the configured number of days (14 by default).",
         "Use Download on the finding page to get it as PDF or Word.",
-        "After the final report, once every action is verified or closed, a manager or the Chief Audit Executive chooses Close finding."
+        "After the final report, once every action is verified or closed, a manager or the Head of Internal Audit chooses Close finding."
       ],
       "result": "The finding's Version history shows who drafted, reviewed, approved, responded and reported it, and when.",
       "troubleshooting": [
-        { "problem": "Submit for review is refused.", "fix": "Criteria, condition, cause, consequence and recommendation must all be written." },
-        { "problem": "You cannot approve your own finding.", "fix": "Segregation of duties: a manager who did not prepare it must approve it." }
+        {
+          "problem": "Submit for review is refused.",
+          "fix": "Criteria, condition, root cause, effect and recommendation must all be written and at least one criterion cited. An AI-assisted finding, or one with AI-assisted evidence, also needs a named auditor's AI-content review."
+        },
+        {
+          "problem": "You cannot approve your own finding.",
+          "fix": "Segregation of duties: a manager who did not prepare it must approve it."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/engagement/WorkTabs.tsx", "src/pages/FindingDetailPage.tsx", "src/reports/Integrations.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "src/pages/engagement/WorkTabs.tsx",
+        "src/pages/FindingDetailPage.tsx",
+        "src/reports/Integrations.tsx",
+        "src/components/lifecycle/FindingEditor.tsx",
+        "shared/fieldwork.ts"
+      ]
+    },
+    {
+      "id": "cite-criteria-classify-s32",
+      "title": "Cite criteria and classify MFMA s32 expenditure on a finding",
+      "goal": "The finding cites the engagement's pinned criteria and, where it reports such spending, carries its MFMA s32 classification and amount.",
+      "role": "Engagement team (preparing the draft finding)",
+      "level": "Intermediate",
+      "before": [
+        "A draft finding on an engagement whose criteria are chosen (pinned once planning is approved)."
+      ],
+      "steps": [
+        "Open the draft finding and choose Edit draft.",
+        "Under Criteria cited (from the engagement's criteria), tick each instrument or standard the condition is measured against. For an instrument with several provisions, choose the Provision (or The instrument as a whole).",
+        "Keep the free-text Criteria field as the narrative of what should be.",
+        "Under MFMA s32 classification, choose the Classification: None, Unauthorised expenditure, Irregular expenditure or Fruitless and wasteful expenditure (MFMA s32; MFMA Circular 68).",
+        "For a classification, enter the Amount (R) and a Note on the basis and what follows (register, investigation, recovery). Save."
+      ],
+      "result": "The finding page shows Criteria cited and the MFMA s32 classification; the register shows an s32 badge (filter MFMA s32), the Committee view lists it with totals, and the findings register export carries the MFMA s32 classification, UIFW amount (R) and Criteria cited columns.",
+      "troubleshooting": [
+        {
+          "problem": "The instrument you need is not offered.",
+          "fix": "Only the engagement's criteria can be cited. Add the instrument to the engagement's criteria first (Planning criteria → Add from register, while in planning)."
+        },
+        {
+          "problem": "MFMA s32 appears among the criteria although the engagement did not pin the MFMA.",
+          "fix": "The system cites the s32 provision automatically while the finding is classified."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/components/lifecycle/FindingEditor.tsx",
+        "shared/fieldwork.ts",
+        "src/pages/FindingDetailPage.tsx",
+        "src/pages/CommitteePage.tsx"
+      ]
     },
     {
       "id": "process-owner-response",
@@ -282,43 +842,454 @@
       "goal": "Your department's management response is recorded, information requests are answered, and your actions carry proof of remediation for internal audit to verify.",
       "role": "Process Owner / Auditee",
       "level": "Basic",
-      "before": ["A finding for your department has been approved, or a request has been sent to your department."],
+      "before": [
+        "A finding for your department has been approved, or a request has been sent to your department."
+      ],
       "steps": [
         "Open My work. It lists the findings awaiting your response, the information requests sent to your department and your actions, with what is overdue.",
-        "Open a finding and choose Record management response. Choose agreed, partially agreed or disagreed, write your comments, and add the actions with their owners and due dates (Add an action). At least one action is needed unless you disagree.",
+        "Open a finding and choose Record management response. Choose your Position (agreed, partially agreed or disagreed), write the Management comments, and add the actions (Add another action), each with what will be done, an Owner (or Someone without an account) and a Due date. Choose Submit response.",
         "Open an information request, attach the files or write your answer, and choose Submit response. Internal audit accepts it or returns it with a reason.",
         "Open one of your actions. Choose Start work when you begin.",
         "Use Upload remediation evidence to attach the proof, then choose Submit remediation evidence.",
-        "An auditor on the engagement then chooses Verify or Reject evidence (with a reason); if rejected, upload new evidence and submit again."
+        "An auditor who is neither the owner nor the submitter then chooses Verify or Reject evidence (with a reason); if rejected, upload new evidence and submit again.",
+        "If the due date cannot be met, choose Propose a revised date on the action (see the follow-up guide)."
       ],
       "result": "The finding moves to management response, and verified actions show as Implemented on the dashboards.",
       "troubleshooting": [
-        { "problem": "You cannot see a finding yet.", "fix": "Process owners see their department's findings from approval onwards." },
-        { "problem": "Submit remediation evidence is greyed out.", "fix": "At least one remediation evidence file must be uploaded since the last rejection." }
+        {
+          "problem": "You cannot see a finding yet.",
+          "fix": "Process owners see their department's findings from approval onwards."
+        },
+        {
+          "problem": "Submit response is refused.",
+          "fix": "Unless you disagree, at least one action is needed and every action of the finding needs an owner and a due date."
+        },
+        {
+          "problem": "Submit remediation evidence is greyed out.",
+          "fix": "At least one remediation evidence file must be uploaded since the last rejection."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "shared/workflow.ts", "src/pages/MyWorkPage.tsx", "src/components/lifecycle/FindingWorkflowPanel.tsx", "src/pages/ActionDetailPage.tsx", "src/pages/RequestDetailPage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "src/pages/MyWorkPage.tsx",
+        "src/components/lifecycle/FindingWorkflowPanel.tsx",
+        "src/pages/ActionDetailPage.tsx",
+        "src/pages/RequestDetailPage.tsx"
+      ]
+    },
+    {
+      "id": "review-qa-issue-report",
+      "title": "Review working papers, sign quality assurance and issue the final report",
+      "goal": "The engagement passes review and quality assurance, and the Chief Audit Executive issues the final report.",
+      "role": "Audit Manager / Director (review, QA checklist, draft report approval); Head of Internal Audit (CAE) (QA sign-off, issue, close)",
+      "level": "Advanced",
+      "before": [
+        "Fieldwork has been submitted for review."
+      ],
+      "steps": [
+        "Manager: on Working papers choose Start review on each paper, then Request changes (with a note) or Approve working paper. Preparers answer notes on Review notes with Answer note; the reviewer chooses Clear note or Reopen note.",
+        "Manager: when every paper is approved at its current version, every note cleared, every finding approved and no request open, choose Complete review (or Return to fieldwork with a reason).",
+        "Manager: on QA answer the eight checklist questions, Save checklist and choose Complete checklist.",
+        "Head of Internal Audit, or another manager who neither completed the checklist nor prepared any working paper: choose Sign quality assurance, or Return to review with a reason.",
+        "On Report write the report and its executive summary. A manager who did not write it chooses Approve draft report.",
+        "The engagement's manager or the Head of Internal Audit writes the Engagement conclusion, and the preparers record the Distribution list (see those guides).",
+        "Make sure management has responded to every finding with a complete action plan, that every AI-assisted item has its AI-content review, and record the exit meeting on Overview (Record the exit meeting).",
+        "Head of Internal Audit: choose Approve and issue final report. The findings become final, a frozen report version is stored, and the users on the distribution list are notified.",
+        "In follow-up, once every action is verified or closed, the Head of Internal Audit chooses Close engagement (or records a risk acceptance with a reason for what remains open)."
+      ],
+      "result": "Open the issued report prints the report as issued; the engagement moves to follow-up and finally to closed.",
+      "troubleshooting": [
+        {
+          "problem": "A working paper's approval disappeared.",
+          "fix": "An approval belongs to the version approved; any later edit voids it. Review the paper again."
+        },
+        {
+          "problem": "Approve draft report is needed again.",
+          "fix": "Editing the report or adding a finding after approval needs the draft approved again."
+        },
+        {
+          "problem": "Approve and issue final report is greyed out.",
+          "fix": "Read the blockers: for example no engagement conclusion, no distribution list, a finding whose action lacks an owner or due date, or an AI-assisted item awaiting review. A missing AI-content review can never be overridden."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "docs/lifecycle/WORKFLOW.md",
+        "src/pages/EngagementWorkspacePage.tsx",
+        "src/pages/engagement/WorkTabs.tsx"
+      ]
+    },
+    {
+      "id": "write-engagement-conclusion",
+      "title": "Write the engagement conclusion and overall rating",
+      "goal": "The engagement has its overall conclusion and rating (Standard 14.5), which the final report needs.",
+      "role": "Audit Manager / Director of the engagement, or the Head of Internal Audit (CAE)",
+      "level": "Intermediate",
+      "before": [
+        "The engagement is in review or later and its final report is not yet issued."
+      ],
+      "steps": [
+        "In the engagement workspace open Report. Find the Engagement conclusion card (Not written until it is).",
+        "Choose Write the conclusion (or Revise the conclusion).",
+        "Choose the Overall rating: Effective; Partially effective: improvement needed; or Ineffective: major improvement needed (a product default scale the municipality may rename).",
+        "Write the Conclusion and choose Save conclusion.",
+        "If AI helped write it, use Declare AI use under AI assistance (conclusion); a named auditor then records the AI-content review."
+      ],
+      "result": "The card shows the rating badge, the text, and who wrote it and when; the issued report version binds the conclusion and rating.",
+      "troubleshooting": [
+        {
+          "problem": "Write the conclusion is not shown.",
+          "fix": "Only the engagement's audit manager or the Head of Internal Audit may write it, and only from review until the final report is issued."
+        },
+        {
+          "problem": "The conclusion is left out of the quarterly performance audit report.",
+          "fix": "It is AI-assisted and awaits a named auditor's review; it is reported once reviewed."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/engagement/WorkTabs.tsx",
+        "shared/fieldwork.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "distribution-list-and-correction",
+      "title": "Record the distribution list and correct an issued report",
+      "goal": "The final report is issued to a recorded list of recipients, and an error found after issue is corrected by a reissue that keeps the original.",
+      "role": "Report preparers or the Head of Internal Audit (distribution list); Head of Internal Audit (CAE) (correct and reissue)",
+      "level": "Advanced",
+      "before": [
+        "The engagement is in reporting (for the list) or its final report is issued (for a correction)."
+      ],
+      "steps": [
+        "On the engagement's Report tab, under Report versions, find Distribution list and choose Record the list (or Change the list).",
+        "Type the Role on the list (for example Municipal Manager, Auditor-General). Choose A user of the system and Add user, or type an external recipient's name and Add external. Remove any entry with Remove. Choose Save the list.",
+        "When the report is issued, the users on the list are notified in the platform; the list is fixed with the issue.",
+        "To correct an error or omission after issue (Standard 11.4), first correct any finding on the finding itself. Then choose Correct and reissue.",
+        "Write the Reason for reissuing, What was wrong and The correction. Tick Correct the executive summary to enter a Corrected executive summary if the text was wrong.",
+        "Tick the confirmation that the distribution list is told of the correction, then choose Reissue."
+      ],
+      "result": "A new issued version is frozen with its own SHA-256; the one it replaces is kept unchanged and marked superseded, and the users on the list are notified of the correction.",
+      "troubleshooting": [
+        {
+          "problem": "Approve and issue final report says the distribution list is missing.",
+          "fix": "The final report is issued only with a distribution list (Standard 15.1). Record it first."
+        },
+        {
+          "problem": "Reissue is refused.",
+          "fix": "Nothing the issued version includes has changed and no text was corrected: correct the executive summary in the dialog, or the finding first."
+        },
+        {
+          "problem": "External recipients were not notified.",
+          "fix": "The platform notifies users only; you confirm that external recipients were told."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/reports/ReportVersionsPanel.tsx",
+        "src/reports/ReportVersionPage.tsx",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
     },
     {
       "id": "report-versions-and-exports",
       "title": "Generate report versions and export registers and summaries",
       "goal": "You have frozen report versions to read, print or download, and working exports of the registers and summaries you need.",
-      "role": "Engagement team, Audit Manager / Director, Chief Audit Executive; executives and the Audit Committee see issued versions and summaries",
+      "role": "Engagement team, Audit Manager / Director, Head of Internal Audit (CAE); executives and the Audit Committee see issued versions and summaries",
       "level": "Intermediate",
-      "before": ["For report versions: the engagement is in review or later."],
+      "before": [
+        "For report versions: the engagement is in review or later."
+      ],
       "steps": [
         "In the engagement workspace open the Report tab. Under Report versions choose Generate draft version to freeze the report, the approved findings with their 5 Cs, responses, action plans and evidence, and the approvals so far.",
-        "Choose Open and print to show a version ready to print, or Download for PDF or Word. The version page shows whether its fingerprint still matches its content.",
-        "If an issued version is marked Superseded — changes after issue, the Chief Audit Executive chooses Reissue after changes and gives a reason.",
-        "On Findings, Actions or Cases, open the Export menu to download the rows you see, with your filters, as Excel or CSV.",
+        "Choose Open and print to show a version ready to print, or Download for PDF or Word. The version page shows whether its fingerprint still matches its content, the conformance statement (or why it is withheld) and any correction.",
+        "The issued version also binds the engagement conclusion and rating, each finding's cited criteria and MFMA s32 classification, the distribution list and the conformance statement.",
+        "If an issued version is marked Superseded — changes after issue, the Head of Internal Audit chooses Correct and reissue (see the distribution and correction guide).",
+        "On Findings, Actions or Cases, open the Export menu to download the rows you see, with your filters, as Excel or CSV. The findings register export uses Significance rating and adds MFMA s32 classification, UIFW amount (R), Criteria cited and an AI-assisted column.",
         "On the Dashboard open Reports for the Findings summary (PDF or Word) and the Audit Committee deck (PowerPoint) or summary (PDF).",
         "Download a single finding or working paper as PDF or Word with Download on its page."
       ],
       "result": "Each file carries the product name, generation time and page or slide numbers; every export is recorded in the audit trail.",
       "troubleshooting": [
-        { "problem": "Generate draft version is disabled.", "fix": "Generating and reissuing a version need a connection." },
-        { "problem": "An export has fewer rows than you expected.", "fix": "Exports only ever contain what your role may see, with the filters in force." }
+        {
+          "problem": "Generate draft version is disabled.",
+          "fix": "Generating and reissuing a version need a connection."
+        },
+        {
+          "problem": "An export has fewer rows than you expected.",
+          "fix": "Exports only ever contain what your role may see, with the filters in force."
+        },
+        {
+          "problem": "The report says conformance is not stated.",
+          "fix": "The conformance statement is printed only when the quality programme supports it on the day of issue (or of generation, for a draft); otherwise the reasons are listed."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/reports/ReportVersionsPanel.tsx", "src/reports/ReportVersionPage.tsx", "src/files/ui.tsx", "src/modules/ExecutiveAuditDashboard.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/reports/ReportVersionsPanel.tsx",
+        "src/reports/ReportVersionPage.tsx",
+        "src/files/ui.tsx",
+        "src/modules/ExecutiveAuditDashboard.tsx",
+        "shared/fieldwork.ts"
+      ]
+    },
+    {
+      "id": "request-and-decide-override",
+      "title": "Request and decide a gate override",
+      "goal": "A blocked step is passed once, with a recorded reason and a decision by someone other than the requester.",
+      "role": "Staff / Senior Auditor, Audit Manager / Director or Head of Internal Audit (request); Head of Internal Audit (decides), or the Audit Committee chair for an override the Head of Internal Audit asked for",
+      "level": "Advanced",
+      "before": [
+        "The step is one that can be overridden (for example Start fieldwork, Mark a working paper as prepared, Submit a finding for review, Approve and issue final report, the plan submission, and the stage 2 and 3 sign-offs)."
+      ],
+      "steps": [
+        "Under the greyed-out step, read the blockers and choose Request override.",
+        "In Request an override, write the Reason and choose Request override. The server copies the blockers into the request.",
+        "Decider: open My work → Overrides awaiting your decision, or Workflow stages → Overrides. Read the step, the record, the reason and the blockers.",
+        "Choose Approve (with an optional note) or Reject (a reason is required).",
+        "The requester tries the step again: it is allowed once under the override, which passes exactly the listed blockers."
+      ],
+      "result": "The override is marked used, and the audit trail and the engagement's overview (Gate overrides) show it.",
+      "troubleshooting": [
+        {
+          "problem": "A blocker remains after approval.",
+          "fix": "A blocker that appeared after the request still blocks; an override passes only what it lists."
+        },
+        {
+          "problem": "The approved override lapsed.",
+          "fix": "An approved override not used within 14 days expires (a product default). Request a new one."
+        },
+        {
+          "problem": "Request override is not offered.",
+          "fix": "Segregation of duties, permissions, the chair's authority, the record's state and a named auditor's AI-content review are never overridable; management responses have no override and closing uses a risk acceptance."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "shared/workflow.ts",
+        "src/components/lifecycle/kit.tsx",
+        "src/pages/StagesPage.tsx",
+        "docs/lifecycle/WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "note-quarterly-committee-report",
+      "title": "Record the Audit Committee's noting of a quarterly report",
+      "goal": "Each quarter's report is recorded as noted by the Audit Committee with the meeting date and minutes reference (stage 11).",
+      "role": "Audit Committee chair",
+      "level": "Basic",
+      "before": [
+        "The quarter has ended and the Head of Internal Audit has issued its quarterly report."
+      ],
+      "steps": [
+        "Open My work → Quarterly reports to note, or Workflow stages → Committee reports and choose the Financial year.",
+        "Each quarter shows Noted, Awaits noting, Overdue or Quarter not ended, and a link to the Quarterly report once issued.",
+        "Open the quarterly report to read it.",
+        "Choose Record noting. Enter the Meeting date and the Minutes reference, and a Note (optional). Choose Record noting.",
+        "Read the count of meetings with a report noted in the year against the minimum of four (MFMA s166; Circular 65)."
+      ],
+      "result": "The quarter shows Noted with the meeting date, minutes reference and who recorded it.",
+      "troubleshooting": [
+        {
+          "problem": "Record noting is not shown.",
+          "fix": "The quarterly report has not been issued (\"it is noted once issued\"), or you are not the chair."
+        },
+        {
+          "problem": "A quarter shows Overdue.",
+          "fix": "It was not noted 60 days after the quarter ended (a product default)."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/StagesPage.tsx",
+        "server/lifecycle/routes-oversight.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "record-quality-assessment",
+      "title": "Record a quality assessment and the Committee's receipt of the results",
+      "goal": "The quality assurance and improvement programme (stage 12) records each assessment, and the Audit Committee's yearly receipt of the results.",
+      "role": "Head of Internal Audit (CAE) (records assessments); Audit Committee chair (records receipt); audit managers and the Committee can read",
+      "level": "Advanced",
+      "before": [],
+      "steps": [
+        "Open Quality programme (under Governance). The banner says whether The conformance statement is supported or may not be used, and why.",
+        "Read when the next external assessment is due (five years after the last, MFMA Circular 65), with an alert from six months before.",
+        "Choose Record assessment. Choose the Kind (Ongoing monitoring, Periodic self-assessment or External assessment) and the Conclusion (Standard 8.4): Generally conforms, Partially conforms or Does not conform.",
+        "Enter the Title, Period from, Period to and Concluded on. Choose the Assessor, or tick Carried out by an external firm or person and enter the External assessor.",
+        "Enter Findings, Improvement actions and Performance measures (one per line: name | value | target), and save. Edit later with Edit; each edit is a new version.",
+        "Read Engagement quality assurance: every signed engagement QA checklist of the year is listed as ongoing monitoring.",
+        "Audit Committee chair: under Audit Committee receipt choose Record receipt, add a Note (optional), and confirm."
+      ],
+      "result": "The assessment is listed, the conformance banner reflects it, and the year shows as received by the Committee.",
+      "troubleshooting": [
+        {
+          "problem": "The conformance statement may not be used.",
+          "fix": "It needs the latest external assessment within five years and the latest self-assessment within 12 months (a product default), both concluding Generally conforms."
+        },
+        {
+          "problem": "Record assessment is not shown.",
+          "fix": "Only the Head of Internal Audit records and edits assessments."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/QualityPage.tsx",
+        "shared/stages.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "prepare-issue-periodic-reports",
+      "title": "Prepare and issue the quarterly Audit Committee, performance audit and annual quality reports",
+      "goal": "Each periodic report is issued once its period has ended, frozen with a SHA-256 and sent to its readers; accepted risks are escalated so they appear in it.",
+      "role": "Head of Internal Audit (CAE) (prepares, escalates and issues); audit managers read drafts; the Municipal Manager and the Audit Committee read issued reports",
+      "level": "Advanced",
+      "before": [
+        "The period has ended."
+      ],
+      "steps": [
+        "Before the quarterly report: open Committee view and, under Accepted risks escalated, choose Escalate a risk (N awaiting). Choose What management accepted (a risk acceptance at closure, a response that disagrees, or a finding with an action more than 90 days overdue, a product default), and write The risk accepted, Why it is escalated, management's position and Your view. Choose Escalate; the chair is notified.",
+        "Open Periodic reports (under Governance), choose the Financial year and the tab: Audit Committee, Performance audit or Annual quality.",
+        "Open a period. The page shows a preview built from the records now: for the quarterly Audit Committee report, Progress against the plan, Significant findings in the quarter, MFMA s32 classification, Overdue actions and ageing, Accepted risks escalated (Standard 11.5), Resource constraints, Independence register (counts only) and conformance.",
+        "Choose Prepare (or Edit draft) and write the narrative: Resource constraints (write \"None\" if there were none), Continuous auditing of performance measurements for the performance audit report, or the optional Commentary of the Head of Internal Audit. Choose Save draft.",
+        "If AI helped write the narrative, declare it under AI assistance (narrative); a named auditor must review it before issue.",
+        "Choose Issue, then Issue the report. The content is frozen with its SHA-256; the Audit Committee (and, for the quarterly reports, the Municipal Manager) is notified.",
+        "Use Print or Download (PDF or Word) on the issued report."
+      ],
+      "result": "The report shows Issued with its SHA-256 \"recomputed and matching\"; on Workflow stages the quarter links to it and the chair can record its noting.",
+      "troubleshooting": [
+        {
+          "problem": "Issue is not offered.",
+          "fix": "The period has not ended, the required narrative is missing, or an AI-assisted narrative or included finding awaits review. Only the Head of Internal Audit issues these reports."
+        },
+        {
+          "problem": "You want to change an issued report.",
+          "fix": "An issued report never changes."
+        },
+        {
+          "problem": "Escalate a risk is not shown.",
+          "fix": "There is no candidate awaiting escalation, or you are not the Head of Internal Audit; nothing is escalated automatically."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/PeriodicReportsPage.tsx",
+        "src/pages/CommitteePage.tsx",
+        "shared/oversight.ts",
+        "server/lifecycle/routes-periodic.ts"
+      ]
+    },
+    {
+      "id": "follow-up-ag-findings-due-dates",
+      "title": "Track follow-up: record Auditor-General findings and propose or approve a revised due date",
+      "goal": "Internal audit and Auditor-General findings (MFMA s131) are tracked to closure with ageing, and due-date changes are proposed and decided on record.",
+      "role": "Audit Manager / Director or Head of Internal Audit (record Auditor-General findings); Process Owner / Auditee (propose dates); Staff / Senior Auditor, Audit Manager / Director or Head of Internal Audit (decide dates)",
+      "level": "Intermediate",
+      "before": [],
+      "steps": [
+        "Open Follow-up register (under Audit work). Select an ageing tile (Not yet due, 0–30, 31–90, 91–180, >180 days overdue) or filter by Source, Status, Department or text.",
+        "To record an Auditor-General finding, choose Record Auditor-General finding: Financial year audited, Auditor-General reference, Audit area, Department, Significance rating, Title and What the Auditor-General found. Choose Record.",
+        "On the finding's page choose Add action: the Action, an optional Description, the Owner (or An official without an account) and the Due date, then Add action. The actions run through the ordinary action workflow.",
+        "When every action is verified, choose Close finding (My work lists Auditor-General findings ready to close).",
+        "Process owner: on an action you own choose Propose a revised date, enter the Revised due date and a Reason, and choose Propose.",
+        "Auditor, audit manager or Head of Internal Audit in scope: open My work → Revised due dates to decide, or the action's Due date and revisions, and choose Approve or Reject (a rejection needs a reason)."
+      ],
+      "result": "The action shows its current due date with the original date and every proposal; ageing is worked out from the current due date each time.",
+      "troubleshooting": [
+        {
+          "problem": "You cannot decide a proposal.",
+          "fix": "Nobody decides their own proposal (segregation of duties)."
+        },
+        {
+          "problem": "A process owner cannot see an Auditor-General finding.",
+          "fix": "Process owners see only those of their own department."
+        },
+        {
+          "problem": "Close finding is greyed out.",
+          "fix": "Every action must first be verified by an internal auditor who is neither its owner nor its submitter."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/FollowUpPage.tsx",
+        "src/pages/ActionDetailPage.tsx",
+        "shared/oversight.ts",
+        "docs/security/PERMISSION-MATRIX.md"
+      ]
+    },
+    {
+      "id": "declare-and-review-ai",
+      "title": "Declare AI-assisted content and record the named auditor's review",
+      "goal": "Every item AI helped write carries the AI-assisted label and a named auditor's review at its current AI content version before it is used.",
+      "role": "Anyone who prepares the item (declares); Staff / Senior Auditor, Audit Manager / Director or Head of Internal Audit who can open the item (reviews)",
+      "level": "Intermediate",
+      "before": [
+        "An item that AI helped write: a working paper, a finding, an audit evidence file, the engagement conclusion, the report text or a periodic report narrative."
+      ],
+      "steps": [
+        "Content saved through a confirmed assistant proposal is labelled by the system (\"Set by the system: content arrived through the assistant. The label cannot be removed.\").",
+        "If you used AI outside the platform, open AI assistance on the item (or the working paper form's I used AI outside the platform box) and choose Declare AI use. Under How AI was used, name the tool and the part of the content, and choose Declare.",
+        "Reviewer: read the item against its evidence, then under AI assistance choose Record AI-content review. Read the statement you confirm and choose I confirm: record the review.",
+        "If a declaration was made in error, its author chooses Withdraw declaration and Withdraw. The system's own label stays."
+      ],
+      "result": "The item shows who reviewed it, when, and the AI content version covered; the steps it blocked (Mark as prepared, Submit for review, issuing the report or a periodic report) are no longer blocked by it.",
+      "troubleshooting": [
+        {
+          "problem": "The review disappeared.",
+          "fix": "A later change made with AI help (through the assistant, or a new or changed declaration) is a new AI content version; review it again. Edits made without AI do not void it."
+        },
+        {
+          "problem": "Record AI-content review is not offered.",
+          "fix": "It needs an auditor, audit manager or Head of Internal Audit who can open the item, is never made through the assistant, and is refused once the content is final (an issued report, a final finding, an engagement past reporting)."
+        },
+        {
+          "problem": "You asked for an override of the missing review.",
+          "fix": "A named auditor's review can never be overridden."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/components/lifecycle/AiLabel.tsx",
+        "src/pages/engagement/WorkTabs.tsx",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
+    },
+    {
+      "id": "read-ai-register",
+      "title": "Read the AI register and the AI and your data position",
+      "goal": "You can account for every AI-assisted item, whether it was reviewed and by whom, and what the assistant sends and to whom.",
+      "role": "Head of Internal Audit (CAE) (every item); Audit Committee chair (counts only)",
+      "level": "Basic",
+      "before": [],
+      "steps": [
+        "Open AI register (under Governance).",
+        "Read the totals: AI-assisted items, Reviewed by a named auditor and Awaiting review.",
+        "Under By type read, for each type, Items, Reviewed, Awaiting, Through the assistant and Declared.",
+        "Head of Internal Audit: read Items, with the items awaiting review first; each shows Reviewed by and when. Open an item to review it.",
+        "Read AI and your data: what is Sent with a question, what is Never sent, the position on Training on client data, and which engine is Answering now."
+      ],
+      "result": "You have the register of AI-assisted work and the stated data position for the Audit Committee.",
+      "troubleshooting": [
+        {
+          "problem": "The page says The external model is off.",
+          "fix": "The operator asked for an external model but has not attested a contract that excludes training on client data, so the local engine answers."
+        },
+        {
+          "problem": "A committee member is refused.",
+          "fix": "Only the Audit Committee chair sees the counts; the platform records the operator's attestation and does not verify a provider's own terms."
+        }
+      ],
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/AiRegisterPage.tsx",
+        "src/app/nav.ts",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
     },
     {
       "id": "use-the-assistant",
@@ -326,23 +1297,46 @@
       "goal": "You get grounded answers, explanations and drafts from the records you can see, and carry out a workflow step only after confirming the assistant's proposal.",
       "role": "Any signed-in user whose licence includes the assistant",
       "level": "Basic",
-      "before": ["You are online. The assistant needs a connection."],
+      "before": [
+        "You are online. The assistant needs a connection."
+      ],
       "steps": [
         "Choose Assistant in the header of any page to open the panel, or open the Assistant page for your conversation history (Conversation history, New conversation).",
-        "Type in plain words in Your question, naming records by id or reference, for example \"Which actions are overdue?\", \"Explain CASE-0001\" or \"Draft a finding from CASE-0005\", and choose Send.",
+        "Type in plain words in Your question, naming records by id or reference, for example \"Which actions are overdue?\", \"Explain CASE-0001\", \"List the Auditor-General findings\" or \"Draft a working paper section for WP-0009\", and choose Send.",
         "Read the answer. Under Supporting records each record it rests on is listed (choose Open the record); each statement is marked Evidence, Inference or Uncertain.",
-        "Drafts are for you to check and copy; complete any text in [square brackets].",
+        "Drafts are for you to check and copy; complete any text in [square brackets]. The assistant forms no audit opinion.",
         "To act, ask for a step (for example \"Approve finding FND-0016\"). The assistant shows a proposal: what would change, what follows and whether you may do it now.",
         "Choose Confirm to carry it out through the normal workflow with every check, or Cancel to discard it. A proposal can be confirmed once, within 15 minutes, while the record is unchanged.",
+        "Content you save through a proposal (a working-paper section, a finding) is labelled AI-assisted and needs a named auditor's review before it is used.",
         "Where your browser supports it, choose Speak to dictate, check the text, then send. Choose Read replies aloud to hear answers."
       ],
       "result": "Confirmed steps appear in the audit trail as done by you through the assistant; nothing changes without your confirmation.",
       "troubleshooting": [
-        { "problem": "The assistant says it cannot see a record.", "fix": "It sees only what you can open; a record outside your access is answered as if it does not exist." },
-        { "problem": "Confirm and Cancel are disabled.", "fix": "You are offline. Proposals are never queued on the device; confirm when you are online again." },
-        { "problem": "The microphone is not shown.", "fix": "Your browser has no speech recognition. Some browsers send recordings to their maker's speech service; the panel says so." }
+        {
+          "problem": "The assistant says it cannot see a record.",
+          "fix": "It sees only what you can open; a record outside your access is answered as if it does not exist."
+        },
+        {
+          "problem": "Confirm and Cancel are disabled.",
+          "fix": "You are offline. Proposals are never queued on the device; confirm when you are online again."
+        },
+        {
+          "problem": "The microphone is not shown.",
+          "fix": "Your browser has no speech recognition. Some browsers send recordings to their maker's speech service; the panel says so."
+        },
+        {
+          "problem": "The assistant will not draft or issue a periodic report or record a review.",
+          "fix": "It reads and cites Auditor-General findings, escalations and periodic reports but writes none of them, and the AI-content review is always recorded by a person."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "docs/assistant/ASSISTANT.md", "src/assistant/AssistantPanel.tsx", "src/assistant/AnswerView.tsx", "src/assistant/AssistantPage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "docs/assistant/ASSISTANT.md",
+        "src/assistant/AssistantPanel.tsx",
+        "src/assistant/AnswerView.tsx",
+        "src/assistant/AssistantPage.tsx",
+        "docs/lifecycle/STANDARDS-INTEGRATION.md"
+      ]
     },
     {
       "id": "work-offline",
@@ -365,22 +1359,44 @@
       ],
       "result": "Accepted changes become the new versions of the records; every choice on a conflict is recorded in the audit trail.",
       "troubleshooting": [
-        { "problem": "Approve, Submit or Issue buttons are disabled offline.", "fix": "Every workflow step, administration, backups and exports, the assistant and report versions need a connection; the reason is shown on the button." },
-        { "problem": "The offline copy disappeared.", "fix": "Signing out, the end of the grant period, a change to your account or an IT administrator's revocation deletes it. Export unsynced work before signing out." },
-        { "problem": "Sync status says this browser cannot keep an offline copy.", "fix": "The browser has no IndexedDB or WebCrypto, or blocks site storage. Work online, or use another browser." }
+        {
+          "problem": "Approve, Submit or Issue buttons are disabled offline.",
+          "fix": "Every workflow step, administration, backups and exports, the assistant and report versions need a connection; the reason is shown on the button."
+        },
+        {
+          "problem": "The offline copy disappeared.",
+          "fix": "Signing out, the end of the grant period, a change to your account or an IT administrator's revocation deletes it. Export unsynced work before signing out."
+        },
+        {
+          "problem": "Sync status says this browser cannot keep an offline copy.",
+          "fix": "The browser has no IndexedDB or WebCrypto, or blocks site storage. Work online, or use another browser."
+        },
+        {
+          "problem": "Auditor-General findings are missing from the offline copy.",
+          "fix": "Offline synchronisation leaves them out; open the Follow-up register when online."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "docs/offline/OFFLINE-CONTRACT.md", "src/offline/OfflineWorkPage.tsx", "src/offline/SyncStatusPage.tsx", "src/offline/ConflictPage.tsx"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "docs/offline/OFFLINE-CONTRACT.md",
+        "src/offline/OfflineWorkPage.tsx",
+        "src/offline/SyncStatusPage.tsx",
+        "src/offline/ConflictPage.tsx"
+      ]
     },
     {
       "id": "users-and-audit-trail",
       "title": "Issue accounts, manage access and verify the audit trail",
       "goal": "New users have accounts with the right roles, access is kept current, and the audit trail's hash chain is shown intact.",
-      "role": "IT & System Administrator (the Chief Audit Executive can read users and the audit trail)",
+      "role": "IT & System Administrator (the Head of Internal Audit (CAE) can read users and the audit trail)",
       "level": "Advanced",
-      "before": ["Two-factor sign-in is set up on your account."],
+      "before": [
+        "Two-factor sign-in is set up on your account."
+      ],
       "steps": [
-        "Open Users & Roles. Under Issue an account enter the Email address, Display name, Title, role and department, and tick Super user only for configuration within the role. Choose Issue account.",
-        "Pass on the temporary password shown once. For auditor, audit manager, CAE, IT administrator and super-user accounts the request goes to a second person (a CAE or another IT administrator) for approval, and the approver receives the password.",
+        "Open Users & Roles. Under Issue an account enter the Email address, Display name, Title, role (including Municipal Manager (accounting officer)) and department, and tick Super user only for configuration within the role. Choose Issue account.",
+        "Pass on the temporary password shown once. For auditor, audit manager, Head of Internal Audit, IT administrator and super-user accounts the request goes to a second person (a Head of Internal Audit or another IT administrator) for approval, and the approver receives the password.",
+        "To designate the Audit Committee chair, choose Make chair on an Audit Committee account (the Head of Internal Audit can do this too). There is one active chair at a time; Remove as chair takes the flag away.",
         "To reset a user's password choose Reset password on their row.",
         "Open Security & Ops → Access & two-factor to change a role, Deactivate or Reactivate an account, Reset MFA for another user, set the two-factor policy (Save the policy) and Approve requests waiting for a second person.",
         "Open Offline devices to see every device grant and choose Revoke to make a device delete its copy the next time it connects.",
@@ -388,34 +1404,63 @@
       ],
       "result": "Role changes, deactivations and resets end the user's sessions; Verify chain reports any edited, reordered or removed event.",
       "troubleshooting": [
-        { "problem": "Reset password is refused.", "fix": "Resets are refused for shared demonstration accounts and in UAT, where issued credentials stay fixed." },
-        { "problem": "You cannot reset your own two-factor sign-in.", "fix": "Another IT administrator must do it." }
+        {
+          "problem": "Reset password is refused.",
+          "fix": "Resets are refused for shared demonstration accounts and in UAT, where issued credentials stay fixed."
+        },
+        {
+          "problem": "You cannot reset your own two-factor sign-in.",
+          "fix": "Another IT administrator must do it."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/pages/UsersPage.tsx", "src/security/admin/OverviewAccess.tsx", "src/offline/OfflineDevicesPage.tsx", "src/pages/AuditTrailPage.tsx", "docs/security/PERMISSION-MATRIX.md"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/pages/UsersPage.tsx",
+        "src/security/admin/OverviewAccess.tsx",
+        "src/offline/OfflineDevicesPage.tsx",
+        "src/pages/AuditTrailPage.tsx",
+        "docs/security/PERMISSION-MATRIX.md",
+        "shared/types.ts"
+      ]
     },
     {
       "id": "security-and-operations",
       "title": "Run backups, data exports, incidents and access reviews in Security & Operations",
       "goal": "Backups are taken and verified, the municipality receives its data exports, incidents and access reviews are recorded, and retention is applied.",
-      "role": "IT & System Administrator and Chief Audit Executive (each tab shows only what your role may use)",
+      "role": "IT & System Administrator and Head of Internal Audit (CAE) (each tab shows only what your role may use)",
       "level": "Advanced",
-      "before": ["You are online; these steps need a connection."],
+      "before": [
+        "You are online; these steps need a connection."
+      ],
       "steps": [
         "Open Security & Ops. On Overview read and Acknowledge open alerts, and check the encryption key id, the licence, the latest backup, drill and monthly export.",
-        "On Backups & restore choose Back up now, then Verify or Restore drill on a backup. To restore, the IT administrator chooses Request restore and the CAE chooses Approve and restore (or Reject). Change schedules and retention with Save settings.",
-        "On Exports & deliveries choose Export all data, Export the audit trail or Export the system log. For the quarterly package choose Prepare the package, then Show the key (CAE only), Record delivery and Upload acknowledgement.",
+        "On Backups & restore choose Back up now, then Verify or Restore drill on a backup. To restore, the IT administrator chooses Request restore and the Head of Internal Audit chooses Approve and restore (or Reject). Change schedules and retention with Save settings.",
+        "On Exports & deliveries choose Export all data, Export the audit trail or Export the system log. For the quarterly package choose Prepare the package, then Show the key (Head of Internal Audit only), Record delivery and Upload acknowledgement.",
         "On Incidents choose Record an incident, then Add an update, Regulator hand-off and Close as it progresses; the 72-hour outer limit for notifying the municipality is counted down.",
-        "On Access reviews choose Generate a review; the CAE chooses Sign off.",
+        "On Access reviews choose Generate a review; the Head of Internal Audit chooses Sign off.",
         "On Retention & legal hold choose Set the period for a record class, place a Legal hold, Request disposal (approved by a second person) or Release a hold.",
-        "On Exit (end of contract) the CAE chooses Start the exit and an IT administrator chooses Approve and build the package; record the hand-overs against the 10-business-day deadline.",
+        "On Exit (end of contract) the Head of Internal Audit chooses Start the exit and an IT administrator chooses Approve and build the package; record the hand-overs against the 10-business-day deadline.",
         "On Licence read what the installed licence allows."
       ],
       "result": "Every operation is recorded, with alerts raised for failed backups, verifications, drills, exports and restores.",
       "troubleshooting": [
-        { "problem": "A tab is missing.", "fix": "Each tab is shown only to roles with that permission; for example only the CAE sees the package key." },
-        { "problem": "Nothing is disposed of under retention.", "fix": "The municipality sets retention periods (none by default), legal holds override disposal, and disposal happens only through an approved request." }
+        {
+          "problem": "A tab is missing.",
+          "fix": "Each tab is shown only to roles with that permission; for example only the Head of Internal Audit sees the package key."
+        },
+        {
+          "problem": "Nothing is disposed of under retention.",
+          "fix": "The municipality sets retention periods (none by default), legal holds override disposal, and disposal happens only through an approved request."
+        }
       ],
-      "sources": ["docs/USER_GUIDE.md", "src/security/AdministrationPage.tsx", "src/security/admin/OverviewAccess.tsx", "src/security/admin/BackupsExports.tsx", "src/security/admin/GovernanceTabs.tsx", "docs/operations/BACKUP-RECOVERY-RUNBOOK.md"]
+      "sources": [
+        "docs/USER_GUIDE.md",
+        "src/security/AdministrationPage.tsx",
+        "src/security/admin/OverviewAccess.tsx",
+        "src/security/admin/BackupsExports.tsx",
+        "src/security/admin/GovernanceTabs.tsx",
+        "docs/operations/BACKUP-RECOVERY-RUNBOOK.md"
+      ]
     }
   ]
 }
