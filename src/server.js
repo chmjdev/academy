@@ -1,6 +1,7 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { loadGuides, guidesIndex, guidesCount, renderGuidesUI, scriptJSON, SYSTEM_ORDER } from "./guides.js";
 import { loadCourses, findLesson, coursesIndex, ANCOPS_COURSE_ID, ACADEMY_NAME } from "./courses.js";
@@ -17,21 +18,298 @@ const COURSES_DIR = path.join(DATA_DIR, "courses");
 
 const PORT = parseInt(process.env.PORT || "3155", 10);
 const HOST = process.env.ACADEMY_HOST || (process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
+const SECRET = (process.env.ACADEMY_SECRET_KEY || "cedec-academy-secret-key-2026-hmac").trim();
+const COOKIE_NAME = "academy_session";
 
-// Load curriculum
+const FAILED_ATTEMPTS = new Map();
+const THROTTLE_AFTER = 3;
+const THROTTLE_BASE_MS = 2000;
+const THROTTLE_MAX_MS = 5 * 60 * 1000;
+const THROTTLE_FORGET_MS = 15 * 60 * 1000;
+
+function getClientIP(req) {
+  const xff = req.headers["x-forwarded-for"];
+  if (xff) {
+    const parts = String(xff).split(",").map(p => p.trim());
+    return parts[parts.length - 1] || "127.0.0.1";
+  }
+  return req.socket?.remoteAddress || "127.0.0.1";
+}
+
+function getThrottleWait(ip) {
+  const entry = FAILED_ATTEMPTS.get(ip);
+  if (!entry) return 0;
+  if (Date.now() - entry.last > THROTTLE_FORGET_MS) {
+    FAILED_ATTEMPTS.delete(ip);
+    return 0;
+  }
+  return Math.max(0, entry.until - Date.now());
+}
+
+function requiresCaptcha(ip) {
+  const entry = FAILED_ATTEMPTS.get(ip);
+  if (!entry) return false;
+  if (Date.now() - entry.last > THROTTLE_FORGET_MS) {
+    FAILED_ATTEMPTS.delete(ip);
+    return false;
+  }
+  return entry.count >= THROTTLE_AFTER;
+}
+
+function recordFailure(ip) {
+  const entry = FAILED_ATTEMPTS.get(ip) || { count: 0, until: 0, last: 0 };
+  entry.count += 1;
+  entry.last = Date.now();
+  if (entry.count >= THROTTLE_AFTER) {
+    const delay = Math.min(THROTTLE_BASE_MS * Math.pow(2, entry.count - THROTTLE_AFTER), THROTTLE_MAX_MS);
+    entry.until = Date.now() + delay;
+  }
+  FAILED_ATTEMPTS.set(ip, entry);
+}
+
+function clearFailure(ip) {
+  FAILED_ATTEMPTS.delete(ip);
+}
+
+const CAPTCHA_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function generateCaptcha() {
+  let code = "";
+  const bytes = crypto.randomBytes(6);
+  for (let i = 0; i < 6; i++) {
+    code += CAPTCHA_CHARS[bytes[i] % CAPTCHA_CHARS.length];
+  }
+  const expires = Date.now() + 5 * 60 * 1000;
+  const nonce = crypto.randomBytes(8).toString("hex");
+  const payload = `${code}:${expires}:${nonce}`;
+  const sig = crypto.createHmac("sha256", SECRET).update(payload).digest("hex");
+  const token = Buffer.from(`${payload}:${sig}`).toString("base64url");
+
+  let lines = "";
+  for (let i = 0; i < 5; i++) {
+    const x1 = crypto.randomInt(0, 200);
+    const y1 = crypto.randomInt(0, 60);
+    const x2 = crypto.randomInt(0, 200);
+    const y2 = crypto.randomInt(0, 60);
+    const colors = ["#facc15", "#16a34a", "#ffffff", "#ef4444"];
+    const c = colors[i % colors.length];
+    lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="1.5" opacity="0.35" />`;
+  }
+
+  let charsSvg = "";
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    const x = 22 + i * 28 + crypto.randomInt(-3, 4);
+    const y = 38 + crypto.randomInt(-5, 6);
+    const rot = crypto.randomInt(-18, 19);
+    const colors = ["#facc15", "#ffffff", "#4ade80", "#fde047"];
+    const c = colors[i % colors.length];
+    charsSvg += `<text x="${x}" y="${y}" fill="${c}" font-family="monospace" font-size="24" font-weight="bold" transform="rotate(${rot} ${x} ${y})">${ch}</text>`;
+  }
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="56" viewBox="0 0 200 56"><rect width="200" height="56" rx="6" fill="#09090b"/>${lines}${charsSvg}</svg>`;
+  return { token, svg };
+}
+
+function verifyCaptcha(token, userInput) {
+  if (!token || !userInput) return false;
+  try {
+    const decoded = Buffer.from(token, "base64url").toString("utf8");
+    const parts = decoded.split(":");
+    if (parts.length !== 4) return false;
+    const [code, expiresStr, nonce, sig] = parts;
+    const expires = parseInt(expiresStr, 10);
+    if (isNaN(expires) || Date.now() > expires) return false;
+    const payload = `${code}:${expiresStr}:${nonce}`;
+    const expected = crypto.createHmac("sha256", SECRET).update(payload).digest("hex");
+    if (sig !== expected) return false;
+    return code.toUpperCase() === userInput.trim().toUpperCase();
+  } catch {
+    return false;
+  }
+}
+
+function createSessionToken(username) {
+  const ts = Date.now();
+  const nonce = crypto.randomBytes(12).toString("hex");
+  const payload = `${username}:${ts}:${nonce}`;
+  const sig = crypto.createHmac("sha256", SECRET).update(payload).digest("hex");
+  return Buffer.from(`${payload}:${sig}`).toString("base64url");
+}
+
+function verifySessionToken(token) {
+  if (!token || typeof token !== "string") return false;
+  try {
+    const decoded = Buffer.from(token, "base64url").toString("utf8");
+    const parts = decoded.split(":");
+    if (parts.length !== 4) return false;
+    const [user, tsStr, nonce, sig] = parts;
+    const ts = Number(tsStr);
+    if (Number.isNaN(ts) || Date.now() - ts > 7 * 24 * 3600 * 1000) return false;
+    const payload = `${user}:${tsStr}:${nonce}`;
+    const expected = crypto.createHmac("sha256", SECRET).update(payload).digest("hex");
+    return sig === expected;
+  } catch {
+    return false;
+  }
+}
+
+function parseCookies(req) {
+  const list = {};
+  const rc = req.headers.cookie;
+  if (!rc) return list;
+  for (const cookie of rc.split(";")) {
+    const parts = cookie.split("=");
+    if (parts.length >= 2) {
+      list[parts[0].trim()] = decodeURIComponent(parts.slice(1).join("=").trim());
+    }
+  }
+  return list;
+}
+
+function isRequestAuthorized(req) {
+  const cookies = parseCookies(req);
+  if (verifySessionToken(cookies[COOKIE_NAME])) return true;
+  const auth = req.headers["authorization"] || "";
+  if (auth.startsWith("Bearer ") && verifySessionToken(auth.slice(7).trim())) return true;
+  return false;
+}
+
+function renderLoginHTML() {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Restricted Access — CEDEC</title>
+  <style>
+    :root { --bg: #000000; --card: #09090b; --border: #27272a; --text: #fafafa; --muted: #a1a1aa; --gold: #facc15; --green: #16a34a; --danger: #ef4444; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg); background-image: radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.08), transparent 45%), radial-gradient(circle at 50% 100%, rgba(22, 163, 74, 0.08), transparent 45%); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
+    .gate-card { width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2.25rem 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(250, 204, 21, 0.1); }
+    .brand { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .brand-mark { width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, var(--gold) 0%, var(--green) 50%, #000000 100%); padding: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .brand-mark-inner { width: 100%; height: 100%; background: var(--card); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; color: var(--gold); letter-spacing: -0.03em; }
+    .brand-title { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.02em; }
+    .brand-sub { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+    .error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.8125rem; padding: 0.625rem 0.75rem; border-radius: 6px; margin-bottom: 1.25rem; display: none; }
+    .field { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.5rem; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 0.6875rem 0.875rem; background: #000000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9375rem; outline: none; }
+    input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2); }
+    .captcha-box { display: none; margin-bottom: 1rem; }
+    .captcha-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .captcha-svg { flex: 1; background: #000; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 56px; }
+    .captcha-refresh { background: #18181b; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.75rem; cursor: pointer; height: 56px; }
+    button[type="submit"] { width: 100%; margin-top: 0.5rem; padding: 0.6875rem 1rem; background: var(--gold); color: #000000; font-weight: 600; font-size: 0.875rem; border: none; border-radius: 8px; cursor: pointer; }
+    .footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #71717a; }
+  </style>
+</head>
+<body>
+  <div class="gate-card">
+    <div class="brand">
+      <div class="brand-mark"><div class="brand-mark-inner">CD</div></div>
+      <div>
+        <div class="brand-title">CEDEC</div>
+        <div class="brand-sub">Restricted Area</div>
+      </div>
+    </div>
+    <h1>Sign In</h1>
+    <div id="error-box" class="error"></div>
+    <form id="login-form" autocomplete="off">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required autofocus autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" />
+      </div>
+      <div id="captcha-container" class="captcha-box">
+        <label for="captcha">Security Challenge</label>
+        <div class="captcha-row">
+          <div id="captcha-svg" class="captcha-svg"></div>
+          <button type="button" id="captcha-refresh" class="captcha-refresh">Refresh</button>
+        </div>
+        <input id="captcha" name="captcha" type="text" placeholder="Enter characters shown above" autocomplete="off" />
+      </div>
+      <button type="submit" id="submit-btn">Continue</button>
+    </form>
+    <div class="footer">
+      <span>Protected by CEDEC Gate</span>
+      <span>TLS 1.3</span>
+    </div>
+  </div>
+  <script>
+    let captchaToken = '';
+    let captchaRequired = false;
+    async function loadCaptcha() {
+      try {
+        const res = await fetch('/api/auth/captcha', { cache: 'no-store' });
+        const data = await res.json();
+        if (data.captcha_svg && data.captcha_token) {
+          document.getElementById('captcha-svg').innerHTML = data.captcha_svg;
+          captchaToken = data.captcha_token;
+          document.getElementById('captcha').value = '';
+        }
+      } catch {}
+    }
+    document.getElementById('captcha-refresh').addEventListener('click', loadCaptcha);
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById('error-box');
+      const btn = document.getElementById('submit-btn');
+      errBox.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      try {
+        const payload = {
+          username: document.getElementById('username').value.trim(),
+          password: document.getElementById('password').value
+        };
+        if (captchaRequired) {
+          payload.captcha = document.getElementById('captcha').value.trim();
+          payload.captcha_token = captchaToken;
+        }
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (data.captcha_required) {
+            captchaRequired = true;
+            document.getElementById('captcha-container').style.display = 'block';
+            await loadCaptcha();
+          }
+          throw new Error(data.error || 'Invalid credentials');
+        }
+        window.location.href = '/';
+      } catch (err) {
+        errBox.textContent = err.message || 'Authentication failed';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Continue';
+      }
+    });
+  </script>
+</body>
+</html>`;
+}
+
 let curriculum = JSON.parse(fs.readFileSync(CURRICULUM_FILE, "utf8"));
 
-// Load how-to guides; a file that fails validation is skipped and reported.
 const guideLoad = loadGuides(GUIDES_DIR);
 const guideSystems = guideLoad.systems;
 for (const err of guideLoad.errors) console.error(`[academy] guides: ${err}`);
 
-// Load courses: ANC CC Ops (curriculum.json) first, then one per Govtech system.
 const courseLoad = loadCourses(curriculum, COURSES_DIR, SYSTEM_ORDER);
 const courses = courseLoad.courses;
 for (const err of courseLoad.errors) console.error(`[academy] courses: ${err}`);
 
-// Guide links shown under each lesson: { lessonId: [{ href, title }] }.
 function lessonGuideLinks(course) {
   const sys = guideSystems.find(s => s.id === course.system);
   const links = {};
@@ -44,7 +322,6 @@ function lessonGuideLinks(course) {
   return links;
 }
 
-// Seat allocations (10 seats, first-come first-served)
 let seatsState = {
   total: 10,
   claimed: 4,
@@ -56,10 +333,8 @@ let seatsState = {
   ]
 };
 
-// In-memory student progress state
 const progressStore = new Map();
 
-// Helper: MIME types
 function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   switch (ext) {
@@ -78,7 +353,6 @@ function getMimeType(filePath) {
   }
 }
 
-// Stream video with HTTP 206 Partial Content
 function streamVideo(req, res, filePath) {
   if (!fs.existsSync(filePath)) {
     res.writeHead(404, { "content-type": "text/plain" });
@@ -126,13 +400,12 @@ function streamVideo(req, res, filePath) {
   }
 }
 
-// Request handler
 export function createApp() {
   return function handler(req, res) {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     const pathname = url.pathname;
+    const clientIP = getClientIP(req);
 
-    // CORS headers
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Range");
@@ -142,7 +415,6 @@ export function createApp() {
       return res.end();
     }
 
-    // Health Check
     if (pathname === "/healthz") {
       res.writeHead(200, { "content-type": "application/json" });
       return res.end(JSON.stringify({
@@ -160,7 +432,98 @@ export function createApp() {
       }));
     }
 
-    // API: Courses
+    if (pathname === "/favicon.svg" || pathname === "/favicon.ico") {
+      res.writeHead(200, { "content-type": "image/svg+xml" });
+      return res.end(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><clipPath id="r"><rect x="3" y="3" width="58" height="58" rx="13"/></clipPath></defs><g clip-path="url(#r)"><rect x="3" y="3" width="58" height="19.33" fill="#060d0a"/><rect x="3" y="22.33" width="58" height="19.33" fill="#007a3d"/><rect x="3" y="41.66" width="58" height="19.34" fill="#ffc72c"/></g><rect x="3" y="3" width="58" height="58" rx="13" fill="none" stroke="#ffc72c" stroke-opacity="0.8" stroke-width="2.5"/><circle cx="32" cy="32" r="10" fill="#0b1f2a" stroke="#ffc72c" stroke-width="1.5"/><text x="32" y="36" font-family="system-ui, sans-serif" font-weight="900" font-size="11" fill="#ffc72c" text-anchor="middle">GA</text></svg>`);
+    }
+
+    if (pathname === "/login" && req.method === "GET") {
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+      return res.end(renderLoginHTML());
+    }
+
+    if (pathname === "/api/auth/captcha" && req.method === "GET") {
+      const ch = generateCaptcha();
+      res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
+      return res.end(JSON.stringify({
+        captcha_svg: ch.svg,
+        captcha_token: ch.token,
+        captcha_required: requiresCaptcha(clientIP)
+      }));
+    }
+
+    if (pathname === "/api/auth/login" && req.method === "POST") {
+      const waitMs = getThrottleWait(clientIP);
+      if (waitMs > 0) {
+        const waitSec = Math.ceil(waitMs / 1000);
+        res.writeHead(429, { "content-type": "application/json", "retry-after": String(waitSec) });
+        return res.end(JSON.stringify({
+          error: "Too many failed attempts. Please wait before trying again.",
+          captcha_required: true,
+          retry_after: waitSec
+        }));
+      }
+      let body = "";
+      req.on("data", c => { body += c; if (body.length > 16384) req.destroy(); });
+      req.on("end", () => {
+        let data = {};
+        try { data = JSON.parse(body || "{}"); } catch {}
+        if (requiresCaptcha(clientIP)) {
+          if (!verifyCaptcha(String(data.captcha_token || ""), String(data.captcha || ""))) {
+            recordFailure(clientIP);
+            res.writeHead(401, { "content-type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid or missing security code", captcha_required: true }));
+          }
+        }
+        const username = String(data.username || data.email || "").trim().toLowerCase();
+        const password = String(data.password || "").trim();
+        const validPasswords = ["CedecGov2026!#", "AncOpsDemo2026!#", "AncOpsAdmin2026!#"];
+        if (process.env.ACADEMY_PASSCODE) validPasswords.push(process.env.ACADEMY_PASSCODE.trim());
+        if (process.env.ACADEMY_GATE_KEY) validPasswords.push(process.env.ACADEMY_GATE_KEY.trim());
+
+        const validUsers = new Set([
+          "bo.mbindwane@gmail.com", "lo-sasg-0001", "sg.advisor",
+          "charles@binteca.com", "charles.majola@gmail.com", "lo-chmj-0001", "admin", "admin@binteca.com",
+          "sg.office", "general.admin", "nec.member1", "nec.member2", "nec.member3",
+          "dcip.lead1", "dcip.lead2", "comms.staff1", "comms.staff2",
+          "prov.gauteng", "prov.kzn", "prov.ec", "prov.wc", "prov.limpopo", "prov.mpumalanga", "prov.nw", "prov.fs", "prov.nc"
+        ]);
+
+        if (!username || !validUsers.has(username) || !validPasswords.includes(password)) {
+          recordFailure(clientIP);
+          res.writeHead(401, { "content-type": "application/json" });
+          return res.end(JSON.stringify({ error: "Invalid credentials", captcha_required: requiresCaptcha(clientIP) }));
+        }
+
+        clearFailure(clientIP);
+        const token = createSessionToken(username);
+        const cookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`;
+        res.writeHead(200, {
+          "content-type": "application/json",
+          "set-cookie": cookie,
+          "cache-control": "no-store"
+        });
+        return res.end(JSON.stringify({ status: "ok", token }));
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/logout") {
+      const expired = `${COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
+      res.writeHead(302, { location: "/login", "set-cookie": expired });
+      return res.end();
+    }
+
+    const requireAuth = process.env.NODE_ENV === "production" || process.env.ACADEMY_REQUIRE_AUTH === "true";
+    if (requireAuth && !isRequestAuthorized(req)) {
+      if (pathname.startsWith("/api/")) {
+        res.writeHead(401, { "content-type": "application/json", "cache-control": "no-store" });
+        return res.end(JSON.stringify({ error: "Authentication required" }));
+      }
+      res.writeHead(302, { location: "/login", "cache-control": "no-store" });
+      return res.end();
+    }
+
     if (pathname === "/api/courses" && req.method === "GET") {
       res.writeHead(200, { "content-type": "application/json" });
       return res.end(JSON.stringify({ courses: coursesIndex(courses) }));
