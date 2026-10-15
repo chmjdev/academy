@@ -181,51 +181,53 @@ function renderLoginHTML() {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Restricted Access — CEDEC</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate" />
+  <title>CEDEC</title>
   <style>
-    :root { --bg: #000000; --card: #09090b; --border: #27272a; --text: #fafafa; --muted: #a1a1aa; --gold: #facc15; --green: #16a34a; --danger: #ef4444; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background-color: var(--bg); background-image: radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.08), transparent 45%), radial-gradient(circle at 50% 100%, rgba(22, 163, 74, 0.08), transparent 45%); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
-    .gate-card { width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2.25rem 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(250, 204, 21, 0.1); }
-    .brand { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .brand-mark { width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, var(--gold) 0%, var(--green) 50%, #000000 100%); padding: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .brand-mark-inner { width: 100%; height: 100%; background: var(--card); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; color: var(--gold); letter-spacing: -0.03em; }
-    .brand-title { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.02em; }
-    .brand-sub { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.25rem; letter-spacing: -0.01em; }
-    .error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.8125rem; padding: 0.625rem 0.75rem; border-radius: 6px; margin-bottom: 1.25rem; display: none; }
-    .field { margin-bottom: 1rem; }
-    label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.5rem; }
-    input[type="text"], input[type="password"] { width: 100%; padding: 0.6875rem 0.875rem; background: #000000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9375rem; outline: none; }
-    input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2); }
-    .captcha-box { display: none; margin-bottom: 1rem; }
-    .captcha-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .captcha-svg { flex: 1; background: #000; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 56px; }
-    .captcha-refresh { background: #18181b; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.75rem; cursor: pointer; height: 56px; }
-    button[type="submit"] { width: 100%; margin-top: 0.5rem; padding: 0.6875rem 1rem; background: var(--gold); color: #000000; font-weight: 600; font-size: 0.875rem; border: none; border-radius: 8px; cursor: pointer; }
-    .footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #71717a; }
+    body { min-height: 100vh; background-color: #0b1f2a; background-image: radial-gradient(ellipse at top, rgba(242, 178, 51, 0.10), transparent 70%); color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+    .gate-card { max-width: 380px; width: 100%; background-color: #10283a; border: 1px solid rgba(242, 178, 51, 0.18); border-radius: 16px; padding: 32px 28px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+    .header { text-align: center; margin-bottom: 24px; }
+    .badge { width: 56px; height: 56px; border-radius: 14px; background-color: #0b1f2a; border: 1px solid rgba(242, 178, 51, 0.35); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    h1 { font-size: 20px; font-weight: 600; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.2px; }
+    .subtitle { font-size: 13px; color: #f2b233; font-weight: 600; letter-spacing: 0.3px; }
+    .error { padding: 10px 12px; background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; color: #f87171; font-size: 13px; margin-bottom: 16px; line-height: 1.4; text-align: center; display: none; }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #e4dac7; margin-bottom: 8px; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 12px 14px; background-color: #0b1f2a; border: 1px solid rgba(228, 218, 199, 0.22); border-radius: 10px; color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s ease; }
+    input:focus { border-color: #f2b233; }
+    input::placeholder { color: #666660; }
+    .captcha-box { display: none; margin-bottom: 16px; }
+    .captcha-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .captcha-svg { flex: 1; background-color: #0b1f2a; border: 1px solid rgba(242, 178, 51, 0.3); border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 52px; }
+    .captcha-refresh { background-color: #0b1f2a; border: 1px solid rgba(242, 178, 51, 0.3); color: #f2b233; border-radius: 10px; padding: 0 12px; font-size: 12px; font-weight: 600; cursor: pointer; height: 52px; }
+    .captcha-refresh:hover { background-color: rgba(242, 178, 51, 0.12); }
+    button[type="submit"] { width: 100%; margin-top: 8px; padding: 12px; background-color: #f2b233; color: #0b1f2a; font-weight: 600; font-size: 14px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; }
+    button[type="submit"]:hover { background-color: #c98d12; }
   </style>
 </head>
 <body>
   <div class="gate-card">
-    <div class="brand">
-      <div class="brand-mark"><div class="brand-mark-inner">CD</div></div>
-      <div>
-        <div class="brand-title">CEDEC</div>
-        <div class="brand-sub">Restricted Area</div>
+    <div class="header">
+      <div class="badge">
+        <svg width="34" height="34" viewBox="0 0 48 48" role="img" aria-label="CEDEC">
+          <circle cx="24" cy="24" r="24" fill="#0b1f2a"/>
+          <circle cx="24" cy="24" r="15" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-dasharray="70 25" stroke-linecap="round" transform="rotate(-150 24 24)"/>
+          <circle cx="24" cy="24" r="5.5" fill="#f2b233"/>
+        </svg>
       </div>
+      <h1>CEDEC</h1>
+      <p class="subtitle">Restricted Area</p>
     </div>
-    <h1>Sign In</h1>
     <div id="error-box" class="error"></div>
     <form id="login-form" autocomplete="off">
       <div class="field">
         <label for="username">Username</label>
-        <input id="username" name="username" type="text" required autofocus autocomplete="username" />
+        <input id="username" name="username" type="text" placeholder="Enter username" required autofocus autocomplete="username" />
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" required autocomplete="current-password" />
+        <input id="password" name="password" type="password" placeholder="Enter password" required autocomplete="current-password" />
       </div>
       <div id="captcha-container" class="captcha-box">
         <label for="captcha">Security Challenge</label>
@@ -235,12 +237,8 @@ function renderLoginHTML() {
         </div>
         <input id="captcha" name="captcha" type="text" placeholder="Enter characters shown above" autocomplete="off" />
       </div>
-      <button type="submit" id="submit-btn">Continue</button>
+      <button type="submit" id="submit-btn">Unlock</button>
     </form>
-    <div class="footer">
-      <span>Protected by CEDEC Gate</span>
-      <span>TLS 1.3</span>
-    </div>
   </div>
   <script>
     let captchaToken = '';
@@ -292,7 +290,7 @@ function renderLoginHTML() {
         errBox.textContent = err.message || 'Authentication failed';
         errBox.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Continue';
+        btn.textContent = 'Unlock';
       }
     });
   </script>
